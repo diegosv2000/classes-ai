@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test de diagnóstico — Programación Concurrente y Distribuida</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+  :root{
+    --bg:#0C0B12;
+    --surface:#13121A;
+    --card:#17161F;
+    --muted:#1F1D28;
+    --secondary:#22202B;
+    --fg:#F4F3F7;
+    --muted-fg:#9A97A6;
+    --on-brand:#FCFCFC;
+    --primary:#8F5CF0;
+    --blue:#4A84F0;
+    --success:#2CC277;
+    --destructive:#EC4B4B;
+    --warning:#F0B429;
+    --info:#3EB0E0;
+    --border:rgba(255,255,255,.09);
+    --input-border:rgba(255,255,255,.12);
+    --font-sans:'Geist',system-ui,sans-serif;
+    --font-mono:'Geist Mono',Consolas,monospace;
+    --grad-brand:linear-gradient(90deg,var(--primary),var(--blue));
+    --grad-num:linear-gradient(180deg,#F4F3F7,#9A97A6);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    min-height:100vh;background:var(--bg);color:var(--fg);
+    font-family:var(--font-sans);font-size:16px;line-height:1.55;
+    display:flex;align-items:center;justify-content:center;
+    padding:30px 16px;position:relative;
+  }
+  /* brillos de fondo en esquinas opuestas */
+  body::before,body::after{
+    content:'';position:fixed;border-radius:50%;pointer-events:none;z-index:0;
+    filter:blur(64px);
+  }
+  body::before{
+    width:56vw;height:56vw;top:-18vw;left:-14vw;
+    background:radial-gradient(circle,rgba(143,92,240,.22),transparent 65%);
+  }
+  body::after{
+    width:50vw;height:50vw;bottom:-18vw;right:-12vw;
+    background:radial-gradient(circle,rgba(74,132,240,.18),transparent 65%);
+  }
+  i.fa-solid{font-size:.85em;margin-right:7px}
+  .wrap{width:100%;max-width:860px;position:relative;z-index:1}
+
+  .card{
+    background:var(--card);border:1px solid var(--border);
+    border-radius:1rem;padding:28px;animation:in .35s ease;
+    box-shadow:0 8px 48px rgba(143,92,240,.1);
+  }
+  @keyframes in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+  h1{font-size:1.8rem;font-weight:600;letter-spacing:-.02em;line-height:1.25;margin-bottom:.5em}
+  h2{font-size:1.25rem;font-weight:600;letter-spacing:-.01em;line-height:1.4;margin-bottom:.7em}
+  h3{font-size:.74rem;text-transform:uppercase;letter-spacing:.2em;color:var(--muted-fg);margin-bottom:.6em;font-weight:600}
+  p{line-height:1.6}
+  .sub{color:var(--muted-fg)}
+  .small{font-size:.86rem;color:var(--muted-fg);line-height:1.6}
+  .small b{color:var(--fg);font-weight:500}
+  .center{text-align:center}
+
+  .btn{
+    background:var(--primary);color:var(--on-brand);border:none;border-radius:9999px;
+    padding:11px 26px;font-size:.9rem;font-weight:600;cursor:pointer;
+    transition:all .2s;font-family:var(--font-sans);
+    box-shadow:0 8px 40px rgba(143,92,240,.25);
+  }
+  .btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 48px rgba(143,92,240,.35)}
+  .btn.ghost{
+    background:var(--secondary);color:var(--fg);border:1px solid var(--border);box-shadow:none;
+  }
+  .btn.ghost:hover{border-color:rgba(143,92,240,.5);box-shadow:0 0 24px rgba(143,92,240,.12)}
+  .btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+
+  /* progreso */
+  #hud{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+  #bar{flex:1;height:6px;background:rgba(255,255,255,.08);border-radius:9999px;overflow:hidden}
+  #barFill{height:100%;width:0;background:var(--grad-brand);transition:width .3s}
+  #cnt{font-size:.8rem;color:var(--muted-fg);white-space:nowrap;font-family:var(--font-mono)}
+
+  /* opciones */
+  .opt{
+    display:flex;align-items:flex-start;gap:12px;width:100%;text-align:left;
+    background:var(--surface);border:1.5px solid var(--border);border-radius:.75rem;
+    color:var(--fg);padding:13px 16px;font-size:.94rem;cursor:pointer;
+    margin-bottom:10px;transition:all .15s;line-height:1.5;font-family:var(--font-sans);
+  }
+  .opt:hover{border-color:var(--input-border)}
+  .opt .mark{
+    flex-shrink:0;width:22px;height:22px;border-radius:9999px;
+    border:2px solid var(--input-border);display:inline-flex;align-items:center;
+    justify-content:center;font-size:.68rem;margin-top:1px;transition:all .15s;color:var(--on-brand);
+  }
+  .opt.sel{
+    border-color:rgba(143,92,240,.6);background:var(--muted);
+    box-shadow:0 0 40px rgba(143,92,240,.15);
+  }
+  .opt.sel .mark{border-color:var(--primary);background:var(--primary)}
+
+  /* resultado */
+  .score{
+    font-family:var(--font-mono);font-size:3rem;font-weight:600;line-height:1;
+    background:var(--grad-num);-webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .badge{
+    display:inline-flex;align-items:center;gap:8px;border-radius:9999px;
+    padding:6px 18px;font-weight:600;font-size:.85rem;
+  }
+  .badge::before{content:'';width:6px;height:6px;border-radius:9999px;background:currentColor}
+  .badge{background:rgba(44,194,119,.15);color:var(--success)}
+  .badge.low{background:rgba(236,75,75,.15);color:var(--destructive)}
+  .badge.mid{background:rgba(240,180,41,.15);color:var(--warning)}
+  .wkgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}
+  @media(max-width:640px){.wkgrid{grid-template-columns:repeat(2,1fr)}}
+  .wkbox{
+    background:var(--surface);border:1px solid var(--border);border-radius:.75rem;
+    padding:14px;text-align:center;
+  }
+  .wkbox b{
+    font-family:var(--font-mono);color:var(--fg);font-size:1.25rem;font-weight:600;display:block;margin-top:4px;
+  }
+  .rev{border-top:1px solid var(--border);padding:20px 4px}
+  .rev h3{margin-bottom:10px}
+  .tag{
+    display:inline-block;font-size:.68rem;font-weight:600;letter-spacing:.1em;
+    border-radius:9999px;padding:3px 10px;
+    background:var(--grad-brand);color:var(--on-brand);
+  }
+  .ansRow{
+    display:flex;gap:10px;align-items:flex-start;padding:9px 12px;border-radius:.75rem;
+    font-size:.9rem;line-height:1.5;margin-bottom:6px;
+  }
+  .ansRow.ok{background:rgba(44,194,119,.1)}
+  .ansRow.bad{background:rgba(236,75,75,.1)}
+  .ansRow i{margin-top:3px}
+  .ansRow.ok i{color:var(--success)}
+  .ansRow.bad i{color:var(--destructive)}
+  .exp{font-size:.84rem;color:var(--muted-fg);padding:4px 10px 0 30px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ INICIO ============ -->
+  <div class="card" id="scrStart">
+    <h1><i class="fa-solid fa-clipboard-check"></i>Test de diagnóstico</h1>
+    <p class="sub" style="margin-bottom:14px">Programación Concurrente y Distribuida</p>
+    <p style="margin-bottom:8px">Este test mide qué tanto sabes del contenido del curso antes de repasar. Son <b>20 preguntas</b> de selección múltiple que cubren las semanas 1, 2, 3 y 5.</p>
+    <ul class="small" style="list-style:none;line-height:2;margin-bottom:20px">
+      <li><i class="fa-solid fa-shuffle" style="color:var(--primary)"></i>El orden de preguntas y opciones es aleatorio en cada intento</li>
+      <li><i class="fa-solid fa-pen" style="color:var(--primary)"></i>Solo marcas tu respuesta; puedes volver y cambiarla antes de finalizar</li>
+      <li><i class="fa-solid fa-chart-column" style="color:var(--primary)"></i>Al final verás tu nota, el desglose por semana y la revisión de cada pregunta</li>
+    </ul>
+    <button class="btn" id="startBtn"><i class="fa-solid fa-play"></i>Comenzar test</button>
+  </div>
+
+  <!-- ============ PREGUNTAS ============ -->
+  <div class="card" id="scrQuiz" style="display:none">
+    <div id="hud">
+      <div id="bar"><div id="barFill"></div></div>
+      <span id="cnt"></span>
+    </div>
+    <h2 id="qText"></h2>
+    <div id="opts"></div>
+    <div style="display:flex;gap:10px;justify-content:space-between;margin-top:18px">
+      <button class="btn ghost" id="prevBtn"><i class="fa-solid fa-arrow-left"></i>Anterior</button>
+      <button class="btn" id="nextBtn" disabled>Siguiente<i class="fa-solid fa-arrow-right" style="margin-right:0;margin-left:6px"></i></button>
+      <button class="btn" id="finishBtn" style="display:none"><i class="fa-solid fa-flag-checkered"></i>Finalizar test</button>
+    </div>
+    <p class="small" style="margin-top:12px" id="markHint"><i class="fa-solid fa-hand-pointer"></i>Marca una opción para continuar.</p>
+  </div>
+
+  <!-- ============ RESULTADO ============ -->
+  <div class="card" id="scrEnd" style="display:none">
+    <div class="center">
+      <h1><i class="fa-solid fa-award"></i>Tu resultado</h1>
+      <div class="score" id="scoreTxt"></div>
+      <p style="margin:12px 0 6px"><span class="badge" id="gradeBadge"></span></p>
+      <p class="sub" id="msgTxt"></p>
+    </div>
+    <div class="wkgrid" id="wkGrid"></div>
+    <h3 style="margin:28px 0 4px"><i class="fa-solid fa-list-check"></i>Revisión de respuestas</h3>
+    <div id="review"></div>
+    <div class="center" style="margin-top:24px">
+      <button class="btn ghost" id="retryBtn"><i class="fa-solid fa-rotate-right"></i>Reintentar (se rebaraja todo)</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- Banco de preguntas (fiel al material de las semanas) ---------- */
+const BANK=[
+/* ----- Week 1: hilos y concurrencia (5) ----- */
+{w:'W1',q:'¿Cuál es la diferencia clave entre un proceso y un hilo?',
+ o:['Un proceso es más ligero de crear que un hilo','Los hilos tienen un espacio de memoria completamente privado; los procesos lo comparten','Los procesos tienen un entorno autónomo con memoria privada; los hilos comparten la memoria y recursos de su proceso','No hay diferencia: son términos equivalentes'],
+ a:2,e:'Un proceso tiene recursos completos y privados (propia memoria). Los hilos viven dentro de un proceso y comparten su memoria y archivos abiertos: comunicación eficiente pero riesgosa.'},
+{w:'W1',q:'En Java, ¿cuáles son las dos formas de definir e iniciar un hilo?',
+ o:['Implementar Runnable y pasarla a un Thread, o extender la clase Thread (sobrescribiendo run())','Llamar a System.newThread() o usar hilos del SO directamente','Implementar Runnable o sobrescribir el método main()','Extender Thread o implementar start()'],
+ a:0,e:'Ambas implican la clase Thread: se proporciona un Runnable (interfaz con el método run) o se crea una subclase de Thread (que ya implementa Runnable). En ambos casos se lanza con start().'},
+{w:'W1',q:'¿Por qué se debe llamar a start() y no directamente a run()?',
+ o:['Porque run() es privado en Java','Porque start() crea un nuevo hilo que ejecuta run(); llamar run() directo ejecuta el código en el hilo actual, sin concurrencia','Porque start() compila el código más rápido','No hay diferencia práctica'],
+ a:1,e:'start() le pide a la JVM crear un nuevo hilo de ejecución y ese nuevo hilo invoca run(). Llamar run() directo es solo una llamada de método normal y secuencial.'},
+{w:'W1',q:'En Java, ¿cómo funcionan las prioridades de los hilos?',
+ o:['Van de 0 a 100; a menor valor, mayor prioridad','Van de 1 a 10; a mayor valor, mayor oportunidad de ejecutarse primero','Son solo letras (A, B, C)','Java no soporta prioridades'],
+ a:1,e:'Las prioridades en Java son enteros de 1 a 10. A mayor valor, más oportunidad de ejecutarse primero; con la misma prioridad, decide el sistema operativo.'},
+{w:'W1',q:'¿Qué caracteriza a un programa secuencial frente a uno concurrente?',
+ o:['El secuencial ejecuta una única actividad (una sola secuencia de instrucciones); el concurrente tiene múltiples actividades que progresan de manera simultánea, cada una soportada por un hilo','El secuencial siempre es más lento porque usa más memoria','El concurrente no puede cooperar para una tarea común','Son lo mismo con distinto nombre'],
+ a:0,e:'En el programa secuencial las instrucciones van una tras otra. En el concurrente hay varias actividades (hilos) que avanzan de forma simultánea y cooperan para la tarea común.'},
+
+/* ----- Week 2: sistemas distribuidos (4) ----- */
+{w:'W2',q:'¿Qué es un sistema distribuido?',
+ o:['Un solo servidor muy potente con varios procesadores','Una colección de computadoras separadas físicamente y conectadas por red, cuyos componentes el programador percibe como un solo sistema','Una red de cables que conecta periféricos','Un programa que corre en dos núcleos a la vez'],
+ a:1,e:'Es una colección de computadoras conectadas por red; el programador accede a componentes remotos como si fueran locales, con un middleware de por medio.'},
+{w:'W2',q:'¿Qué es el middleware y cuál es su función?',
+ o:['Un antivirus para servidores','El estrato de software que provee abstracción de programación y enmascara la heterogeneidad de redes, hardware, SO y lenguajes (ej. CORBA, Java RMI)','El cableado físico de la red','Un tipo de base de datos distribuida'],
+ a:1,e:'El middleware es la capa intermedia que oculta la heterogeneidad subyacente y ofrece una abstracción uniforme de programación (RPC, SOAP, RMI).'},
+{w:'W2',q:'"Permitir acceder a los recursos sin conocer su localización" corresponde a qué tipo de transparencia?',
+ o:['Transparencia de acceso','Transparencia de ubicación','Transparencia de replicación','Transparencia frente a fallos'],
+ a:1,e:'Es la transparencia de ubicación. (La de acceso permite usar operaciones idénticas para recursos locales y remotos; la de replicación oculta las copias; la de fallos oculta los fallos.)'},
+{w:'W2',q:'En el tratamiento de fallos, ¿qué implica la "recuperación de fallos"?',
+ o:['Apagar el sistema para evitar más daños','Diseñar el software de modo que, tras una caída del servidor, el estado de los datos pueda reponerse o retrotraerse (rollback) a una situación anterior','Duplicar los cables de la red','Detectar datos corruptos con checksums'],
+ a:1,e:'La recuperación implica restaurar el estado tras una caída (rollback). Detección = checksums; enmascaramiento = retransmisión/replicación; redundancia = componentes duplicados.'},
+
+/* ----- Week 3: redes, desempeño, sockets (5) ----- */
+{w:'W3',q:'¿Por qué se usa TCP en aplicaciones cliente-servidor confiables?',
+ o:['Porque es más rápido que UDP','Porque proporciona un canal punto a punto confiable: no se descartan datos y llegan en el mismo orden en que se enviaron','Porque no requiere conexión','Porque cifra todo el tráfico automáticamente'],
+ a:1,e:'TCP garantiza fiabilidad y orden. Para comunicarse, cliente y servidor establecen una conexión y cada uno vincula un socket a su extremo.'},
+{w:'W3',q:'¿Qué identifica un número de puerto?',
+ o:['Una máquina física dentro de la red','Un tipo de protocolo de enrutamiento','Una aplicación/servicio dentro de una máquina','La velocidad de la conexión'],
+ a:2,e:'La IP identifica la máquina; el puerto identifica el programa/servicio que escucha dentro de ella. El cliente también vincula un puerto local para identificarse.'},
+{w:'W3',q:'¿Cuál es el orden correcto del saludo de tres vías (3-way handshake) de TCP?',
+ o:['ACK → SYN → SYN-ACK','SYN → SYN-ACK → ACK','SYN-ACK → ACK → SYN','SYN → ACK → SYN-ACK'],
+ a:1,e:'El cliente envía SYN (solicitud), el servidor responde SYN-ACK (acepta) y el cliente confirma con ACK. Una vez aceptada, el servidor crea un socket nuevo para atender al cliente sin dejar de escuchar.'},
+{w:'W3',q:'En redes, ¿qué es la encapsulación?',
+ o:['El proceso de cifrar los datos antes de enviarlos','Añadir cabecera (y cola) al payload de datos para formar un paquete','Comprimir los datos para que ocupen menos','Eliminar las cabeceras para obtener el payload'],
+ a:1,e:'Encapsular = añadir header/tail al payload para formar el paquete que se transmite. El proceso inverso (quitarlas) es la decapsulación.'},
+{w:'W3',q:'¿Qué es la latencia y de qué factores depende?',
+ o:['La cantidad de datos que soporta la red por segundo; depende del ancho de banda','El tiempo que tarda una solicitud en viajar al destino y regresar; depende de distancia física, congestión de red, hardware e ineficiencias de software','El número de usuarios simultáneos que soporta un servidor','Un tipo de cable de fibra óptica'],
+ a:1,e:'La latencia es tiempo (ida y vuelta de una solicitud). Los cuellos de botella a optimizar: retrasos de propagación, transmisión, procesamiento y colas de espera.'},
+
+/* ----- Week 5: sincronización (6) ----- */
+{w:'W5',q:'¿Por qué la operación contador++ NO es atómica en un entorno multihilo?',
+ o:['Porque Java no permite incrementar variables compartidas','Porque internamente son 3 pasos (leer, incrementar, escribir) y los hilos pueden interrumpirse entre ellos','Porque el contador se guarda en el disco duro','Porque siempre lanza InterruptedException'],
+ a:1,e:'Leer-modificar-guardar puede entrelazarse entre hilos: la escritura de un hilo sobrescribe la del otro y su resultado se pierde (interferencia de hilos).'},
+{w:'W5',q:'Dos hilos incrementan 1000 veces cada uno un contador compartido protegido solo con variables normales. El valor esperado es 2000, pero…',
+ o:['Siempre será exactamente 2000','Será mayor a 2000 por los solapamientos','Puede ser menor (ej. 1987, 1995) por la condición de carrera: valor++ no es atómico','El programa no compila'],
+ a:2,e:'Esa es la condición de carrera: el resultado depende del entrelazado. Con synchronized en el método incrementar, solo un hilo ejecuta a la vez y el resultado es siempre 2000.'},
+{w:'W5',q:'¿Qué es un deadlock (interbloqueo)?',
+ o:['Hilos que se ejecutan demasiado lento por baja prioridad','Dos o más hilos bloqueados indefinidamente, cada uno esperando un recurso que posee el otro','Hilos que cambian de estado constantemente sin avanzar','Un error de compilación por sincronizar de más'],
+ a:1,e:'Cada hilo posee un recurso y espera el que tiene el otro; nadie libera lo suyo y quedan bloqueados para siempre. Se evita adquiriendo recursos siempre en el mismo orden o usando tryLock con timeout.'},
+{w:'W5',q:'¿Cuál es la diferencia entre livelock y deadlock?',
+ o:['Son lo mismo con distinto nombre','En el deadlock los hilos quedan bloqueados esperando; en el livelock están activos, cambiando de estado en respuesta al otro, pero sin avanzar nunca','El livelock solo ocurre con un solo hilo','El deadlock se resuelve solo, el livelock no'],
+ a:1,e:'En el livelock los hilos no están bloqueados: reaccionan constantemente a las acciones del otro (como dos personas cediéndose el paso en un pasillo) sin hacer progreso.'},
+{w:'W5',q:'¿Qué garantiza la palabra clave volatile y qué NO garantiza?',
+ o:['Garantiza atomicidad de operaciones compuestas y exclusión mutua','Garantiza visibilidad inmediata de los cambios entre hilos, pero NO atomicidad ni sincronización completa','Garantiza que la variable sea privada a cada hilo','Garantiza orden de ejecución de todos los hilos'],
+ a:1,e:'volatile evita que cada hilo trabaje con una copia cacheada: los cambios en la variable son visibles para los demás hilos. Pero no vuelve atómica una operación compuesta como contador++; para eso, synchronized o AtomicInteger.'},
+{w:'W5',q:'¿Para qué se usa AtomicInteger?',
+ o:['Para evitar crear hilos manualmente','Para realizar operaciones sobre enteros de manera atómica (incrementAndGet, addAndGet) sin solapamientos entre hilos','Para declarar variables finales','Para medir el tiempo de ejecución de un hilo'],
+ a:1,e:'Pertenece a java.util.concurrent.atomic y hace operaciones seguras en entornos concurrentes sin usar synchronized; muy usada para contadores compartidos.'},
+];
+
+/* ---------- utilidades ---------- */
+function shuffle(arr){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+const $=id=>document.getElementById(id);
+
+/* ---------- estado ---------- */
+let order=[],optsMap=[],answers=[],cur=0;
+
+function start(){
+  order=shuffle(BANK);
+  optsMap=order.map(q=>{ // baraja opciones y recuerda dónde quedó la correcta
+    const idx=shuffle(q.o.map((_,k)=>k));
+    return idx;
+  });
+  answers=Array(BANK.length).fill(null);
+  cur=0;
+  show('scrQuiz');
+  render();
+}
+
+function show(id){
+  ['scrStart','scrQuiz','scrEnd'].forEach(s=>$(s).style.display=s===id?'block':'none');
+  window.scrollTo(0,0);
+}
+
+/* ---------- render pregunta ---------- */
+function render(){
+  const q=order[cur];
+  $('barFill').style.width=((cur)/BANK.length*100)+'%';
+  $('cnt').innerHTML='<i class="fa-solid fa-circle-question"></i>Pregunta '+(cur+1)+' de '+BANK.length;
+  $('qText').innerHTML='<span class="tag">'+q.w+'</span> '+q.q;
+  const box=$('opts');box.innerHTML='';
+  optsMap[cur].forEach((origIdx,pos)=>{
+    const b=document.createElement('button');
+    b.className='opt'+(answers[cur]===pos?' sel':'');
+    b.innerHTML='<span class="mark">'+(answers[cur]===pos?'<i class="fa-solid fa-check"></i>':'')+'</span><span>'+q.o[origIdx]+'</span>';
+    b.onclick=()=>{
+      answers[cur]=pos;
+      render();
+      $('nextBtn').disabled=false;
+      $('markHint').style.display='none';
+    };
+    box.appendChild(b);
+  });
+  if(answers[cur]!==null){$('nextBtn').disabled=false;$('markHint').style.display='none';}
+  else{$('nextBtn').disabled=true;$('markHint').style.display='block';}
+
+  $('prevBtn').disabled=cur===0;
+  const last=cur===BANK.length-1;
+  $('nextBtn').style.display=last?'none':'inline-block';
+  $('finishBtn').style.display=last?'inline-block':'none';
+}
+
+$('prevBtn').onclick=()=>{if(cur>0){cur--;render();}};
+$('nextBtn').onclick=()=>{if(cur<BANK.length-1){cur++;render();}};
+$('finishBtn').onclick=finish;
+
+/* ---------- resultado ---------- */
+function finish(){
+  const total=BANK.length;
+  let got=0;
+  const per={};
+  order.forEach((q,i)=>{ // mismo orden barajado que answers/optsMap
+    per[q.w]=per[q.w]||{got:0,total:0};
+    per[q.w].total++;
+    const correctPos=optsMap[i].indexOf(q.a);
+    if(answers[i]===correctPos){got++;per[q.w].got++;}
+  });
+  const pct=Math.round(got/total*100);
+  $('scoreTxt').textContent=got+' / '+total;
+  const badge=$('gradeBadge'),msg=$('msgTxt');
+  if(pct>=85){badge.className='badge';badge.textContent=pct+'% · Excelente';
+    msg.textContent='Dominas los conceptos del curso. Úsalos como base para profundizar.';}
+  else if(pct>=60){badge.className='badge mid';badge.textContent=pct+'% · Bien, pero repasa';
+    msg.textContent='Buena base. Revisa la revisión de abajo y refuerza las semanas más bajas.';}
+  else{badge.className='badge low';badge.textContent=pct+'% · Necesitas repasar';
+    msg.textContent='Conviene volver a la introducción interactiva y luego reintentar este test.';}
+  const wk=$('wkGrid');
+  wk.innerHTML=Object.keys(per).map(w=>
+    '<div class="wkbox"><span class="small">'+w+'</span><b>'+per[w].got+' / '+per[w].total+'</b></div>'
+  ).join('');
+
+  const rev=$('review');rev.innerHTML='';
+  order.forEach((q,i)=>{
+    const correctPos=optsMap[i].indexOf(q.a);
+    const ok=answers[i]===correctPos;
+    const div=document.createElement('div');
+    div.className='rev';
+    let html='<h3><span class="tag">'+q.w+'</span> Pregunta '+(i+1)+' '+
+      (ok?'<i class="fa-solid fa-circle-check" style="color:var(--success)"></i>'
+         :'<i class="fa-solid fa-circle-xmark" style="color:var(--destructive)"></i>')+'</h3>';
+    html+='<p style="margin-bottom:10px">'+q.q+'</p>';
+    html+='<div class="ansRow '+(ok?'ok':'bad')+'"><i class="fa-solid fa-user"></i><span><b>Tu respuesta:</b> '+
+      (answers[i]===null?'Sin responder':q.o[optsMap[i][answers[i]]])+'</span></div>';
+    if(!ok){
+      html+='<div class="ansRow ok"><i class="fa-solid fa-check"></i><span><b>Respuesta correcta:</b> '+q.o[q.a]+'</span></div>';
+    }
+    html+='<div class="exp"><i class="fa-solid fa-circle-info"></i>'+q.e+'</div>';
+    div.innerHTML=html;
+    rev.appendChild(div);
+  });
+  show('scrEnd');
+}
+
+$('startBtn').onclick=start;
+$('retryBtn').onclick=start;
+})();
+</script>
+</body>
+</html>
