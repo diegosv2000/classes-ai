@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Semana 2 — Sistemas Distribuidos y Desempeño</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+  :root{
+    --bg:#0C0B12;
+    --surface:#13121A;
+    --card:#17161F;
+    --muted:#1F1D28;
+    --secondary:#22202B;
+    --fg:#F4F3F7;
+    --muted-fg:#9A97A6;
+    --on-brand:#FCFCFC;
+    --primary:#8F5CF0;
+    --blue:#4A84F0;
+    --success:#2CC277;
+    --destructive:#EC4B4B;
+    --warning:#F0B429;
+    --info:#3EB0E0;
+    --border:rgba(255,255,255,.09);
+    --input-border:rgba(255,255,255,.12);
+    --font-sans:'Geist',system-ui,sans-serif;
+    --font-mono:'Geist Mono',Consolas,monospace;
+    --grad-brand:linear-gradient(90deg,var(--primary),var(--blue));
+    --grad-num:linear-gradient(180deg,#F4F3F7,#9A97A6);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    min-height:100vh;background:var(--bg);color:var(--fg);
+    font-family:var(--font-sans);font-size:16px;line-height:1.55;
+    display:flex;align-items:center;justify-content:center;
+    padding:30px 16px;position:relative;
+  }
+  body::before,body::after{
+    content:'';position:fixed;border-radius:50%;pointer-events:none;z-index:0;
+    filter:blur(64px);
+  }
+  body::before{
+    width:56vw;height:56vw;top:-18vw;left:-14vw;
+    background:radial-gradient(circle,rgba(143,92,240,.22),transparent 65%);
+  }
+  body::after{
+    width:50vw;height:50vw;bottom:-18vw;right:-12vw;
+    background:radial-gradient(circle,rgba(74,132,240,.18),transparent 65%);
+  }
+  i.fa-solid{font-size:.85em;margin-right:7px}
+  .wrap{width:100%;max-width:860px;position:relative;z-index:1}
+
+  .card{
+    background:var(--card);border:1px solid var(--border);
+    border-radius:1rem;padding:28px;animation:in .35s ease;
+    box-shadow:0 8px 48px rgba(143,92,240,.1);
+  }
+  @keyframes in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+  h1{font-size:1.8rem;font-weight:600;letter-spacing:-.02em;line-height:1.25;margin-bottom:.5em}
+  h2{font-size:1.25rem;font-weight:600;letter-spacing:-.01em;line-height:1.4;margin-bottom:.7em}
+  h3{font-size:.74rem;text-transform:uppercase;letter-spacing:.2em;color:var(--muted-fg);margin-bottom:.6em;font-weight:600}
+  p{line-height:1.6}
+  .sub{color:var(--muted-fg)}
+  .small{font-size:.86rem;color:var(--muted-fg);line-height:1.6}
+  .small b{color:var(--fg);font-weight:500}
+  .center{text-align:center}
+
+  .btn{
+    background:var(--primary);color:var(--on-brand);border:none;border-radius:9999px;
+    padding:11px 26px;font-size:.9rem;font-weight:600;cursor:pointer;
+    transition:all .2s;font-family:var(--font-sans);
+    box-shadow:0 8px 40px rgba(143,92,240,.25);
+  }
+  .btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 48px rgba(143,92,240,.35)}
+  .btn.ghost{
+    background:var(--secondary);color:var(--fg);border:1px solid var(--border);box-shadow:none;
+  }
+  .btn.ghost:hover{border-color:rgba(143,92,240,.5);box-shadow:0 0 24px rgba(143,92,240,.12)}
+  .btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+
+  #hud{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+  #bar{flex:1;height:6px;background:rgba(255,255,255,.08);border-radius:9999px;overflow:hidden}
+  #barFill{height:100%;width:0;background:var(--grad-brand);transition:width .3s}
+  #cnt{font-size:.8rem;color:var(--muted-fg);white-space:nowrap;font-family:var(--font-mono)}
+
+  .opt{
+    display:flex;align-items:flex-start;gap:12px;width:100%;text-align:left;
+    background:var(--surface);border:1.5px solid var(--border);border-radius:.75rem;
+    color:var(--fg);padding:13px 16px;font-size:.94rem;cursor:pointer;
+    margin-bottom:10px;transition:all .15s;line-height:1.5;font-family:var(--font-sans);
+  }
+  .opt:hover{border-color:var(--input-border)}
+  .opt .mark{
+    flex-shrink:0;width:22px;height:22px;border-radius:9999px;
+    border:2px solid var(--input-border);display:inline-flex;align-items:center;
+    justify-content:center;font-size:.68rem;margin-top:1px;transition:all .15s;color:var(--on-brand);
+  }
+  .opt.sel{
+    border-color:rgba(143,92,240,.6);background:var(--muted);
+    box-shadow:0 0 40px rgba(143,92,240,.15);
+  }
+  .opt.sel .mark{border-color:var(--primary);background:var(--primary)}
+
+  .score{
+    font-family:var(--font-mono);font-size:3rem;font-weight:600;line-height:1;
+    background:var(--grad-num);-webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .badge{
+    display:inline-flex;align-items:center;gap:8px;border-radius:9999px;
+    padding:6px 18px;font-weight:600;font-size:.85rem;
+  }
+  .badge::before{content:'';width:6px;height:6px;border-radius:9999px;background:currentColor}
+  .badge{background:rgba(44,194,119,.15);color:var(--success)}
+  .badge.low{background:rgba(236,75,75,.15);color:var(--destructive)}
+  .badge.mid{background:rgba(240,180,41,.15);color:var(--warning)}
+  .wkgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+  @media(max-width:640px){.wkgrid{grid-template-columns:repeat(2,1fr)}}
+  .wkbox{
+    background:var(--surface);border:1px solid var(--border);border-radius:.75rem;
+    padding:14px;text-align:center;
+  }
+  .wkbox b{
+    font-family:var(--font-mono);color:var(--fg);font-size:1.25rem;font-weight:600;display:block;margin-top:4px;
+  }
+  .rev{border-top:1px solid var(--border);padding:20px 4px}
+  .rev h3{margin-bottom:10px}
+  .tag{
+    display:inline-block;font-size:.68rem;font-weight:600;letter-spacing:.1em;
+    border-radius:9999px;padding:3px 10px;
+    background:var(--grad-brand);color:var(--on-brand);
+  }
+  .ansRow{
+    display:flex;gap:10px;align-items:flex-start;padding:9px 12px;border-radius:.75rem;
+    font-size:.9rem;line-height:1.5;margin-bottom:6px;
+  }
+  .ansRow.ok{background:rgba(44,194,119,.1)}
+  .ansRow.bad{background:rgba(236,75,75,.1)}
+  .ansRow i{margin-top:3px}
+  .ansRow.ok i{color:var(--success)}
+  .ansRow.bad i{color:var(--destructive)}
+  .exp{font-size:.84rem;color:var(--muted-fg);padding:4px 10px 0 30px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ INICIO ============ -->
+  <div class="card" id="scrStart">
+    <h1><i class="fa-solid fa-clipboard-check"></i>Test de repaso · Semana 2</h1>
+    <p class="sub" style="margin-bottom:14px">Sistemas distribuidos y desempeño</p>
+    <p style="margin-bottom:8px">Comprueba cuánto aprendiste de los materiales <span class="mono">w2_1.pdf</span> y <span class="mono">w2_2.pdf</span>. Son <b>20 preguntas</b> de selección múltiple sobre sistemas distribuidos, sus desafíos, concurrencia y desempeño.</p>
+    <ul class="small" style="list-style:none;line-height:2;margin-bottom:20px">
+      <li><i class="fa-solid fa-shuffle" style="color:var(--primary)"></i>El orden de preguntas y opciones es aleatorio en cada intento</li>
+      <li><i class="fa-solid fa-pen" style="color:var(--primary)"></i>Solo marcas tu respuesta; puedes volver y cambiarla antes de finalizar</li>
+      <li><i class="fa-solid fa-chart-column"></i>Al final verás tu nota, el desglose por tema y la revisión de cada pregunta</li>
+    </ul>
+    <button class="btn" id="startBtn"><i class="fa-solid fa-play"></i>Comenzar test</button>
+  </div>
+
+  <!-- ============ PREGUNTAS ============ -->
+  <div class="card" id="scrQuiz" style="display:none">
+    <div id="hud">
+      <div id="bar"><div id="barFill"></div></div>
+      <span id="cnt"></span>
+    </div>
+    <h2 id="qText"></h2>
+    <div id="opts"></div>
+    <div style="display:flex;gap:10px;justify-content:space-between;margin-top:18px">
+      <button class="btn ghost" id="prevBtn"><i class="fa-solid fa-arrow-left"></i>Anterior</button>
+      <button class="btn" id="nextBtn" disabled>Siguiente<i class="fa-solid fa-arrow-right" style="margin-right:0;margin-left:6px"></i></button>
+      <button class="btn" id="finishBtn" style="display:none"><i class="fa-solid fa-flag-checkered"></i>Finalizar test</button>
+    </div>
+    <p class="small" style="margin-top:12px" id="markHint"><i class="fa-solid fa-hand-pointer"></i>Marca una opción para continuar.</p>
+  </div>
+
+  <!-- ============ RESULTADO ============ -->
+  <div class="card" id="scrEnd" style="display:none">
+    <div class="center">
+      <h1><i class="fa-solid fa-award"></i>Tu resultado</h1>
+      <div class="score" id="scoreTxt"></div>
+      <p style="margin:12px 0 6px"><span class="badge" id="gradeBadge"></span></p>
+      <p class="sub" id="msgTxt"></p>
+    </div>
+    <div class="wkgrid" id="wkGrid"></div>
+    <h3 style="margin:28px 0 4px"><i class="fa-solid fa-list-check"></i>Revisión de respuestas</h3>
+    <div id="review"></div>
+    <div class="center" style="margin-top:24px">
+      <button class="btn" id="retryBtn"><i class="fa-solid fa-rotate-right"></i>Reintentar (se rebaraja todo)</button>
+      <p class="small" style="margin-top:14px"><a href="index.html" style="color:var(--muted-fg);text-decoration:none">← volver al contenido de la semana 2</a></p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- Banco de preguntas (fiel a w2_1.pdf y w2_2.pdf) ---------- */
+const BANK=[
+/* ----- Sistemas distribuidos (2) ----- */
+{w:'Sistemas distribuidos',q:'¿Qué es un sistema distribuido?',
+ o:['Un servidor con varios procesadores','Una colección de computadoras separadas físicamente, conectadas por red, que el programador percibe como un solo sistema','Un programa que ejecuta varios hilos a la vez','Un cable que conecta varias máquinas'],
+ a:1,e:'Colección de computadoras separadas físicamente y conectadas por una red de comunicaciones; el programador percibe todos los componentes como un solo sistema y accede a los remotos igual que a los locales, con middleware de por medio.'},
+{w:'Sistemas distribuidos',q:'¿Qué es el middleware y qué ejemplos menciona el material?',
+ o:['Un antivirus de red; ej. firewall','El estrato de software que abstrae y enmascara la heterogeneidad; ej. CORBA y Java RMI','El cableado del edificio; ej. fibra óptica','Una base de datos; ej. MySQL'],
+ a:1,e:'El middleware provee una abstracción de programación y enmascara la heterogeneidad subyacente de redes, hardware, SO y lenguajes. Ejemplos: CORBA, Java RMI; destacan también RPC y SOAP.'},
+
+/* ----- Desafíos (4) ----- */
+{w:'Desafíos',q:'¿A qué elementos se aplica la heterogeneidad?',
+ o:['Solo a los lenguajes de programación','Redes, hardware, sistemas operativos, lenguajes de programación e implementaciones de diferentes desarrolladores','Solo al hardware de red','A los cables y conectores'],
+ a:1,e:'La heterogeneidad abarca: redes, hardware de computadores, sistemas operativos, lenguajes de programación e implementaciones de diferentes desarrolladores. El middleware la enmascara.'},
+{w:'Desafíos',q:'¿Qué se requiere para lograr la extensibilidad de un sistema distribuido abierto?',
+ o:['Comprar más servidores','Que las interfaces clave sean publicadas','Cerrar el sistema a terceros','Usar un solo proveedor'],
+ a:1,e:'Para la extensibilidad es imprescindible que las interfaces clave sean publicadas. Los sistemas abiertos se extienden con más computadoras (hardware) y nuevos servicios o re-implementaciones (software), y dan independencia de proveedores.'},
+{w:'Desafíos',q:'¿Cuáles son los tres componentes de la seguridad según el material?',
+ o:['Velocidad, memoria y disco','Confidencialidad, integridad y disponibilidad','Autenticación, autorización y auditoría','Firewall, antivirus y VPN'],
+ a:1,e:'Confidencialidad: protección contra individuos no autorizados. Integridad: protección contra la alteración o corrupción. Disponibilidad: protección contra la interferencia que impide el acceso a los recursos.'},
+{w:'Desafíos',q:'Se dice que un sistema es escalable si…',
+ o:['usa el último hardware disponible','conserva su efectividad cuando crecen significativamente el número de recursos y el número de usuarios','tiene más de un servidor','está escrito en un lenguaje moderno'],
+ a:1,e:'Escalabilidad: conservar la efectividad ante un incremento significativo de recursos y usuarios. No basta con "aguantar más": la efectividad debe mantenerse.'},
+
+/* ----- Fallos y transparencia (4) ----- */
+{w:'Fallos y transparencia',q:'¿Cómo se implementa la detección de fallos según el ejemplo del material?',
+ o:['Reiniciando el servidor cada día','Con sumas de comprobación (checksums) para detectar datos corruptos en un mensaje','Contratando más administradores','Preguntando al usuario'],
+ a:1,e:'Detección: se pueden utilizar sumas de comprobación (checksums) para detectar datos corruptos en un mensaje.'},
+{w:'Fallos y transparencia',q:'¿Qué implica la recuperación de fallos?',
+ o:['Apagar todo el sistema','Que tras una caída del servidor, el estado de los datos pueda reponerse o retrotraerse (rollback) a una situación anterior','Borrar los datos corruptos','Ignorar el fallo'],
+ a:1,e:'La recuperación implica diseñar software donde, tras una caída del servidor, el estado de los datos se repone o retracta (rollback) a una situación anterior.'},
+{w:'Fallos y transparencia',q:'"Acceder a los recursos sin conocer su localización" es la transparencia de…',
+ o:['acceso','ubicación','replicación','movilidad'],
+ a:1,e:'Es la transparencia de ubicación. (La de acceso usa operaciones idénticas para local y remoto; la de replicación oculta las copias; la de movilidad permite reubicar sin afectar la operación).'},
+{w:'Fallos y transparencia',q:'¿Qué permite la transparencia de concurrencia?',
+ o:['Ocultar los fallos del sistema','Que varios procesos operen concurrentemente sobre recursos compartidos sin interferencia mutua','Reconfigurar el sistema según la carga','Copiar recursos sin avisar'],
+ a:1,e:'Transparencia de concurrencia: varios procesos operan concurrentemente sobre recursos compartidos sin interferencia mutua.'},
+
+/* ----- Concurrencia (4) ----- */
+{w:'Concurrencia',q:'Según la tabla del material, ¿qué distingue a los hilos de los procesos?',
+ o:['Creación costosa, memoria independiente','Creación ligera, memoria y recursos compartidos, comunicación sencilla pero mayor complejidad de programación','Solo se diferencian en el nombre','Los hilos no pueden comunicarse'],
+ a:1,e:'Procesos: creación costosa, memoria independiente, comunicación compleja, programación menos compleja. Hilos: creación ligera, recursos y memoria compartidos, comunicación sencilla, pero alta complejidad de programación.'},
+{w:'Concurrencia',q:'¿Cuándo constituyen un conjunto de actividades un programa concurrente?',
+ o:['Cuando se ejecutan en máquinas distintas','Cuando todas cooperan entre sí para realizar una tarea común','Cuando usan varios núcleos','Cuando tienen la misma prioridad'],
+ a:1,e:'Cada actividad está soportada por un hilo, y para que el conjunto constituya un programa concurrente todas deben cooperar entre sí para realizar una tarea común.'},
+{w:'Concurrencia',q:'¿Cuál es la diferencia entre paralelismo real y paralelismo lógico?',
+ o:['No hay diferencia práctica','Real: una actividad por procesador/núcleo, avanzan a la vez; lógico: se intercalan actividades en un núcleo, dando la imagen de simultaneidad','Real: un solo núcleo; lógico: varios núcleos','Lógico: solo en Java; real: en C'],
+ a:1,e:'Paralelismo real: múltiples procesadores/núcleos, cada actividad en el suyo (o varios ordenadores). Paralelismo lógico: las operaciones de E/S suspenden hilos y se intercalan actividades, ofreciendo la imagen de simultaneidad; el usuario no puede distinguir un caso del otro.'},
+{w:'Concurrencia',q:'¿Qué inconvenientes de la programación concurrente menciona el material?',
+ o:['Consume más memoria RAM siempre','Condición de carrera con inconsistencias en variables compartidas, interbloqueos, y depuración compleja por entrelazados distintos en cada ejecución','Solo funciona en Linux','Los programas quedan más lentos siempre'],
+ a:1,e:'Programación delicada: la condición de carrera genera inconsistencias imprevistas en variables compartidas y pueden surgir interbloqueos. Depuración compleja: las sentencias de cada actividad pueden intercalarse de manera distinta en cada ejecución.'},
+
+/* ----- Desempeño (3) ----- */
+{w:'Desempeño',q:'¿Qué aspectos abarca el término "desempeño"?',
+ o:['Velocidad de procesamiento, uso de recursos, confiabilidad y escalabilidad','Solo la velocidad de la red','Únicamente el número de usuarios','El precio del hardware'],
+ a:0,e:'Desempeño abarca: velocidad de procesamiento, uso de recursos (CPU, memoria, energía), confiabilidad (consistencia sin fallos) y escalabilidad (manejar más carga sin degradarse).'},
+{w:'Desempeño',q:'¿Qué es la latencia y de qué factores depende?',
+ o:['El ancho de banda disponible; depende del proveedor','El tiempo de una solicitud en viajar al destino y regresar; depende de distancia física, congestión, hardware e ineficiencias de software','El número de solicitudes por segundo','Una medida de almacenamiento'],
+ a:1,e:'La latencia es el tiempo que tarda una solicitud en ir del nodo origen al destino y regresar con la respuesta. La afectan la distancia física, la congestión de la red, las limitaciones de hardware y las ineficiencias de software.'},
+{w:'Desempeño',q:'¿En qué cuellos de botella se trabaja para optimizar la latencia?',
+ o:['Disco, CPU, RAM y red','Retrasos de propagación, transmisión, procesamiento y colas de espera','Solo en el hardware del cliente','En el diseño de la interfaz'],
+ a:1,e:'Optimizar la latencia implica identificar y abordar cuellos de botella en el retraso de propagación, de transmisión, de procesamiento y en las colas de espera; con algoritmos eficientes, hardware actualizado y diseños que minimicen distancia y congestión.'},
+
+/* ----- Paralelización (3) ----- */
+{w:'Paralelización',q:'¿Qué mide el throughput y en qué unidades se expresa?',
+ o:['El tiempo por tarea; en ms','La cantidad de operaciones/tareas completadas por período; en ops/s, TPS, req/s, B/s o mensajes/s','La memoria usada; en MB','El número de hilos; en unidades'],
+ a:1,e:'Throughput = operaciones o tareas completadas en un período. Ejemplos: ops/s (BD distribuida con 10,000 consultas/s), TPS (transacciones financieras), req/s (servidores web y APIs), B/s-KB/s-MB/s (datos) y mensajes/s (Kafka, RabbitMQ).'},
+{w:'Paralelización',q:'¿Cuándo es óptimo que #threads = #cores (N)?',
+ o:['Siempre, sin importar la tarea','Solo si todos los subprocesos son ejecutables sin interrupción (sin E/S, llamadas bloqueantes, sleep) y nada más consume mucha CPU','Solo en laptops','Solo si hay más hilos que núcleos'],
+ a:1,e:'Con N núcleos, N subtareas llenan la máquina; con N+1 tareas una queda en espera (idle). #threads = #cores es óptimo solo si todos los subprocesos son ejecutables sin bloqueo y no corre otra cosa que consuma CPU. Si los hilos se bloquean en E/S, más hilos que núcleos puede ser correcto.'},
+{w:'Paralelización',q:'¿Qué es el Simultaneous Multithreading (SMT / Hyper-Threading)?',
+ o:['Una librería de Java para crear hilos','Una técnica de hardware donde un núcleo físico gestiona dos hilos a la vez, emitiendo instrucciones de ambos en el mismo ciclo; no duplica la velocidad (mejoras hasta 70-80%)','Un algoritmo del sistema operativo','Lo mismo que multi-core'],
+ a:1,e:'SMT (Hyper-Threading en Intel, SMT en AMD) permite a un núcleo físico gestionar dos hilos simultáneamente aprovechando recursos inactivos: 4 núcleos / 8 hilos significa dos tareas por núcleo. No duplica la velocidad: hasta 70-80% de mejora en software especializado. Es hardware; el multithreading de software es el SO alternando hilos.'},
+];
+
+/* ---------- utilidades ---------- */
+function shuffle(arr){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+const $=id=>document.getElementById(id);
+
+/* ---------- estado ---------- */
+let order=[],optsMap=[],answers=[],cur=0;
+
+function start(){
+  order=shuffle(BANK);
+  optsMap=order.map(q=>{ // baraja opciones y recuerda dónde quedó la correcta
+    const idx=shuffle(q.o.map((_,k)=>k));
+    return idx;
+  });
+  answers=Array(BANK.length).fill(null);
+  cur=0;
+  show('scrQuiz');
+  render();
+}
+
+function show(id){
+  ['scrStart','scrQuiz','scrEnd'].forEach(s=>$(s).style.display=s===id?'block':'none');
+  window.scrollTo(0,0);
+}
+
+/* ---------- render pregunta ---------- */
+function render(){
+  const q=order[cur];
+  $('barFill').style.width=((cur)/BANK.length*100)+'%';
+  $('cnt').innerHTML='<i class="fa-solid fa-circle-question"></i>Pregunta '+(cur+1)+' de '+BANK.length;
+  $('qText').innerHTML='<span class="tag">'+q.w+'</span> '+q.q;
+  const box=$('opts');box.innerHTML='';
+  optsMap[cur].forEach((origIdx,pos)=>{
+    const b=document.createElement('button');
+    b.className='opt'+(answers[cur]===pos?' sel':'');
+    b.innerHTML='<span class="mark">'+(answers[cur]===pos?'<i class="fa-solid fa-check"></i>':'')+'</span><span>'+q.o[origIdx]+'</span>';
+    b.onclick=()=>{
+      answers[cur]=pos;
+      render();
+      $('nextBtn').disabled=false;
+      $('markHint').style.display='none';
+    };
+    box.appendChild(b);
+  });
+  if(answers[cur]!==null){$('nextBtn').disabled=false;$('markHint').style.display='none';}
+  else{$('nextBtn').disabled=true;$('markHint').style.display='block';}
+
+  $('prevBtn').disabled=cur===0;
+  const last=cur===BANK.length-1;
+  $('nextBtn').style.display=last?'none':'inline-block';
+  $('finishBtn').style.display=last?'inline-block':'none';
+}
+
+$('prevBtn').onclick=()=>{if(cur>0){cur--;render();}};
+$('nextBtn').onclick=()=>{if(cur<BANK.length-1){cur++;render();}};
+$('finishBtn').onclick=finish;
+
+/* ---------- resultado ---------- */
+function finish(){
+  const total=BANK.length;
+  let got=0;
+  const per={};
+  order.forEach((q,i)=>{ // mismo orden barajado que answers/optsMap
+    per[q.w]=per[q.w]||{got:0,total:0};
+    per[q.w].total++;
+    const correctPos=optsMap[i].indexOf(q.a);
+    if(answers[i]===correctPos){got++;per[q.w].got++;}
+  });
+  const pct=Math.round(got/total*100);
+  $('scoreTxt').textContent=got+' / '+total;
+  const badge=$('gradeBadge'),msg=$('msgTxt');
+  if(pct>=85){badge.className='badge';badge.textContent=pct+'% · Excelente';
+    msg.textContent='Dominas la semana 2. Listo para avanzar a la semana 3.';}
+  else if(pct>=60){badge.className='badge mid';badge.textContent=pct+'% · Bien, pero repasa';
+    msg.textContent='Buena base. Revisa la revisión de abajo y refuerza los temas más bajos.';}
+  else{badge.className='badge low';badge.textContent=pct+'% · Necesitas repasar';
+    msg.textContent='Conviene volver a la presentación de la semana 2 y luego reintentar este test.';}
+  const wk=$('wkGrid');
+  wk.innerHTML=Object.keys(per).map(w=>
+    '<div class="wkbox"><span class="small">'+w+'</span><b>'+per[w].got+' / '+per[w].total+'</b></div>'
+  ).join('');
+
+  const rev=$('review');rev.innerHTML='';
+  order.forEach((q,i)=>{
+    const correctPos=optsMap[i].indexOf(q.a);
+    const ok=answers[i]===correctPos;
+    const div=document.createElement('div');
+    div.className='rev';
+    let html='<h3><span class="tag">'+q.w+'</span> Pregunta '+(i+1)+' '+
+      (ok?'<i class="fa-solid fa-circle-check" style="color:var(--success)"></i>'
+         :'<i class="fa-solid fa-circle-xmark" style="color:var(--destructive)"></i>')+'</h3>';
+    html+='<p style="margin-bottom:10px">'+q.q+'</p>';
+    html+='<div class="ansRow '+(ok?'ok':'bad')+'"><i class="fa-solid fa-user"></i><span><b>Tu respuesta:</b> '+
+      (answers[i]===null?'Sin responder':q.o[optsMap[i][answers[i]]])+'</span></div>';
+    if(!ok){
+      html+='<div class="ansRow ok"><i class="fa-solid fa-check"></i><span><b>Respuesta correcta:</b> '+q.o[q.a]+'</span></div>';
+    }
+    html+='<div class="exp"><i class="fa-solid fa-circle-info"></i>'+q.e+'</div>';
+    div.innerHTML=html;
+    rev.appendChild(div);
+  });
+  show('scrEnd');
+}
+
+$('startBtn').onclick=start;
+$('retryBtn').onclick=start;
+})();
+</script>
+</body>
+</html>

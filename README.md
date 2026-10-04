@@ -19,13 +19,15 @@ entiendo-ai/
     │   ├── index.html            ← presentación interactiva de conceptos previos
     │   └── test.html             ← test de diagnóstico (20 preguntas)
     ├── week_1/
-    │   ├── index.html            ← (pendiente de contenido)
-    │   ├── introduction.html     ← (pendiente: contiene TODO)
+    │   ├── index.html            ← presentación de la semana (17 slides)
+    │   ├── introduction.html     ← resumen de una página
+    │   ├── test.html             ← test de repaso (16 preguntas)
     │   └── files/
     │       └── w1_1.pdf          ← material de la semana 1
     ├── week_2/
-    │   ├── index.html            ← (pendiente)
-    │   ├── introduction.html     ← (pendiente: TODO)
+    │   ├── index.html            ← presentación de la semana (25 slides)
+    │   ├── introduction.html     ← resumen de una página
+    │   ├── test.html             ← test de repaso (20 preguntas)
     │   └── files/
     │       ├── w2_1.pdf          ← desafío de los sistemas distribuidos + programación concurrente
     │       └── w2_2.pdf          ← desempeño y optimización para la latencia
@@ -53,8 +55,9 @@ entiendo-ai/
 
 Cada `week_N/` sigue la misma plantilla:
 
-- `index.html` — página principal de la semana (por ahora vacía; se rellenará después).
-- `introduction.html` — introducción de la semana (por ahora solo contiene `TODO`).
+- `index.html` — presentación completa del material de la semana (weeks 1 y 2 listas; 3-5 pendientes).
+- `introduction.html` — resumen de una página con el mapa mental de la semana (weeks 1 y 2 listas; 3-5 solo contienen `TODO`).
+- `test.html` — test de repaso de la semana (existe para weeks 1 y 2 por ahora).
 - `files/` — los PDFs entregados por el profesor, nombrados `wN_X.pdf` (semana N, material X).
 
 No existe material para la **semana 4**, así que su carpeta se mantiene con la plantilla pero sin PDFs.
@@ -93,6 +96,13 @@ Test de diagnóstico con **20 preguntas** de selección múltiple fiel al materi
 - Al finalizar muestra: nota sobre 20 con porcentaje y escala (≥85 % Excelente, ≥60 % Bien, <60 % Repasar), desglose por semana y **revisión completa** de cada pregunta (tu respuesta, la correcta y una explicación).
 - Botón de reintento que vuelve a barajar todo.
 
+## Tests semanales
+
+Cada semana con contenido incluye su propio test de repaso con el mismo formato (preguntas y opciones barajadas, navegación, nota, desglose por tema y revisión explicada):
+
+- **Week 1** (`week_1/test.html`) — **16 preguntas** sobre `w1_1.pdf`: concurrencia, hilos y procesos, crear hilos, estados y prioridades, métodos esenciales (`currentThread`, `sleep`, `join`), interrupciones y daemon threads.
+- **Week 2** (`week_2/test.html`) — **20 preguntas** sobre `w2_1.pdf` y `w2_2.pdf`: sistemas distribuidos, desafíos, fallos y transparencia, concurrencia, desempeño y paralelización/SMT.
+
 ## styles.md
 
 Guía de estilo visual del proyecto: paleta dark (casi negro con tinte violeta), colores de marca (púrpura `#8F5CF0`, azul `#4A84F0`), colores utilitarios (success/destructive/warning/info), bordes, radios, sombras con resplandor, glows de fondo, gradientes y tipografía (Geist Sans / Geist Mono). Ambas páginas HTML siguen esta guía.
@@ -120,5 +130,7 @@ Nota: las páginas cargan **Geist** (Google Fonts) y **Font Awesome** (cdnjs) de
 - [x] Presentación interactiva de conceptos previos (`course_introduction/index.html`).
 - [x] Test de diagnóstico (`course_introduction/test.html`).
 - [x] Guía de estilo (`styles.md`).
-- [ ] Páginas semanales (`week_N/index.html` y `week_N/introduction.html`) — pendientes de contenido.
+- [x] Week 1: presentación (17 slides), introducción y test de repaso (16 preguntas).
+- [x] Week 2: presentación (25 slides), introducción y test de repaso (20 preguntas).
+- [ ] Weeks 3 y 5: páginas semanales (`index.html`, `introduction.html`, `test.html`) — pendientes.
 - [ ] Material de la semana 4 — aún no entregado.

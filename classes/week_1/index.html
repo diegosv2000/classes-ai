@@ -832,7 +832,7 @@ const slideFx={};
     bar.style.width=progress+'%';
     if(progress%24===0&&progress>0)addLog('worker: tick de trabajo, progreso '+progress+'%');
   }
-  slideFx[12]=()=>{resetDemo();timer=setInterval(tick,900);};
+  slideFx[12]=()=>{resetDemo();timer=addT(tick,900);};
 })();
 
 /* ---------- init ---------- */

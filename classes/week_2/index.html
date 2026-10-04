@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Semana 2 — Sistemas Distribuidos y Desempeño</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+  :root{
+    --bg:#0C0B12;
+    --surface:#13121A;
+    --card:#17161F;
+    --muted:#1F1D28;
+    --secondary:#22202B;
+    --fg:#F4F3F7;
+    --muted-fg:#9A97A6;
+    --on-brand:#FCFCFC;
+    --primary:#8F5CF0;
+    --blue:#4A84F0;
+    --success:#2CC277;
+    --destructive:#EC4B4B;
+    --warning:#F0B429;
+    --info:#3EB0E0;
+    --border:rgba(255,255,255,.09);
+    --input-border:rgba(255,255,255,.12);
+    --font-sans:'Geist',system-ui,sans-serif;
+    --font-mono:'Geist Mono',Consolas,monospace;
+    --grad-brand:linear-gradient(90deg,var(--primary),var(--blue));
+    --grad-num:linear-gradient(180deg,#F4F3F7,#9A97A6);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg);color:var(--fg);
+    font-family:var(--font-sans);font-size:16px;line-height:1.55;
+    overflow:hidden;position:relative;
+  }
+  body::before,body::after{
+    content:'';position:fixed;border-radius:50%;pointer-events:none;z-index:0;
+    filter:blur(64px);
+  }
+  body::before{
+    width:56vw;height:56vw;top:-18vw;left:-14vw;
+    background:radial-gradient(circle,rgba(143,92,240,.22),transparent 65%);
+  }
+  body::after{
+    width:50vw;height:50vw;bottom:-18vw;right:-12vw;
+    background:radial-gradient(circle,rgba(74,132,240,.18),transparent 65%);
+  }
+
+  i.fa-solid{font-size:.85em;margin-right:7px}
+  code,.mono{font-family:var(--font-mono);font-size:.92em}
+
+  #progress{position:fixed;top:0;left:0;right:0;height:2px;background:rgba(255,255,255,.08);z-index:60}
+  #progressFill{height:100%;width:0;background:var(--grad-brand);transition:width .4s ease}
+  #counter,#brand,#hint{
+    position:fixed;z-index:60;font-size:.72rem;letter-spacing:.18em;
+    background:rgba(12,11,18,.7);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border:1px solid var(--border);border-radius:9999px;padding:6px 14px;
+  }
+  #brand{top:16px;left:22px;text-transform:uppercase;color:var(--muted-fg)}
+  #counter{top:16px;right:22px;color:var(--muted-fg);font-family:var(--font-mono)}
+  #hint{bottom:22px;left:22px;color:var(--muted-fg)}
+
+  .slide{
+    position:fixed;inset:0;display:none;flex-direction:column;
+    align-items:center;justify-content:center;
+    padding:80px 64px 96px;overflow-y:auto;z-index:1;
+  }
+  .slide.active{display:flex;animation:fade .5s ease}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .inner{width:100%;max-width:1060px;position:relative}
+
+  .kicker{font-size:.72rem;text-transform:uppercase;letter-spacing:.3em;color:var(--muted-fg);margin-bottom:18px;font-weight:500}
+  .kicker b{font-family:var(--font-mono);font-weight:600;background:var(--grad-brand);-webkit-background-clip:text;background-clip:text;color:transparent;margin-right:10px}
+  h1{font-size:3rem;font-weight:600;letter-spacing:-.02em;line-height:1.15;color:var(--fg);margin-bottom:.45em}
+  h2{font-size:2.1rem;font-weight:600;letter-spacing:-.02em;line-height:1.2;color:var(--fg);margin-bottom:.55em}
+  h3{font-size:.74rem;text-transform:uppercase;letter-spacing:.2em;color:var(--muted-fg);font-weight:600;margin-bottom:14px}
+  h4{font-size:.64rem;text-transform:uppercase;letter-spacing:.2em;color:var(--muted-fg);font-weight:600;margin-bottom:9px}
+  p{line-height:1.6}
+  .lead{color:var(--muted-fg);font-size:1.02rem;max-width:68ch;margin-bottom:1.4em}
+  .lead b{color:var(--fg);font-weight:500}
+  .small{font-size:.88rem;color:var(--muted-fg);line-height:1.6}
+  .small b{color:var(--fg);font-weight:500}
+  .rule{border:none;border-top:1px solid var(--border);margin:30px 0}
+  .note{border-left:2px solid var(--primary);padding:4px 0 4px 18px;margin-top:26px}
+
+  ul.clean{list-style:none}
+  ul.clean li{padding:7px 0 7px 24px;position:relative;line-height:1.55}
+  ul.clean li::before{content:"\f0da";font-family:"Font Awesome 6 Free";font-weight:900;position:absolute;left:4px;top:9px;color:var(--primary);font-size:.75em}
+  ul.check li::before{content:"\f00c";color:var(--success)}
+
+  table{width:100%;border-collapse:collapse;font-size:.95rem}
+  th{font-size:.7rem;text-transform:uppercase;letter-spacing:.18em;color:var(--muted-fg);text-align:left;padding:0 16px 12px 0;font-weight:600}
+  td{padding:12px 16px 12px 0;border-top:1px solid var(--border);vertical-align:top;line-height:1.55;color:var(--muted-fg)}
+  td:first-child{color:var(--fg);font-weight:500}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:40px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  @media(max-width:860px){.grid2,.grid3{grid-template-columns:1fr}}
+
+  .anim{opacity:0}
+  .slide.active .anim{animation:up .55s ease forwards}
+  @keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  .d1{animation-delay:.08s!important}.d2{animation-delay:.18s!important}.d3{animation-delay:.28s!important}
+  .d4{animation-delay:.38s!important}.d5{animation-delay:.5s!important}.d6{animation-delay:.62s!important}
+
+  .demo{
+    background:var(--surface);border:1px solid rgba(143,92,240,.25);border-radius:1rem;
+    padding:24px;margin:6px 0;box-shadow:0 8px 48px rgba(143,92,240,.12);
+  }
+  .panelcard{
+    background:var(--card);border:1px solid var(--border);border-radius:.75rem;padding:14px;
+  }
+  .demo-head{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+  .demo-head .spacer{margin-left:auto}
+  .stat{font-size:.8rem;color:var(--muted-fg);letter-spacing:.04em;font-family:var(--font-mono)}
+  .stat b{color:var(--fg);font-weight:600}
+
+  .chip{
+    display:inline-block;background:var(--card);border:1px solid var(--border);
+    border-radius:9999px;padding:4px 12px;font-size:.78rem;margin:3px 3px 0 0;
+    font-family:var(--font-mono);transition:all .3s;color:var(--muted-fg);
+  }
+  .chip.running{
+    background:var(--primary);color:var(--on-brand);font-weight:600;
+    border-color:var(--primary);animation:glow 1.1s infinite;
+  }
+  @keyframes glow{0%,100%{box-shadow:0 0 0 rgba(143,92,240,0)}50%{box-shadow:0 0 18px rgba(143,92,240,.45)}}
+
+  .core{
+    background:var(--card);border:1px solid var(--border);border-radius:.75rem;
+    padding:12px;min-width:104px;text-align:center;
+  }
+  .core h4{margin-bottom:9px}
+  .bar{height:5px;background:rgba(255,255,255,.08);border-radius:9999px;overflow:hidden;margin-top:9px}
+  .bar>i{display:block;height:100%;width:0;background:var(--grad-brand);transition:width .6s}
+
+  .nodebox{
+    background:var(--card);border:1px solid var(--border);border-radius:9999px;
+    padding:8px 18px;font-size:.78rem;font-family:var(--font-mono);color:var(--fg);
+    display:inline-block;animation:pulse 2.6s infinite;
+  }
+  @keyframes pulse{0%,100%{border-color:var(--border)}50%{border-color:rgba(74,132,240,.6)}}
+  .mwstrip{
+    background:var(--muted);border:1px dashed var(--input-border);
+    border-radius:.75rem;padding:9px;text-align:center;font-size:.66rem;
+    text-transform:uppercase;letter-spacing:.2em;color:var(--muted-fg);font-weight:600;
+  }
+  .arrow{color:var(--muted-fg);font-size:.8rem}
+
+  /* desafíos grid */
+  .chal{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  @media(max-width:760px){.chal{grid-template-columns:repeat(2,1fr)}}
+  .chal .c{
+    background:var(--card);border:1px solid var(--border);border-radius:.75rem;
+    padding:14px 12px;text-align:center;
+  }
+  .chal .c b{font-weight:600;font-size:.92rem;color:var(--fg);display:block}
+  .chal .c small{color:var(--muted-fg);font-size:.7rem;line-height:1.4;display:block;margin-top:4px}
+
+  .agenda{list-style:none;columns:2;column-gap:60px}
+  .agenda li{display:flex;align-items:baseline;gap:16px;padding:11px 0;border-bottom:1px solid var(--border);break-inside:avoid}
+  .agenda .n{font-family:var(--font-mono);font-size:.95rem;font-weight:600;min-width:26px;background:var(--grad-brand);-webkit-background-clip:text;background-clip:text;color:transparent}
+  @media(max-width:760px){.agenda{columns:1}}
+
+  /* latencia split demo */
+  .lane{display:flex;align-items:center;gap:10px;margin-top:10px}
+  .lane label{width:120px;font-size:.72rem;color:var(--muted-fg);font-family:var(--font-mono);flex-shrink:0}
+  .lane .track{flex:1;height:10px;background:rgba(255,255,255,.08);border-radius:9999px;overflow:hidden}
+  .lane .track>i{display:block;height:100%;width:0;background:var(--grad-brand);transition:width .5s linear}
+  #latLog{font-size:.85rem;color:var(--muted-fg);min-height:22px;margin-top:14px;font-family:var(--font-mono)}
+
+  #dots{position:fixed;bottom:32px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:60}
+  .dot{width:6px;height:6px;border-radius:9999px;background:rgba(255,255,255,.18);cursor:pointer;transition:all .3s}
+  .dot.on{background:var(--primary);transform:scale(1.4);box-shadow:0 0 10px rgba(143,92,240,.5)}
+  #navBtns{position:fixed;bottom:20px;right:22px;display:flex;gap:8px;z-index:60}
+  .navBtn{
+    width:40px;height:40px;border-radius:9999px;border:1px solid var(--border);
+    background:rgba(23,22,31,.7);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    color:var(--muted-fg);font-size:.85rem;cursor:pointer;transition:all .25s;
+  }
+  .navBtn:hover{border-color:rgba(143,92,240,.6);color:var(--fg);box-shadow:0 0 24px rgba(143,92,240,.15)}
+
+  @media(max-width:640px){
+    .slide{padding:76px 20px 96px}
+    h1{font-size:2.1rem}
+    h2{font-size:1.55rem}
+    .demo{padding:16px}
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"><div id="progressFill"></div></div>
+<div id="brand">PCCD · Semana 2</div>
+<div id="counter">1 / 25</div>
+<div id="hint">← &nbsp;→</div>
+
+<main id="deck">
+
+<!-- ============ 0 · PORTADA ============ -->
+<section class="slide" data-title="Portada">
+  <div class="inner">
+    <p class="kicker anim d1">Semana 2 · Programación Concurrente y Distribuida</p>
+    <h1 class="anim d2">Sistemas distribuidos<br>y desempeño</h1>
+    <p class="lead anim d3">Contenido completo de los materiales <span class="mono">w2_1.pdf</span> (desafío de los sistemas distribuidos y programación concurrente) y <span class="mono">w2_2.pdf</span> (desempeño y optimización para la latencia).</p>
+    <hr class="rule anim d4">
+    <ul class="agenda anim d5">
+      <li><span class="n">01</span>Sistemas distribuidos y middleware</li>
+      <li><span class="n">02</span>Los 7 desafíos</li>
+      <li><span class="n">03</span>Concurrencia en servidores</li>
+      <li><span class="n">04</span>Transparencia</li>
+      <li><span class="n">05</span>Procesos, hilos y programas concurrentes</li>
+      <li><span class="n">06</span>Paralelismo real vs lógico</li>
+      <li><span class="n">07</span>Ventajas e inconvenientes</li>
+      <li><span class="n">08</span>Aplicaciones reales y distribuidas</li>
+      <li><span class="n">09</span>Desempeño, latencia y throughput</li>
+      <li><span class="n">10</span>Paralelización: límites, costos y SMT</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ 1 · SISTEMAS DISTRIBUIDOS ============ -->
+<section class="slide" data-title="Sistemas distribuidos">
+  <div class="inner">
+    <p class="kicker anim d1"><b>01</b>Definición</p>
+    <h2 class="anim d1">Sistemas distribuidos</h2>
+    <p class="lead anim d2">Un <b>sistema distribuido</b> es una colección de computadoras separadas físicamente y conectadas entre sí por una red de comunicaciones. Cada máquina posee sus componentes de hardware y software, pero el programador lo percibe como <b>un solo sistema</b>: no necesita saber qué cosas están en qué máquinas, y accede a los componentes remotos igual que a los locales. El material lo motiva con las <b>operaciones bursátiles de alta velocidad</b>: son tan rápidas que dejan en desventaja a quienes operan desde más lejos.</p>
+    <div class="demo anim d3">
+      <div style="display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;padding:8px 0">
+        <span class="nodebox">nodo 1</span>
+        <i class="fa-solid fa-arrows-left-right arrow"></i>
+        <span class="nodebox">nodo 2</span>
+        <i class="fa-solid fa-arrows-left-right arrow"></i>
+        <span class="nodebox">nodo n</span>
+      </div>
+      <div class="mwstrip">middleware · RPC y SOAP destacan entre los mecanismos</div>
+      <p class="small" style="margin-top:12px">Cada máquina conserva su hardware y software, pero con un middleware de por medio todo se ve como un sistema único con un objetivo común.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2 · LOS 7 DESAFÍOS ============ -->
+<section class="slide" data-title="Los 7 desafíos">
+  <div class="inner">
+    <p class="kicker anim d1"><b>02</b>El mapa del problema</p>
+    <h2 class="anim d1">Desafío de los sistemas distribuidos</h2>
+    <p class="lead anim d2">Hacer que máquinas separadas se sientan como un sistema único implica resolver siete desafíos. Los recorreremos uno a uno:</p>
+    <div class="chal anim d3">
+      <div class="c"><b>Heterogeneidad</b><small>redes, hardware, SO, lenguajes, desarrolladores</small></div>
+      <div class="c"><b>Extensibilidad</b><small>sistemas abiertos, interfaces publicadas</small></div>
+      <div class="c"><b>Seguridad</b><small>confidencialidad, integridad, disponibilidad</small></div>
+      <div class="c"><b>Escalabilidad</b><small>más recursos y usuarios sin perder efectividad</small></div>
+      <div class="c"><b>Tolerancia a fallas</b><small>detección, enmascaramiento, recuperación</small></div>
+      <div class="c"><b>Concurrencia</b><small>acceso simultáneo a recursos compartidos</small></div>
+      <div class="c"><b>Transparencia</b><small>ocultar la complejidad al usuario y programador</small></div>
+      <div class="c"><b>El objetivo</b><small>que todo funcione como un solo sistema</small></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3 · HETEROGENEIDAD ============ -->
+<section class="slide" data-title="Heterogeneidad">
+  <div class="inner">
+    <p class="kicker anim d1"><b>02a</b>Desafíos</p>
+    <h2 class="anim d1">Heterogeneidad</h2>
+    <p class="lead anim d2">La heterogeneidad se aplica a <b>redes</b>, <b>hardware de computadores</b>, <b>sistemas operativos</b>, <b>lenguajes de programación</b> y <b>implementaciones de diferentes desarrolladores</b>. La respuesta a toda esa diversidad es el <b>middleware</b>:</p>
+    <div class="demo anim d3">
+      <div class="mwstrip">middleware: abstracción de programación + enmascaramiento de la heterogeneidad subyacente</div>
+      <p class="small" style="margin-top:12px">Es el estrato de software que provee una abstracción de programación y enmascara la heterogeneidad de redes, hardware, sistemas operativos y lenguajes. Ejemplos del material: <span class="mono">CORBA</span> y <span class="mono">Java RMI</span>.</p>
+      <div style="display:flex;gap:12px;justify-content:center;margin-top:14px;flex-wrap:wrap">
+        <div class="panelcard" style="text-align:center;min-width:150px"><h4>aplicación</h4><p class="small">ve un sistema uniforme</p></div>
+        <div class="arrow" style="align-self:center"><i class="fa-solid fa-arrows-up-down"></i></div>
+        <div class="panelcard" style="text-align:center;min-width:150px;border-color:rgba(143,92,240,.5)"><h4>middleware</h4><p class="small">traduce y oculta</p></div>
+        <div class="arrow" style="align-self:center"><i class="fa-solid fa-arrows-up-down"></i></div>
+        <div class="panelcard" style="text-align:center;min-width:150px"><h4>red · hardware · SO</h4><p class="small">todo lo heterogéneo</p></div>
+      </div>
+    </div>
+    <p class="note anim d4 small">Complemento: <b>código móvil</b> — código que puede enviarse de un computador a otro y ejecutarse en este último. El concepto de <b>máquina virtual</b> ofrece un modo de crear código ejecutable sobre cualquier hardware (Java y la JVM son el ejemplo canónico).</p>
+  </div>
+</section>
+
+<!-- ============ 4 · EXTENSIBILIDAD Y SEGURIDAD ============ -->
+<section class="slide" data-title="Extensibilidad y seguridad">
+  <div class="inner">
+    <p class="kicker anim d1"><b>02b</b>Desafíos</p>
+    <h2 class="anim d1">Extensibilidad y seguridad</h2>
+    <div class="grid2 anim d2" style="gap:26px">
+      <div class="demo">
+        <h3>Extensibilidad</h3>
+        <p class="small">Determina si el sistema puede <b>extenderse de varias maneras</b>: un sistema puede ser abierto o cerrado con respecto a extensiones de hardware o software. Para lograrla es imprescindible que las <b>interfaces clave sean publicadas</b>.</p>
+        <ul class="clean small" style="margin-top:10px">
+          <li>Los <b>sistemas distribuidos abiertos</b> se extienden a nivel de hardware añadiendo computadoras a la red.</li>
+          <li>A nivel de software: nuevos servicios y re-implementación de los antiguos.</li>
+          <li>Beneficio extra: <b>independencia de proveedores</b> concretos.</li>
+        </ul>
+      </div>
+      <div class="demo">
+        <h3>Seguridad · tres componentes</h3>
+        <ul class="clean small" style="margin-top:4px">
+          <li><b>Confidencialidad:</b> protección contra individuos no autorizados.</li>
+          <li><b>Integridad:</b> protección contra la alteración o corrupción de los datos.</li>
+          <li><b>Disponibilidad:</b> protección contra la interferencia que impide el acceso a los recursos.</li>
+        </ul>
+        <p class="small" style="margin-top:10px">Piensa la tríada como <span class="mono">C-I-D</span>: quién puede leer, quién puede modificar y si el recurso está accesible cuando se necesita.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5 · ESCALABILIDAD ============ -->
+<section class="slide" data-title="Escalabilidad">
+  <div class="inner">
+    <p class="kicker anim d1"><b>02c</b>Desafíos</p>
+    <h2 class="anim d1">Escalabilidad</h2>
+    <p class="lead anim d2">Se dice que un sistema es <b>escalable</b> si conserva su efectividad cuando ocurre un incremento significativo en el <b>número de recursos</b> y en el <b>número de usuarios</b>.</p>
+    <div class="demo anim d3">
+      <div style="display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap;padding:6px 0">
+        <div class="panelcard" style="text-align:center"><h4>hoy</h4><p class="small mono">N usuarios · M recursos</p></div>
+        <i class="fa-solid fa-arrow-right arrow"></i>
+        <div class="panelcard" style="text-align:center"><h4>mañana</h4><p class="small mono">10N usuarios · 10M recursos</p></div>
+        <i class="fa-solid fa-equals arrow"></i>
+        <div class="panelcard" style="text-align:center;border-color:rgba(44,194,119,.5)"><h4>escalable</h4><p class="small">misma efectividad</p></div>
+      </div>
+    </div>
+    <p class="note anim d4 small">La escalabilidad no es solo "aguantar más": es <b>conservar la efectividad</b> mientras crece la carga. Volverá a aparecer cuando hablemos de desempeño: un sistema lento que escala sigue siendo lento.</p>
+  </div>
+</section>
+
+<!-- ============ 6 · TRATAMIENTO DE FALLOS ============ -->
+<section class="slide" data-title="Tratamiento de fallos">
+  <div class="inner">
+    <p class="kicker anim d1"><b>02d</b>Desafíos</p>
+    <h2 class="anim d1">Tratamiento de fallos</h2>
+    <p class="lead anim d2">En un sistema distribuido algo <i>siempre</i> va a fallar; la pregunta es cómo lo detectas, lo ocultas y te recuperas. El material distingue cinco estrategias:</p>
+    <table class="anim d3">
+      <tr><th style="width:26%">Estrategia</th><th>Qué implica</th><th>Ejemplo del material</th></tr>
+      <tr><td>Detección de fallos</td><td>Reconocer que algo falló</td><td>Sumas de comprobación (<span class="mono">checksums</span>) para detectar datos corruptos en un mensaje</td></tr>
+      <tr><td>Enmascaramiento de fallos</td><td>Ocultar el fallo al usuario</td><td>Retransmitir mensajes, replicar los datos</td></tr>
+      <tr><td>Tolerancia de fallos</td><td>El cliente está diseñado para tolerar ciertos fallos</td><td>Los usuarios también tendrán que tolerarlos</td></tr>
+      <tr><td>Recuperación de fallos</td><td>Volver a un estado válido tras una caída</td><td>Tras caída del servidor, el estado de los datos se repone o retrotrae (<span class="mono">rollback</span>)</td></tr>
+      <tr><td>Redundancia</td><td>Duplicar componentes críticos</td><td>Emplear componentes redundantes</td></tr>
+    </table>
+    <p class="note anim d4 small">Estas cinco estrategias se combinan: detectas con checksums, enmascaras retransmitiendo o replicando, y si la caída es inevitable, recuperas el estado con rollback gracias a la redundancia.</p>
+  </div>
+</section>
+
+<!-- ============ 7 · CONCURRENCIA EN SERVIDORES ============ -->
+<section class="slide" data-title="Concurrencia en servidores">
+  <div class="inner">
+    <p class="kicker anim d1"><b>02e</b>Desafíos</p>
+    <h2 class="anim d1">Concurrencia</h2>
+    <p class="lead anim d2">Existe la posibilidad de <b>acceso concurrente a un mismo recurso</b>. La concurrencia en los servidores se logra a través de <b>threads</b>: cada cliente puede ser atendido por un hilo distinto. Pero hay una responsabilidad directa:</p>
+    <div class="demo anim d3">
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <span class="chip running">hilo cliente 1</span>
+        <span class="chip running">hilo cliente 2</span>
+        <span class="chip running">hilo cliente n</span>
+        <i class="fa-solid fa-arrows-left-right arrow" style="align-self:center"></i>
+        <div class="panelcard" style="border-color:rgba(240,180,41,.5)"><h4 style="color:var(--warning)">recurso compartido</h4><p class="small">los hilos llegan a la vez</p></div>
+      </div>
+    </div>
+    <p class="note anim d4 small">Cada objeto que represente un <b>recurso compartido</b> debe responsabilizarse de garantizar que opera correctamente en un entorno concurrente. Para que un objeto sea <b>seguro en concurrencia</b>, sus operaciones deben <b>sincronizarse</b> de forma que sus datos permanezcan consistentes — el tema central de la semana 5.</p>
+  </div>
+</section>
+
+<!-- ============ 8 · TRANSPARENCIA ============ -->
+<section class="slide" data-title="Transparencia">
+  <div class="inner">
+    <p class="kicker anim d1"><b>02f</b>Desafíos</p>
+    <h2 class="anim d1">Transparencia</h2>
+    <p class="lead anim d2">La transparencia es el arte de <b>ocultar</b> al usuario y al programador todo lo complejo del sistema distribuido. El material define ocho tipos:</p>
+    <table class="anim d3">
+      <tr><th style="width:32%">Tipo</th><th>Qué oculta</th></tr>
+      <tr><td>De acceso</td><td>Permite acceder a recursos locales y remotos empleando <b>operaciones idénticas</b></td></tr>
+      <tr><td>De ubicación</td><td>Acceder a los recursos <b>sin conocer su localización</b></td></tr>
+      <tr><td>De concurrencia</td><td>Varios procesos operan concurrentemente sobre recursos compartidos <b>sin interferencia mutua</b></td></tr>
+      <tr><td>De replicación</td><td><b>Replicar los recursos</b> sin que usuarios y programadores necesiten saberlo</td></tr>
+      <tr><td>Frente a fallos</td><td><b>Ocultar fallos</b> del sistema</td></tr>
+      <tr><td>De movilidad</td><td>Reubicar recursos y clientes <b>sin afectar la operación</b> de usuarios y programas</td></tr>
+      <tr><td>De rendimiento</td><td><b>Reconfigurar el sistema</b> para mejorar el desempeño según varíe su carga</td></tr>
+      <tr><td>Al escalado</td><td>Expandir el sistema y las aplicaciones <b>sin cambiar su estructura</b> ni los algoritmos</td></tr>
+    </table>
+    <p class="note anim d4 small">Juntas, estas transparencias son la promesa original del sistema distribuido: que parezca — y se sienta — un solo sistema.</p>
+  </div>
+</section>
+
+<!-- ============ 9 · PROCESO VS HILO ============ -->
+<section class="slide" data-title="Proceso vs Hilo">
+  <div class="inner">
+    <p class="kicker anim d1"><b>03</b>Programación concurrente</p>
+    <h2 class="anim d1">Diferencia entre procesos e hilos</h2>
+    <p class="lead anim d2">Un <b>proceso</b> es un programa en ejecución: se compone de las instrucciones del programa, su estado de ejecución, memoria de trabajo y otra información para controlar su planificación. Un <b>hilo de ejecución</b> es la unidad de procesamiento <b>más pequeña que puede ser planificada por un sistema operativo</b>; permite a una aplicación realizar varias tareas a la vez (concurrencia).</p>
+    <table class="anim d3">
+      <tr><th></th><th>Procesos</th><th>Hilos</th></tr>
+      <tr><td>Creación</td><td>Costosa</td><td>Ligera</td></tr>
+      <tr><td>Recursos y memoria</td><td>Independiente</td><td>Compartida</td></tr>
+      <tr><td>Comunicación</td><td>Compleja</td><td>Sencilla</td></tr>
+      <tr><td>Complejidad en programación</td><td>Reducida</td><td>Alta</td></tr>
+    </table>
+    <p class="note anim d4 small">La misma tabla que viste en la introducción del curso, ahora en el contexto de servidores distribuidos: los hilos son la moneda de cambio de la concurrencia en el servidor.</p>
+  </div>
+</section>
+
+<!-- ============ 10 · SECUENCIAL VS CONCURRENTE ============ -->
+<section class="slide" data-title="Programa secuencial vs concurrente">
+  <div class="inner">
+    <p class="kicker anim d1"><b>03a</b>Programación concurrente</p>
+    <h2 class="anim d1">Programa secuencial vs concurrente</h2>
+    <div class="grid2 anim d2" style="gap:26px">
+      <div class="demo">
+        <h3>Secuencial</h3>
+        <p class="small">Sus instrucciones se ejecutan <b>en serie</b>, una tras otra, desde su inicio hasta el final. Existe una <b>única actividad o hilo de ejecución</b>.</p>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <div class="panelcard" style="flex:1;text-align:center;padding:8px"><p class="small mono">inst 1</p></div>
+          <i class="fa-solid fa-arrow-right arrow" style="align-self:center"></i>
+          <div class="panelcard" style="flex:1;text-align:center;padding:8px"><p class="small mono">inst 2</p></div>
+          <i class="fa-solid fa-arrow-right arrow" style="align-self:center"></i>
+          <div class="panelcard" style="flex:1;text-align:center;padding:8px"><p class="small mono">inst n</p></div>
+        </div>
+      </div>
+      <div class="demo">
+        <h3>Concurrente</h3>
+        <p class="small">Se crean <b>múltiples actividades que progresan de manera simultánea</b>. Cada actividad es secuencial, pero el programa ya no sigue una única secuencia: todas avanzan a la vez (o al menos esa es la imagen que ofrecen al usuario).</p>
+        <p class="small" style="margin-top:10px">Cada actividad está soportada por un <b>hilo de ejecución</b>. Y la condición clave: para constituir un programa concurrente, todas deben <b>cooperar entre sí</b> para realizar una tarea común.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 11 · PARALELISMO REAL VS LÓGICO ============ -->
+<section class="slide" data-title="Paralelismo real vs lógico">
+  <div class="inner">
+    <p class="kicker anim d1"><b>03b</b>Programación concurrente</p>
+    <h2 class="anim d1">Paralelismo real vs paralelismo lógico</h2>
+    <p class="lead anim d2">Dos formas de lograr que las actividades progresen "a la vez":</p>
+    <div class="grid2 anim d3" style="gap:26px">
+      <div class="demo">
+        <h3>Paralelismo real</h3>
+        <p class="small" style="margin-bottom:12px">Múltiples procesadores (o núcleos): asignamos <b>una actividad a cada núcleo</b> y todas avanzan simultáneamente sin ningún problema. Incluso con un solo procesador de un núcleo, se puede lograr concurrencia real usando <b>múltiples ordenadores</b>.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <div class="core"><h4>Núcleo 1</h4><div class="chip running" style="margin:0">A</div></div>
+          <div class="core"><h4>Núcleo 2</h4><div class="chip running" style="margin:0">B</div></div>
+          <div class="core"><h4>Núcleo 3</h4><div class="chip running" style="margin:0">C</div></div>
+        </div>
+      </div>
+      <div class="demo">
+        <h3>Paralelismo lógico</h3>
+        <p class="small" style="margin-bottom:12px">Con un solo núcleo: como las operaciones de E/S suspenden temporalmente el hilo que las programó, se puede <b>intercalar</b> la ejecución de múltiples actividades y ofrecer la imagen de que progresan simultáneamente.</p>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <div class="core" style="min-width:96px"><h4>CPU única</h4><div class="chip" id="plCur" style="margin:0">—</div></div>
+          <div>
+            <div class="chip" id="plA">A</div>
+            <div class="chip" id="plB">B</div>
+            <div class="chip" id="plC">C</div>
+          </div>
+        </div>
+        <p class="small" id="plLog" style="margin-top:10px"></p>
+      </div>
+    </div>
+    <p class="note anim d4 small">El usuario será <b>incapaz de distinguir</b> un sistema con un solo procesador y un núcleo de otro con múltiples procesadores: los sistemas operativos ocultan estos detalles.</p>
+  </div>
+</section>
+
+<!-- ============ 12 · VENTAJAS ============ -->
+<section class="slide" data-title="Ventajas de la concurrencia">
+  <div class="inner">
+    <p class="kicker anim d1"><b>03c</b>Programación concurrente</p>
+    <h2 class="anim d1">Ventajas</h2>
+    <div class="grid2 anim d2" style="gap:22px">
+      <div class="demo">
+        <h3>Eficiencia</h3>
+        <p class="small">Disponer de múltiples actividades dentro de la aplicación permite <b>concluir el trabajo de manera más rápida</b>.</p>
+      </div>
+      <div class="demo">
+        <h3>Escalabilidad</h3>
+        <p class="small">Si la aplicación se diseña como componentes que colaboran, con al menos una actividad por componente, se facilita <b>distribuirla sobre diferentes ordenadores</b>.</p>
+      </div>
+      <div class="demo">
+        <h3>Gestión de las comunicaciones</h3>
+        <p class="small">El uso eficiente de los recursos permite que los recursos de <b>comunicación entre actividades</b> se exploten de manera sencilla.</p>
+      </div>
+      <div class="demo">
+        <h3>Flexibilidad</h3>
+        <p class="small">Las aplicaciones concurrentes suelen tener un <b>diseño modular y estructurado</b>: qué hace cada actividad, qué recursos requiere, qué módulos necesita.</p>
+      </div>
+      <div class="demo" style="grid-column:1/-1">
+        <h3>Menor hueco semántico</h3>
+        <p class="small">Muchas aplicaciones <b>necesitan por naturaleza</b> varias actividades simultáneas: en un videojuego suele usarse un hilo por cada elemento móvil en pantalla; en una hoja de cálculo, un hilo para la entrada de datos, otro para el recálculo, otro para los menús, otro para actualizar las celdas visibles…</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 13 · INCONVENIENTES ============ -->
+<section class="slide" data-title="Inconvenientes de la concurrencia">
+  <div class="inner">
+    <p class="kicker anim d1"><b>03d</b>Programación concurrente</p>
+    <h2 class="anim d1">Inconvenientes</h2>
+    <div class="grid2 anim d2" style="gap:26px">
+      <div class="demo">
+        <h3>Programación delicada</h3>
+        <p class="small">Durante el desarrollo pueden surgir problemas serios: la <b>condición de carrera</b> puede generar <b>inconsistencias imprevistas</b> en el valor de las variables o atributos compartidos entre actividades cuando estas los modifican. Un segundo problema son los <b>interbloqueos</b>.</p>
+        <p class="note small" style="margin-top:14px">Ambos serán el corazón de la semana 5: condición de carrera, deadlock y sus soluciones con sincronización.</p>
+      </div>
+      <div class="demo">
+        <h3>Depuración compleja</h3>
+        <p class="small">Al estar compuesta por múltiples actividades, la aplicación puede <b>intercalar de diferentes maneras en cada ejecución</b> las sentencias que ejecuta cada una. Un error puede aparecer hoy y no mañana: los bugs de concurrencia no son reproducibles de forma fiable.</p>
+        <p class="small" style="margin-top:12px">Esto convierte la depuración en una tarea de razonamiento, no solo de observación.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 14 · APLICACIONES REALES ============ -->
+<section class="slide" data-title="Aplicaciones reales">
+  <div class="inner">
+    <p class="kicker anim d1"><b>04</b>La concurrencia en el mundo real</p>
+    <h2 class="anim d1">Aplicaciones reales</h2>
+    <div class="grid2 anim d2" style="gap:22px">
+      <div class="demo">
+        <h3>Acelerador lineal</h3>
+        <p class="small">Se usa en tratamientos de <b>radioterapia</b> para algunos tipos de cáncer, eliminando células cancerígenas mediante radiación (electrones, rayos X, rayos gamma). Software de control con requisitos de precisión extrema.</p>
+      </div>
+      <div class="demo">
+        <h3>Servidor web Apache</h3>
+        <p class="small">Emplea programación concurrente: en un servidor web interesa tener <b>múltiples hilos de ejecución</b>, de modo que cada uno atienda a un <b>cliente distinto</b>, paralelizando la gestión de múltiples clientes.</p>
+      </div>
+      <div class="demo">
+        <h3>Videojuegos</h3>
+        <p class="small">La mayoría se estructuran como aplicaciones concurrentes con <b>múltiples hilos de ejecución</b> — por ejemplo, uno por cada elemento móvil en pantalla.</p>
+      </div>
+      <div class="demo">
+        <h3>Navegador web · Chrome</h3>
+        <p class="small">Cuando Google presentó Chrome (2008), su arquitectura era muy distinta al resto: <b>cada pestaña abierta está soportada por un proceso independiente</b> — aislamiento entre pestañas, no solo hilos.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 15 · APLICACIONES DISTRIBUIDAS I ============ -->
+<section class="slide" data-title="Aplicaciones distribuidas I">
+  <div class="inner">
+    <p class="kicker anim d1"><b>04a</b>Patrones distribuidos del material</p>
+    <h2 class="anim d1">Librería para servidor web y BD de alta disponibilidad</h2>
+    <div class="grid2 anim d2" style="gap:26px">
+      <div class="demo">
+        <h3>Librería para servidor web</h3>
+        <div style="display:flex;flex-direction:column;gap:8px;align-items:center">
+          <div><span class="chip">petición de página web</span></div>
+          <i class="fa-solid fa-arrow-down arrow"></i>
+          <div><span class="chip" style="border-color:rgba(143,92,240,.5)">http://accion01</span></div>
+          <i class="fa-solid fa-arrow-down arrow"></i>
+          <div class="panelcard" style="text-align:center;width:100%"><h4>servidor</h4><p class="small">interpreta la acción y ejecuta la función de la librería</p></div>
+          <i class="fa-solid fa-arrow-down arrow"></i>
+          <div><span class="chip" style="border-color:rgba(44,194,119,.5)">devuelve respuesta01.html</span></div>
+        </div>
+      </div>
+      <div class="demo">
+        <h3>Base de datos de alta disponibilidad</h3>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:6px">
+          <div class="panelcard" style="text-align:center;min-width:80px"><p class="small mono">nodo 1</p></div>
+          <div class="panelcard" style="text-align:center;min-width:80px"><p class="small mono">nodo 2</p></div>
+          <div class="panelcard" style="text-align:center;min-width:80px"><p class="small mono">nodo 3</p></div>
+          <div class="panelcard" style="text-align:center;min-width:80px"><p class="small mono">nodo n</p></div>
+        </div>
+        <p class="small" style="margin-top:12px">Varios nodos mantienen los datos: si uno cae, el servicio continúa. Es la <b>redundancia</b> del tratamiento de fallos aplicada a datos.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 16 · MAPREDUCE ============ -->
+<section class="slide" data-title="MapReduce">
+  <div class="inner">
+    <p class="kicker anim d1"><b>04b</b>Patrones distribuidos del material</p>
+    <h2 class="anim d1">MapReduce</h2>
+    <p class="lead anim d2">Un patrón para procesar grandes volúmenes de datos distribuyendo el trabajo entre <b>nodos Map/Reduce</b> coordinados por un <b>master</b>:</p>
+    <div class="demo anim d3">
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:center">
+        <div><span class="chip" style="border-color:rgba(143,92,240,.5)">master · coordina el trabajo</span></div>
+        <i class="fa-solid fa-arrows-up-down arrow"></i>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+          <div class="panelcard" style="text-align:center;min-width:80px"><p class="small mono">map 0</p></div>
+          <div class="panelcard" style="text-align:center;min-width:80px"><p class="small mono">map 1</p></div>
+          <div class="panelcard" style="text-align:center;min-width:80px"><p class="small mono">map 2</p></div>
+          <div class="panelcard" style="text-align:center;min-width:80px"><p class="small mono">map n</p></div>
+        </div>
+        <i class="fa-solid fa-arrows-up-down arrow"></i>
+        <div class="mwstrip">map → shuffle → reduce</div>
+      </div>
+      <p class="small" style="margin-top:14px">Cada nodo <b>Map</b> procesa una porción de los datos en paralelo; el <b>shuffle</b> agrupa los resultados intermedios por clave; y el <b>Reduce</b> los combina en el resultado final. Paralelización + agregación en acción.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 17 · APLICACIONES DISTRIBUIDAS II ============ -->
+<section class="slide" data-title="Aplicaciones distribuidas II">
+  <div class="inner">
+    <p class="kicker anim d1"><b>04c</b>Patrones distribuidos del material</p>
+    <h2 class="anim d1">Colas de mensajes, juegos y punto de venta</h2>
+    <div class="grid2 anim d2" style="gap:22px">
+      <div class="demo">
+        <h3>Librería MQ (Message Queue)</h3>
+        <p class="small" style="margin-bottom:10px">Productores y consumidores desacoplados a través de una cola (<span class="mono">cola01</span>, <span class="mono">cola02</span>…): soporta simple producer/consumer, varios consumers, y varias colas a la vez.</p>
+        <div style="display:flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap">
+          <span class="chip">producing</span>
+          <i class="fa-solid fa-arrow-right arrow"></i>
+          <div class="panelcard" style="border-color:rgba(74,132,240,.5)"><h4 style="color:var(--info)">queue</h4></div>
+          <i class="fa-solid fa-arrow-right arrow"></i>
+          <span class="chip">consuming</span>
+        </div>
+      </div>
+      <div class="demo">
+        <h3>Juego desktop con servidor</h3>
+        <p class="small" style="margin-bottom:10px">Un servidor central (ej. <span class="mono">ip 127.0.0.2:4040</span>) mantiene el estado del juego con <b>réplicas de la matriz</b> (<span class="mono">r1…rn</span>); los clientes <span class="mono">c1…cn</span> se conectan a él.</p>
+        <div style="display:flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap">
+          <div class="panelcard" style="text-align:center"><h4>servidor</h4><p class="small mono">r1 · r2 · … rn</p></div>
+          <i class="fa-solid fa-arrows-left-right arrow"></i>
+          <div class="panelcard" style="text-align:center"><h4>clientes</h4><p class="small mono">c1 · c2 · … cn</p></div>
+        </div>
+      </div>
+      <div class="demo">
+        <h3>Punto de venta móvil</h3>
+        <p class="small">Base de datos de recibos (<span class="mono">recibo</span> + <span class="mono">detallerecibo</span>): cabeceras con cliente, total y banco; detalles por producto y cantidad. Un dominio real donde concurrencia y persistencia se cruzan.</p>
+      </div>
+      <div class="demo">
+        <h3>Juego 2D/3D móvil</h3>
+        <p class="small">Clientes Android que se conectan a un servidor indicando su <span class="mono">IP</span> — el mismo patrón cliente-servidor de los juegos desktop, llevado al bolsillo.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 18 · DESEMPEÑO Y LATENCIA ============ -->
+<section class="slide" data-title="Desempeño y latencia">
+  <div class="inner">
+    <p class="kicker anim d1"><b>05</b>Segundo material · w2_2.pdf</p>
+    <h2 class="anim d1">Desempeño y latencia</h2>
+    <p class="lead anim d2">El desempeño y la optimización de la latencia en un sistema distribuido miden cómo <b>se mejora la rapidez con la que los nodos responden</b> a solicitudes, reduciendo retrasos en la comunicación y garantizando eficiencia en el procesamiento. El objetivo: un sistema <b>rápido, escalable y confiable</b> que minimice el tiempo de espera de los usuarios.</p>
+    <div class="grid2 anim d3" style="gap:26px">
+      <div class="demo">
+        <h3>Desempeño (performance)</h3>
+        <p class="small">La capacidad del sistema para ejecutar tareas de manera eficiente y rápida, aprovechando múltiples nodos. Abarca:</p>
+        <ul class="clean small" style="margin-top:8px">
+          <li><b>Velocidad de procesamiento</b>: qué tan rápido se completa una tarea.</li>
+          <li><b>Uso de recursos</b>: CPU, memoria, energía.</li>
+          <li><b>Confiabilidad</b>: consistencia en la entrega sin fallos.</li>
+          <li><b>Escalabilidad</b>: manejar más carga sin degradarse.</li>
+        </ul>
+      </div>
+      <div class="demo">
+        <h3>Latencia</h3>
+        <p class="small">El <b>tiempo que tarda una solicitud en viajar desde el nodo de origen hasta el de destino y regresar con la respuesta</b>. Es crítica: determina la rapidez con la que el usuario percibe que el sistema responde.</p>
+        <p class="small" style="margin-top:8px">Factores: <b>distancia física</b>, <b>congestión de la red</b>, <b>limitaciones de hardware</b> e <b>ineficiencias de software</b>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 19 · OPTIMIZAR LATENCIA ============ -->
+<section class="slide" data-title="Optimizar la latencia">
+  <div class="inner">
+    <p class="kicker anim d1"><b>05a</b>Desempeño</p>
+    <h2 class="anim d1">Optimizar la latencia</h2>
+    <p class="lead anim d2">Optimizar implica <b>identificar y abordar cuellos de botella</b> en cuatro componentes:</p>
+    <div class="chal anim d3" style="grid-template-columns:repeat(4,1fr)">
+      <div class="c"><b>Propagación</b><small>el tiempo físico de viaje de la señal</small></div>
+      <div class="c"><b>Transmisión</b><small>empujar los datos al medio</small></div>
+      <div class="c"><b>Procesamiento</b><small>el trabajo de cada nodo</small></div>
+      <div class="c"><b>Colas de espera</b><small>solicitudes esperando ser atendidas</small></div>
+    </div>
+    <p class="small anim d4" style="margin-top:16px">Se logra con <b>algoritmos eficientes</b>, <b>hardware actualizado</b> y estrategias de diseño que <b>minimicen la distancia y la congestión</b> en la red. Casos del material donde la latencia manda:</p>
+    <div class="grid3 anim d5" style="gap:16px;margin-top:12px">
+      <div class="panelcard"><h4>Trading de alta velocidad</h4><p class="small">solicitud de compra/venta → la latencia decide quién gana la operación</p></div>
+      <div class="panelcard"><h4>Reproductor de video</h4><p class="small">aplicación → frames: si llegan tarde, se entrecorta</p></div>
+      <div class="panelcard"><h4>Machine Learning</h4><p class="small">data → predicción: el tiempo de respuesta importa tanto como el modelo</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 20 · THROUGHPUT ============ -->
+<section class="slide" data-title="Throughput">
+  <div class="inner">
+    <p class="kicker anim d1"><b>05b</b>Desempeño</p>
+    <h2 class="anim d1">Rendimiento en subprocesos múltiples</h2>
+    <p class="lead anim d2">El rendimiento en subprocesos múltiples mide la eficiencia con la que un programa aprovecha varios hilos <b>simultáneos</b> para mejorar velocidad, capacidad de respuesta y escalabilidad. Dos métricas lo cuantifican:</p>
+    <div class="grid2 anim d3" style="gap:26px">
+      <div class="demo">
+        <h3>Throughput (rendimiento)</h3>
+        <p class="small">La cantidad de operaciones o tareas completadas en un período determinado. Se mide en tareas/tiempo:</p>
+        <ul class="clean small" style="margin-top:8px">
+          <li><span class="mono">ops/s</span>: una BD distribuida que procesa 10,000 consultas por segundo.</li>
+          <li><span class="mono">TPS</span>: transacciones por segundo, en sistemas financieros o de comercio electrónico.</li>
+          <li><span class="mono">req/s</span>: solicitudes por segundo, común en servidores web y APIs.</li>
+          <li><span class="mono">B/s · KB/s · MB/s</span>: transmisión de datos o almacenamiento distribuido.</li>
+          <li><b>Mensajes/s</b>: mensajería distribuida (Kafka, RabbitMQ).</li>
+        </ul>
+      </div>
+      <div class="demo">
+        <h3>Latencia</h3>
+        <p class="small">El <b>tiempo para completar una tarea</b>. Se mide en unidades de tiempo: milisegundos (<span class="mono">ms</span>), microsegundos (<span class="mono">µs</span>) e incluso nanosegundos (<span class="mono">ns</span>).</p>
+        <p class="note small" style="margin-top:14px">Un sistema puede tener alto throughput y aun así alta latencia individual: miles de solicitudes por segundo, pero cada una esperando en cola.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 21 · LATENCIA T → T/N ============ -->
+<section class="slide" data-title="Latencia: T vs T/N">
+  <div class="inner">
+    <p class="kicker anim d1"><b>05c</b>Desempeño</p>
+    <h2 class="anim d1">Dividir para reducir la latencia</h2>
+    <p class="lead anim d2">Si una tarea tarda <span class="mono">T</span> y puede dividirse en <span class="mono">N</span> subtareas <b>independientes</b> ejecutadas en paralelo, la latencia teórica baja a <span class="mono">T/N</span>. Comparación animada (una tarea T vs 4 subtareas T/4):</p>
+    <div class="demo anim d3">
+      <div class="lane"><label>1 hilo (T)</label><div class="track"><i id="latSeq"></i></div></div>
+      <div class="lane"><label>núcleo 1</label><div class="track"><i id="latP1"></i></div></div>
+      <div class="lane"><label>núcleo 2</label><div class="track"><i id="latP2"></i></div></div>
+      <div class="lane"><label>núcleo 3</label><div class="track"><i id="latP3"></i></div></div>
+      <div class="lane"><label>núcleo 4</label><div class="track"><i id="latP4"></i></div></div>
+      <p id="latLog"></p>
+    </div>
+    <p class="note anim d4 small">Es un <b>enfoque teórico</b>: reducir la latencia en un factor N y mejorar el rendimiento en un factor N. Las dos preguntas clave del material: ¿cuántas subtareas/hilos podemos tener para dividir la tarea original? y ¿podemos dividir <i>cualquier</i> tarea en subtareas?</p>
+  </div>
+</section>
+
+<!-- ============ 22 · N=? ============ -->
+<section class="slide" data-title="N: cuántos hilos">
+  <div class="inner">
+    <p class="kicker anim d1"><b>05d</b>Desempeño</p>
+    <h2 class="anim d1">N = ? ¿Cuántos hilos usar?</h2>
+    <div class="grid2 anim d2" style="gap:26px">
+      <div class="demo">
+        <h3>En una computadora de propósito general</h3>
+        <p class="small">N = <b>número de núcleos</b>: cada núcleo ejecuta una subtarea.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+          <div class="core"><h4>Core 1</h4><div class="chip running" style="margin:0">Tarea 1</div></div>
+          <div class="core"><h4>Core 2</h4><div class="chip running" style="margin:0">Tarea 2</div></div>
+          <div class="core"><h4>Core N</h4><div class="chip running" style="margin:0">Tarea N</div></div>
+        </div>
+      </div>
+      <div class="demo">
+        <h3>Con un hilo extra: tareas = N + 1</h3>
+        <p class="small">Si hay más tareas que núcleos, la sobrante queda <b>en espera</b> (idle) hasta que un núcleo se libere.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+          <div class="core"><h4>Core 1</h4><div class="chip running" style="margin:0">Tarea 1</div></div>
+          <div class="core"><h4>Core 2</h4><div class="chip running" style="margin:0">Tarea 2</div></div>
+          <div class="core"><h4>Core N</h4><div class="chip running" style="margin:0">Tarea N+1</div></div>
+          <div class="core" style="border-style:dashed"><h4>Idle</h4><div class="chip" style="margin:0;opacity:.4">Tarea N espera</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="note anim d4 small">
+      <p>Condición del material para que <b>#threads = #cores sea óptimo</b>:</p>
+      <ul class="clean small" style="margin-top:8px">
+        <li>Todos los subprocesos son <b>ejecutables</b> y pueden ejecutarse <b>sin interrupción</b> (sin E/S, llamadas bloqueantes, sleep, etc.).</li>
+        <li>La suposición es que <b>no se ejecuta nada más</b> que consuma una gran cantidad de CPU.</li>
+      </ul>
+      <p class="small" style="margin-top:10px">Si tus hilos pasan la vida bloqueados en E/S, tener <b>más hilos que núcleos</b> puede ser correcto: mientras unos esperan, otros avanzan.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 23 · HT VS MULTICORE VS SMT ============ -->
+<section class="slide" data-title="Hyper-Threading, Multi-Core y SMT">
+  <div class="inner">
+    <p class="kicker anim d1"><b>05e</b>Hardware</p>
+    <h2 class="anim d1">Hyper-Threading, Multi-Core y SMT</h2>
+    <div class="grid2 anim d2" style="gap:22px">
+      <div class="demo">
+        <h3>Hyper-Threading (SMT)</h3>
+        <p class="small">Crea <b>dos núcleos de procesamiento virtual</b> para cada núcleo físico. El núcleo físico alimenta a los núcleos virtuales, que comparten la responsabilidad del procesamiento. Ninguno es tan potente como el núcleo físico, pero <b>juntos superan con creces</b> la potencia de uno solo.</p>
+      </div>
+      <div class="demo">
+        <h3>Multi-Core</h3>
+        <p class="small">Agrega <b>núcleos físicos</b> adicionales (2, 4, 6+). En una CPU de un solo núcleo las tareas se procesan una a la vez por orden de llegada — problemático para la multitarea. Con varios núcleos la multitarea es mucho más eficiente: a más núcleos, más datos procesados sin pérdida de rendimiento.</p>
+      </div>
+      <div class="demo" style="grid-column:1/-1">
+        <h3>SMT en detalle</h3>
+        <p class="small"><b>Simultaneous Multithreading</b> (Hyper-Threading en Intel, SMT en AMD): un solo núcleo físico gestiona <b>dos hilos simultáneamente</b>. En lugar de alternar entre hilos, el procesador emite instrucciones de múltiples hilos <b>en el mismo ciclo de reloj</b>, aprovechando recursos que estarían inactivos. Un "4 núcleos / 8 hilos" significa que cada núcleo físico ejecuta dos tareas a la vez. Ideal para renderizado 3D, edición de video y multitarea pesada. <b>No duplica la velocidad</b>: mejoras significativas hasta 70-80% en software especializado.</p>
+      </div>
+    </div>
+    <p class="note anim d4 small">No confundir: <b>Multithreading</b> es un concepto de <b>software</b> (un proceso se divide en hilos que comparten memoria; el SO alterna entre ellos, ideal para tareas I/O-bound). <b>SMT</b> es una técnica de <b>hardware</b> (el procesador mantiene el contexto de dos hilos por núcleo y emite instrucciones de ambos en el mismo ciclo). Ambos convierten un núcleo físico en dos núcleos lógicos.</p>
+  </div>
+</section>
+
+<!-- ============ 24 · COSTO Y TIPOS DE PARALELIZACIÓN ============ -->
+<section class="slide" data-title="Costos y tipos de paralelización">
+  <div class="inner">
+    <p class="kicker anim d1"><b>05f</b>Cierre</p>
+    <h2 class="anim d1">El costo de paralelizar</h2>
+    <p class="lead anim d2">Dividir una tarea en hilos <b>no es gratis</b>. El material enumera el costo inherente de la paralelización y agregación:</p>
+    <div class="grid2 anim d3" style="gap:22px">
+      <div class="demo">
+        <h3>Costos antes y durante</h3>
+        <ul class="clean small">
+          <li>Dividir la tarea en múltiples tareas.</li>
+          <li>Creación de hilos y paso de tareas a hilos.</li>
+          <li>Tiempo entre <span class="mono">thread.start()</span> y que el hilo queda programado.</li>
+        </ul>
+      </div>
+      <div class="demo">
+        <h3>Costos al finalizar</h3>
+        <ul class="clean small">
+          <li>Esperar hasta que finaliza el <b>último</b> hilo y señala.</li>
+          <li>Esperar la ejecución del subproceso de agregación.</li>
+          <li><b>Agregar los subresultados</b> en un solo artefacto.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="grid2 anim d4" style="gap:22px;margin-top:22px">
+      <div class="demo">
+        <h3>Consecuencia</h3>
+        <p class="small">La solución multihilo <b>solo gana</b> si el beneficio del paralelo supera estos costos. En tareas pequeñas o mal divisibles, la solución con un solo hilo puede ser <b>más rápida</b> — por eso el gráfico de latencia del material compara ambas soluciones y no siempre gana el multihilo.</p>
+      </div>
+      <div class="demo">
+        <h3>Tipos de tareas</h3>
+        <ul class="clean small">
+          <li><b>Tipo 1 · paralelizable:</b> se divide en subtareas independientes ejecutadas por varios hilos simultáneos.</li>
+          <li><b>Tipo 2 · secuencial irrompible:</b> un solo hilo, paso tras paso — no hay qué dividir.</li>
+          <li><b>Tipo 3 · mixto:</b> parcialmente paralelizable, parcialmente secuencial — la parte secuencial pone el piso.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note anim d5 small">Cierre de la semana: ya sabes qué hace posible un sistema distribuido (middleware, transparencia, tolerancia a fallos), cómo logra concurrencia (hilos) y cómo se mide su velocidad (latencia, throughput) junto con los límites reales de la paralelización. En la semana 3, esas máquinas empiezan a <b>comunicarse</b>: redes y sockets.</p>
+  </div>
+</section>
+
+</main>
+
+<nav id="dots"></nav>
+<div id="navBtns">
+  <button class="navBtn" id="prevBtn" title="Anterior"><i class="fa-solid fa-chevron-left"></i></button>
+  <button class="navBtn" id="nextBtn" title="Siguiente"><i class="fa-solid fa-chevron-right"></i></button>
+</div>
+
+<script>
+(function(){
+"use strict";
+const slides=[...document.querySelectorAll('.slide')];
+const N=slides.length;
+let cur=0;
+const timers=[];
+function addT(fn,ms){const id=setInterval(fn,ms);timers.push(id);fn();return id;}
+function addTimeout(fn,ms){const id=setTimeout(fn,ms);timers.push(id);return id;}
+function clearTimers(){timers.forEach(clearInterval);timers.forEach(clearTimeout);timers.length=0;}
+
+const dotsBox=document.getElementById('dots');
+slides.forEach((s,i)=>{
+  const d=document.createElement('div');
+  d.className='dot';d.title=s.dataset.title;
+  d.onclick=()=>go(i);
+  dotsBox.appendChild(d);
+});
+const dots=[...dotsBox.children];
+function go(i){
+  if(i<0||i>=N)return;
+  clearTimers();
+  slides[cur].classList.remove('active');
+  cur=i;
+  slides[cur].classList.add('active');
+  dots.forEach((d,k)=>d.classList.toggle('on',k===cur));
+  document.getElementById('progressFill').style.width=((cur+1)/N*100)+'%';
+  document.getElementById('counter').textContent=(cur+1)+' / '+N;
+  const fx=slideFx[cur]; if(fx)fx();
+  slides[cur].scrollTop=0;
+}
+document.getElementById('prevBtn').onclick=()=>go(cur-1);
+document.getElementById('nextBtn').onclick=()=>go(cur+1);
+document.addEventListener('keydown',e=>{
+  if(e.key===' '&&document.activeElement&&document.activeElement.tagName==='BUTTON')return;
+  if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown')go(cur+1);
+  else if(e.key==='ArrowLeft'||e.key==='PageUp')go(cur-1);
+  else if(e.key==='Home')go(0);
+  else if(e.key==='End')go(N-1);
+});
+const slideFx={};
+
+/* ---------- slide 11: paralelismo lógico (auto) ---------- */
+(function(){
+  const labels={A:'plA',B:'plB',C:'plC'};
+  const rot=['A','B','C','A','C','B','A','B','C','C','A','B'];
+  let i=0;
+  slideFx[11]=()=>{i=0;
+    addT(()=>{
+      const t=rot[i%rot.length];i++;
+      document.getElementById('plCur').textContent=t;
+      ['A','B','C'].forEach(k=>document.getElementById(labels[k]).classList.toggle('running',k===t));
+      document.getElementById('plLog').textContent='tick '+i+' — intercalado: la CPU salta entre A, B y C.';
+    },1100);
+  };
+})();
+
+/* ---------- slide 21: T vs T/N (auto) ---------- */
+(function(){
+  let tick=0;
+  slideFx[21]=()=>{tick=0;
+    addT(()=>{
+      tick++;
+      const seq=Math.min(100,tick*10);       // 10 ticks -> T
+      const par=Math.min(100,tick*40);       // 2.5 ticks -> T/4
+      document.getElementById('latSeq').style.width=seq+'%';
+      ['latP1','latP2','latP3','latP4'].forEach(id=>{
+        document.getElementById(id).style.width=par+'%';
+      });
+      const done=par>=100?'Completado (T/4). El secuencial aún va por '+seq+'%…':'Ejecutando… T = 10 ticks vs T/4 = 2.5 ticks.';
+      document.getElementById('latLog').textContent=done;
+      if(tick>=11){tick=0;
+        setTimeout(()=>{
+          ['latSeq','latP1','latP2','latP3','latP4'].forEach(id=>document.getElementById(id).style.width='0%');
+        },900);
+      }
+    },900);
+  };
+})();
+
+/* ---------- init ---------- */
+go(0);
+})();
+</script>
+</body>
+</html>
