@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Semana 5 — Sincronización de Hilos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+  :root{
+    --bg:#0C0B12;
+    --surface:#13121A;
+    --card:#17161F;
+    --muted:#1F1D28;
+    --secondary:#22202B;
+    --fg:#F4F3F7;
+    --muted-fg:#9A97A6;
+    --on-brand:#FCFCFC;
+    --primary:#8F5CF0;
+    --blue:#4A84F0;
+    --success:#2CC277;
+    --destructive:#EC4B4B;
+    --warning:#F0B429;
+    --info:#3EB0E0;
+    --border:rgba(255,255,255,.09);
+    --input-border:rgba(255,255,255,.12);
+    --font-sans:'Geist',system-ui,sans-serif;
+    --font-mono:'Geist Mono',Consolas,monospace;
+    --grad-brand:linear-gradient(90deg,var(--primary),var(--blue));
+    --grad-num:linear-gradient(180deg,#F4F3F7,#9A97A6);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg);color:var(--fg);
+    font-family:var(--font-sans);font-size:16px;line-height:1.55;
+    overflow:hidden;position:relative;
+  }
+  body::before,body::after{
+    content:'';position:fixed;border-radius:50%;pointer-events:none;z-index:0;
+    filter:blur(64px);
+  }
+  body::before{
+    width:56vw;height:56vw;top:-18vw;left:-14vw;
+    background:radial-gradient(circle,rgba(143,92,240,.22),transparent 65%);
+  }
+  body::after{
+    width:50vw;height:50vw;bottom:-18vw;right:-12vw;
+    background:radial-gradient(circle,rgba(74,132,240,.18),transparent 65%);
+  }
+
+  i.fa-solid{font-size:.85em;margin-right:7px}
+  code,.mono{font-family:var(--font-mono);font-size:.92em}
+
+  #progress{position:fixed;top:0;left:0;right:0;height:2px;background:rgba(255,255,255,.08);z-index:60}
+  #progressFill{height:100%;width:0;background:var(--grad-brand);transition:width .4s ease}
+  #counter,#brand,#hint{
+    position:fixed;z-index:60;font-size:.72rem;letter-spacing:.18em;
+    background:rgba(12,11,18,.7);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border:1px solid var(--border);border-radius:9999px;padding:6px 14px;
+  }
+  #brand{top:16px;left:22px;text-transform:uppercase;color:var(--muted-fg)}
+  #counter{top:16px;right:22px;color:var(--muted-fg);font-family:var(--font-mono)}
+  #hint{bottom:22px;left:22px;color:var(--muted-fg)}
+
+  .slide{
+    position:fixed;inset:0;display:none;flex-direction:column;
+    align-items:center;justify-content:center;
+    padding:80px 64px 96px;overflow-y:auto;z-index:1;
+  }
+  .slide.active{display:flex;animation:fade .5s ease}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .inner{width:100%;max-width:1060px;position:relative}
+
+  .kicker{font-size:.72rem;text-transform:uppercase;letter-spacing:.3em;color:var(--muted-fg);margin-bottom:18px;font-weight:500}
+  .kicker b{font-family:var(--font-mono);font-weight:600;background:var(--grad-brand);-webkit-background-clip:text;background-clip:text;color:transparent;margin-right:10px}
+  h1{font-size:3rem;font-weight:600;letter-spacing:-.02em;line-height:1.15;color:var(--fg);margin-bottom:.45em}
+  h2{font-size:2.1rem;font-weight:600;letter-spacing:-.02em;line-height:1.2;color:var(--fg);margin-bottom:.55em}
+  h3{font-size:.74rem;text-transform:uppercase;letter-spacing:.2em;color:var(--muted-fg);font-weight:600;margin-bottom:14px}
+  h4{font-size:.64rem;text-transform:uppercase;letter-spacing:.2em;color:var(--muted-fg);font-weight:600;margin-bottom:9px}
+  p{line-height:1.6}
+  .lead{color:var(--muted-fg);font-size:1.02rem;max-width:68ch;margin-bottom:1.4em}
+  .lead b{color:var(--fg);font-weight:500}
+  .small{font-size:.88rem;color:var(--muted-fg);line-height:1.6}
+  .small b{color:var(--fg);font-weight:500}
+  .rule{border:none;border-top:1px solid var(--border);margin:30px 0}
+  .note{border-left:2px solid var(--primary);padding:4px 0 4px 18px;margin-top:26px}
+
+  ul.clean{list-style:none}
+  ul.clean li{padding:7px 0 7px 24px;position:relative;line-height:1.55}
+  ul.clean li::before{content:"\f0da";font-family:"Font Awesome 6 Free";font-weight:900;position:absolute;left:4px;top:9px;color:var(--primary);font-size:.75em}
+  ul.check li::before{content:"\f00c";color:var(--success)}
+
+  .code{
+    background:var(--surface);border:1px solid var(--border);border-radius:.75rem;
+    padding:18px 20px;font-family:var(--font-mono);font-size:.8rem;
+    line-height:1.6;overflow-x:auto;white-space:pre;color:var(--fg);
+  }
+  .code .k{color:var(--primary);font-weight:600}
+  .code .c{color:var(--muted-fg);font-style:italic}
+
+  table{width:100%;border-collapse:collapse;font-size:.95rem}
+  th{font-size:.7rem;text-transform:uppercase;letter-spacing:.18em;color:var(--muted-fg);text-align:left;padding:0 16px 12px 0;font-weight:600}
+  td{padding:12px 16px 12px 0;border-top:1px solid var(--border);vertical-align:top;line-height:1.55;color:var(--muted-fg)}
+  td:first-child{color:var(--fg);font-weight:500}
+  td.mono{font-family:var(--font-mono);font-size:.82rem}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:40px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  @media(max-width:860px){.grid2,.grid3{grid-template-columns:1fr}}
+
+  .anim{opacity:0}
+  .slide.active .anim{animation:up .55s ease forwards}
+  @keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  .d1{animation-delay:.08s!important}.d2{animation-delay:.18s!important}.d3{animation-delay:.28s!important}
+  .d4{animation-delay:.38s!important}.d5{animation-delay:.5s!important}.d6{animation-delay:.62s!important}
+
+  .demo{
+    background:var(--surface);border:1px solid rgba(143,92,240,.25);border-radius:1rem;
+    padding:24px;margin:6px 0;box-shadow:0 8px 48px rgba(143,92,240,.12);
+  }
+  .panelcard{
+    background:var(--card);border:1px solid var(--border);border-radius:.75rem;padding:14px;
+  }
+  .demo-head{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+  .demo-head .spacer{margin-left:auto}
+  .stat{font-size:.8rem;color:var(--muted-fg);letter-spacing:.04em;font-family:var(--font-mono)}
+  .stat b{color:var(--fg);font-weight:600}
+
+  .chip{
+    display:inline-block;background:var(--card);border:1px solid var(--border);
+    border-radius:9999px;padding:4px 12px;font-size:.78rem;margin:3px 3px 0 0;
+    font-family:var(--font-mono);transition:all .3s;color:var(--muted-fg);
+  }
+  .chip.hi{border-color:rgba(143,92,240,.5);color:var(--fg)}
+  .chip.running{
+    background:var(--primary);color:var(--on-brand);font-weight:600;
+    border-color:var(--primary);animation:glow 1.1s infinite;
+  }
+  @keyframes glow{0%,100%{box-shadow:0 0 0 rgba(143,92,240,0)}50%{box-shadow:0 0 18px rgba(143,92,240,.45)}}
+
+  .btn{
+    background:var(--secondary);color:var(--fg);border:1px solid var(--border);
+    border-radius:.5rem;padding:7px 16px;font-size:.8rem;letter-spacing:.06em;
+    cursor:pointer;transition:all .2s;font-family:var(--font-sans);font-weight:500;
+  }
+  .btn:hover{border-color:rgba(143,92,240,.5);box-shadow:0 0 24px rgba(143,92,240,.12)}
+  .btn.brand{background:var(--primary);color:var(--on-brand);border-color:var(--primary);font-weight:600}
+
+  .membox{
+    font-family:var(--font-mono);font-size:1.8rem;font-weight:600;color:var(--fg);
+    text-align:center;padding:16px 24px;background:var(--card);
+    border:1px solid var(--input-border);border-radius:1rem;min-width:180px;transition:all .3s;
+  }
+  .membox.flash{border-color:var(--destructive);box-shadow:0 0 28px rgba(236,75,75,.25)}
+  .mem-label{font-size:.66rem;text-transform:uppercase;letter-spacing:.22em;color:var(--muted-fg);text-align:center;margin-top:8px}
+  .threadTag{
+    background:var(--card);border:1px solid var(--border);border-radius:.75rem;
+    padding:14px;text-align:center;
+  }
+  .threadTag b{font-weight:600;color:var(--muted-fg);font-size:.72rem;text-transform:uppercase;letter-spacing:.18em}
+  .threadTag .mono{display:block;margin-top:6px;font-size:1rem;color:var(--fg)}
+  #raceStep{
+    font-size:.92rem;color:var(--fg);min-height:26px;padding:12px 16px;
+    background:var(--card);border:1px solid var(--border);border-radius:.75rem;margin-top:14px;
+  }
+  #raceRes b{color:var(--destructive)}
+
+  .arrow{color:var(--muted-fg);font-size:.8rem}
+
+  /* deadlock */
+  .dl{display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap}
+  .dl .actor{background:var(--card);border:1px solid var(--border);border-radius:1rem;padding:14px;text-align:center;min-width:150px}
+  .dl .actor b{color:var(--fg);font-size:.9rem}
+  .dl .actor p{font-size:.78rem;color:var(--muted-fg);font-family:var(--font-mono)}
+  .dl .want{color:var(--destructive);font-size:.72rem;margin-top:6px}
+  .dl .hold{color:var(--success);font-size:.72rem;margin-top:2px}
+
+  /* parking */
+  .parking{display:flex;gap:12px;justify-content:center;margin:12px 0}
+  .spot{
+    width:74px;height:74px;border:2px dashed var(--input-border);border-radius:.75rem;
+    display:flex;align-items:center;justify-content:center;transition:all .4s;
+    font-size:.7rem;color:var(--muted-fg);text-align:center;font-family:var(--font-mono);
+  }
+  .spot.full{border-style:solid;border-color:var(--primary);background:var(--muted);color:var(--on-brand);box-shadow:0 0 20px rgba(143,92,240,.25)}
+
+  /* wait/notify demo */
+  .consumers{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0}
+  .consumer{
+    background:var(--card);border:1px solid var(--border);border-radius:.75rem;
+    padding:12px 16px;text-align:center;transition:all .4s;font-family:var(--font-mono);font-size:.82rem;
+  }
+  .consumer .st-ico{font-size:1rem}
+  .consumer.waiting{color:var(--muted-fg)}
+  .consumer.awake{border-color:rgba(44,194,119,.6);box-shadow:0 0 24px rgba(44,194,119,.2);color:var(--fg)}
+  #wnLog{
+    font-family:var(--font-mono);font-size:.78rem;color:var(--muted-fg);
+    background:var(--bg);border:1px solid var(--border);border-radius:.5rem;
+    padding:12px 14px;min-height:80px;line-height:1.7;margin-top:14px;overflow-y:auto;max-height:140px;
+  }
+  #wnLog .ok{color:var(--success)}
+  #wnLog .info{color:var(--info)}
+  #wnLog .warn{color:var(--warning)}
+
+  .agenda{list-style:none;columns:2;column-gap:60px}
+  .agenda li{display:flex;align-items:baseline;gap:16px;padding:11px 0;border-bottom:1px solid var(--border);break-inside:avoid}
+  .agenda .n{font-family:var(--font-mono);font-size:.95rem;font-weight:600;min-width:26px;background:var(--grad-brand);-webkit-background-clip:text;background-clip:text;color:transparent}
+  @media(max-width:760px){.agenda{columns:1}}
+
+  #dots{position:fixed;bottom:32px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:60}
+  .dot{width:6px;height:6px;border-radius:9999px;background:rgba(255,255,255,.18);cursor:pointer;transition:all .3s}
+  .dot.on{background:var(--primary);transform:scale(1.4);box-shadow:0 0 10px rgba(143,92,240,.5)}
+  #navBtns{position:fixed;bottom:20px;right:22px;display:flex;gap:8px;z-index:60}
+  .navBtn{
+    width:40px;height:40px;border-radius:9999px;border:1px solid var(--border);
+    background:rgba(23,22,31,.7);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    color:var(--muted-fg);font-size:.85rem;cursor:pointer;transition:all .25s;
+  }
+  .navBtn:hover{border-color:rgba(143,92,240,.6);color:var(--fg);box-shadow:0 0 24px rgba(143,92,240,.15)}
+
+  @media(max-width:640px){
+    .slide{padding:76px 20px 96px}
+    h1{font-size:2.1rem}
+    h2{font-size:1.55rem}
+    .demo{padding:16px}
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"><div id="progressFill"></div></div>
+<div id="brand">PCCD · Semana 5</div>
+<div id="counter">1 / 27</div>
+<div id="hint">← &nbsp;→</div>
+
+<main id="deck">
+
+<!-- ============ 0 · PORTADA ============ -->
+<section class="slide" data-title="Portada">
+  <div class="inner">
+    <p class="kicker anim d1">Semana 5 · Programación Concurrente y Distribuida</p>
+    <h1 class="anim d2">Sincronización<br>de hilos</h1>
+    <p class="lead anim d3">Contenido de los materiales <span class="mono">w5_1.pdf</span> (sincronización de hilos), <span class="mono">w5_2.pdf</span> (monitores, condiciones de carrera, deadlock, semáforos…) y <span class="mono">w5_3.pdf</span> (volatile, atomic, wait/notify, executors).</p>
+    <hr class="rule anim d4">
+    <ul class="agenda anim d5">
+      <li><span class="n">01</span>El problema de compartir memoria</li>
+      <li><span class="n">02</span>Interferencia de hilos</li>
+      <li><span class="n">03</span>Consistencia de memoria y happens-before</li>
+      <li><span class="n">04</span>Métodos sincronizados</li>
+      <li><span class="n">05</span>Bloqueo intrínseco</li>
+      <li><span class="n">06</span>Sentencias sincronizadas y reentrancia</li>
+      <li><span class="n">07</span>Monitores</li>
+      <li><span class="n">08</span>Condición de carrera</li>
+      <li><span class="n">09</span>Deadlock</li>
+      <li><span class="n">10</span>Livelock</li>
+      <li><span class="n">11</span>Starvation</li>
+      <li><span class="n">12</span>Mutex y thread-safe</li>
+      <li><span class="n">13</span>Semaphore</li>
+      <li><span class="n">14</span>Liveness</li>
+      <li><span class="n">15</span>wait / notify / notifyAll</li>
+      <li><span class="n">16</span>Locks y Conditions</li>
+      <li><span class="n">17</span>volatile y AtomicInteger</li>
+      <li><span class="n">18</span>BlockingQueue</li>
+      <li><span class="n">19</span>Callable, Future, FutureTask</li>
+      <li><span class="n">20</span>ThreadPool, Executors y Scheduled</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ 1 · EL PROBLEMA ============ -->
+<section class="slide" data-title="El problema de compartir memoria">
+  <div class="inner">
+    <p class="kicker anim d1"><b>01</b>El punto de partida</p>
+    <h2 class="anim d1">El problema de compartir memoria</h2>
+    <p class="lead anim d2">Los hilos se comunican principalmente <b>compartiendo el acceso a campos y objetos referenciados</b>. Esta forma de comunicación es extremadamente eficiente, pero conlleva dos posibles errores:</p>
+    <div class="grid2 anim d3" style="gap:22px">
+      <div class="demo" style="border-color:rgba(236,75,75,.4)">
+        <h3 style="color:var(--destructive)">Interferencia de hilos</h3>
+        <p class="small">Dos operaciones sobre la misma data se <b>entrelazan</b> y una pisa el resultado de la otra.</p>
+      </div>
+      <div class="demo" style="border-color:rgba(240,180,41,.4)">
+        <h3 style="color:var(--warning)">Errores de consistencia de memoria</h3>
+        <p class="small">Diferentes hilos tienen una <b>vista inconsistente</b> de lo que debería ser la misma data.</p>
+      </div>
+    </div>
+    <div class="note anim d4 small">
+      <p>Para prevenir estos errores existe la <b>sincronización</b>. Pero cuidado: la sincronización puede introducir <b>problemas de contención de hilos</b> (ej. <b>starvation</b> y <b>livelock</b>), que ocurren cuando 2 o más hilos intentan acceder a un mismo recurso simultáneamente — el runtime ejecuta uno o más hilos más lento, o incluso los suspende. Todo esto es la semana.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2 · INTERFERENCIA ============ -->
+<section class="slide" data-title="Interferencia de hilos">
+  <div class="inner">
+    <p class="kicker anim d1"><b>02</b>w5_1 · el error fundamental</p>
+    <h2 class="anim d1">Interferencia de hilos</h2>
+    <p class="lead anim d2">Ocurre cuando dos o más operaciones en hilos distintos, actuando sobre la <b>misma data</b>, se entrelazan: ambas constan de múltiples pasos y sus secuencias se sobreponen. Con <span class="mono">c++</span> descompuesto en sus 3 pasos (recuperar, incrementar, almacenar), la secuencia del material:</p>
+    <div class="demo anim d3">
+      <div class="grid2" style="align-items:center;gap:20px">
+        <div class="threadTag"><b>Hilo A</b><span class="mono">c++</span></div>
+        <div>
+          <div class="membox">c = <span id="raceC">0</span></div>
+          <div class="mem-label">memoria compartida</div>
+        </div>
+        <div class="threadTag"><b>Hilo B</b><span class="mono">c--</span></div>
+      </div>
+      <div id="raceStep">Recorrido automático del entrelazado…</div>
+      <p class="stat" id="raceRes" style="margin-top:10px"></p>
+    </div>
+    <p class="note anim d4 small"><b>El resultado del hilo A se pierde</b> al ser sobrescrito por el hilo B. Ejemplo completo del material: la clase <span class="mono">Counter</span> con <span class="mono">increment()</span>, <span class="mono">decrement()</span> y <span class="mono">value()</span> — sin sincronizar, es vulnerable.</p>
+  </div>
+</section>
+
+<!-- ============ 3 · CONSISTENCIA / HAPPENS-BEFORE ============ -->
+<section class="slide" data-title="Consistencia de memoria y happens-before">
+  <div class="inner">
+    <p class="kicker anim d1"><b>03</b>w5_1 · la vista de los datos</p>
+    <h2 class="anim d1">Consistencia de memoria y happens-before</h2>
+    <p class="lead anim d2">Los errores de consistencia de memoria ocurren cuando diferentes hilos tienen una <b>vista inconsistente</b> de lo que debería ser la misma data. Ejemplo del material: <span class="mono">counter = 0</span> compartido; el hilo A imprime y el hilo B incrementa — el valor impreso podría ser 0 o 1, porque <b>no hay garantía de visibilidad</b> sin una relación <b>happens-before</b>.</p>
+    <div class="demo anim d3">
+      <p class="small" style="margin-bottom:10px">La relación <b>happens-before</b> es simplemente una garantía de que las escrituras de memoria de una sentencia son <b>visibles</b> para otra sentencia. Dos sentencias que la crean:</p>
+      <div class="grid2" style="gap:18px">
+        <div class="panelcard">
+          <h4>Thread.start()</h4>
+          <p class="small">Toda sentencia que guarde happens-before con esta llamada también lo guardará con <b>cada sentencia ejecutada en el hilo creado</b>.</p>
+        </div>
+        <div class="panelcard">
+          <h4>Thread.join()</h4>
+          <p class="small">Todas las sentencias ejecutadas por el hilo <b>terminado</b> tienen happens-before con toda sentencia que siga a un <span class="mono">join()</span> exitoso.</p>
+        </div>
+      </div>
+    </div>
+    <p class="note anim d4 small">Si una acción A <i>happens-before</i> una acción B, entonces los efectos de A son <b>visibles para B</b>. Otras relaciones las verás con synchronized, volatile y los locks.</p>
+  </div>
+</section>
+
+<!-- ============ 4 · MÉTODOS SINCRONIZADOS ============ -->
+<section class="slide" data-title="Métodos sincronizados">
+  <div class="inner">
+    <p class="kicker anim d1"><b>04</b>w5_1 · la primera herramienta</p>
+    <h2 class="anim d1">Métodos sincronizados</h2>
+    <p class="lead anim d2">Para crear uno basta incluir la palabra clave <span class="mono">synchronized</span> en su declaración. Es la solución al <span class="mono">Counter</span> de la slide anterior:</p>
+    <div class="code anim d3"><span class="k">public class</span> SynchronizedCounter {
+  <span class="k">private int</span> c = 0;
+  <span class="k">public synchronized void</span> increment() { c++; }
+  <span class="k">public synchronized void</span> decrement() { c--; }
+  <span class="k">public synchronized int</span> value() { <span class="k">return</span> c; }
+}</div>
+    <div class="grid2 anim d4" style="gap:22px;margin-top:22px">
+      <div class="demo">
+        <h3>Efecto 1 · no se interponen</h3>
+        <p class="small">No es posible que dos invocaciones de métodos sincronizados sobre el <b>mismo objeto</b> se interpongan: mientras un hilo ejecuta uno, los demás hilos que hayan invocado métodos sincronizados del mismo objeto <b>se bloquean</b> hasta que el primero termine.</p>
+      </div>
+      <div class="demo">
+        <h3>Efecto 2 · happens-before automático</h3>
+        <p class="small">Cuando un método sincronizado termina, <b>automáticamente establece una relación happens-before</b> con cualquier invocación subsecuente de un método sincronizado para el <b>mismo objeto</b>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5 · BLOQUEO INTRÍNSECO ============ -->
+<section class="slide" data-title="Bloqueo intrínseco">
+  <div class="inner">
+    <p class="kicker anim d1"><b>05</b>w5_1 · el mecanismo interno</p>
+    <h2 class="anim d1">Bloqueo intrínseco (monitor)</h2>
+    <p class="lead anim d2">La sincronización se construye alrededor de una entidad interna conocida como <b>bloqueo intrínseco</b> o <b>monitor de bloqueo</b> (a veces simplemente "monitor"). <b>Cada objeto tiene uno asociado</b>:</p>
+    <div class="demo anim d3">
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <span class="chip running">hilo A · posee el bloqueo</span>
+        <span class="chip">hilo B · espera</span>
+        <span class="chip">hilo C · espera</span>
+      </div>
+      <ul class="clean small" style="margin-top:14px">
+        <li>Un hilo que necesite <b>acceso exclusivo y consistente</b> a los campos de un objeto debe <b>adquirir</b> el bloqueo intrínseco del objeto y <b>liberarlo</b> cuando termine.</li>
+        <li>Mientras un hilo lo posea, <b>ningún otro hilo podrá adquirir el mismo bloqueo</b>.</li>
+        <li><b>Liberar</b> el bloqueo establece una relación <b>happens-before</b> entre esa acción y cualquier adquisición subsecuente del mismo bloqueo.</li>
+      </ul>
+    </div>
+    <p class="note anim d4 small">Esto explica los dos efectos de la slide anterior: "métodos sincronizados del mismo objeto" significa "compiten por el mismo bloqueo intrínseco".</p>
+  </div>
+</section>
+
+<!-- ============ 6 · SENTENCIAS SINCRONIZADAS ============ -->
+<section class="slide" data-title="Sentencias sincronizadas">
+  <div class="inner">
+    <p class="kicker anim d1"><b>06</b>w5_1 · sincronización fina</p>
+    <h2 class="anim d1">Sentencias sincronizadas y reentrancia</h2>
+    <p class="lead anim d2">A diferencia de los métodos sincronizados, las <b>sentencias sincronizadas</b> deben <b>especificar el objeto que proporciona el bloqueo intrínseco</b> — y permiten sincronizar solo un bloque, no todo el método:</p>
+    <div class="code anim d3"><span class="k">public void</span> addName(String name) {
+  <span class="k">synchronized</span>(<span class="k">this</span>) {
+    lastName = name;
+    nameCount++;
+  }
+  nameList.add(name);  <span class="c">// fuera de la sección crítica</span>
+}</div>
+    <div class="note anim d4 small">
+      <p><b>Sincronización reentrante:</b> un hilo no puede adquirir un bloqueo en posesión de <i>otro</i> hilo, pero <b>sí puede adquirir un bloqueo que ya tenga</b>. Permitir que un hilo adquiera el mismo bloqueo más de una vez habilita la sincronización reentrante: un código sincronizado puede invocar otro método sincronizado, y ambos usan el mismo bloqueo. Gracias a ello <b>no es necesario tomar precauciones para evitar que un hilo se bloquee a sí mismo</b>.</p>
+    </div>
+    <p class="small anim d5" style="margin-top:14px">Y sobre <b>acceso atómico</b>: una acción atómica ocurre una a la vez, siempre se completa del todo o no sucede, y ningún efecto secundario es visible hasta completarse. <b>Toda lectura y escritura es atómica para variables <span class="mono">volatile</span></b>, y cualquier escritura a una variable volatile establece happens-before con las lecturas subsecuentes de esa variable.</p>
+  </div>
+</section>
+
+<!-- ============ 7 · MONITORES ============ -->
+<section class="slide" data-title="Monitores">
+  <div class="inner">
+    <p class="kicker anim d1"><b>07</b>w5_2 · la abstracción</p>
+    <h2 class="anim d1">Monitores</h2>
+    <p class="lead anim d2">Un <b>monitor</b> es un mecanismo de sincronización que <b>controla el acceso de múltiples hilos a recursos compartidos</b>, garantizando que solo un hilo ejecute un <b>bloque de código crítico</b> a la vez. En Java, cada objeto puede actuar como monitor:</p>
+    <div class="grid2 anim d3" style="gap:22px">
+      <div class="demo">
+        <h3>Implementación en Java</h3>
+        <ul class="clean small">
+          <li>Cada objeto tiene un <b>monitor implícito</b>.</li>
+          <li>Se accede mediante <span class="mono">synchronized</span> en métodos o bloques.</li>
+          <li>Solo un hilo puede <b>poseer el bloqueo</b> del monitor en un momento dado.</li>
+        </ul>
+      </div>
+      <div class="demo">
+        <h3>El ejemplo del material</h3>
+        <div class="code"><span class="k">class</span> Contador {
+  <span class="k">private int</span> valor = 0;
+  <span class="k">public synchronized void</span> incrementar() { valor++; }
+  <span class="k">public synchronized int</span> obtenerValor() { <span class="k">return</span> valor; }
+}
+<span class="c">// 2 HiloIncrementador (1000 c/u) + join()</span>
+<span class="c">// → Valor final: 2000, siempre</span></div>
+      </div>
+    </div>
+    <p class="note anim d4 small">El programa del material une todo lo de la semana 1: dos hilos que incrementan 1000 veces cada uno, <span class="mono">join()</span> para esperarlos, y el monitor (synchronized) garantizando el resultado.</p>
+  </div>
+</section>
+
+<!-- ============ 8 · CONDICIÓN DE CARRERA ============ -->
+<section class="slide" data-title="Condición de carrera">
+  <div class="inner">
+    <p class="kicker anim d1"><b>08</b>w5_2 · el error sin sincronización</p>
+    <h2 class="anim d1">Condición de carrera</h2>
+    <p class="lead anim d2">Ocurre cuando dos o más hilos <b>acceden y modifican un recurso compartido al mismo tiempo, sin la debida sincronización</b>. El resultado final <b>depende del orden</b> en que se ejecuten las instrucciones de los hilos — lo cual es <b>no determinista</b>.</p>
+    <div class="demo anim d3">
+      <div class="grid2" style="align-items:center;gap:20px">
+        <div>
+          <p class="small">En Java suele pasar cuando varios hilos modifican una variable compartida <b>sin usar synchronized</b>. El experimento del material: dos hilos, 1000 incrementos cada uno.</p>
+          <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+            <div class="panelcard" style="text-align:center"><h4>esperado</h4><p class="small mono">2000</p></div>
+            <div class="panelcard" style="text-align:center;border-color:rgba(236,75,75,.5)"><h4 style="color:var(--destructive)">obtenido</h4><p class="small mono">1987 · 1995…</p></div>
+          </div>
+        </div>
+        <div>
+          <p class="small" style="margin-bottom:10px">¿Por qué? La operación <span class="mono">valor++</span> <b>no es atómica</b>: internamente se descompone en <b>leer, incrementar y escribir</b>, y los hilos pueden interrumpirse entre esos pasos.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <span class="chip">① leer</span>
+            <span class="chip">② incrementar</span>
+            <span class="chip">③ escribir</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="note anim d4 small">Solución: el <b>monitor con synchronized</b> — solo un hilo ejecuta el método a la vez, y el resultado será siempre 2000.</p>
+  </div>
+</section>
+
+<!-- ============ 9 · DEADLOCK ============ -->
+<section class="slide" data-title="Deadlock">
+  <div class="inner">
+    <p class="kicker anim d1"><b>09</b>w5_2 · liveness roto I</p>
+    <h2 class="anim d1">Deadlock</h2>
+    <p class="lead anim d2">Dos o más hilos quedan <b>bloqueados para siempre, esperando recursos que nunca se liberan</b>. Cada hilo posee un recurso y espera otro que está en manos del otro; como ninguno libera lo que tiene, ambos quedan bloqueados indefinidamente.</p>
+    <div class="demo anim d3">
+      <div class="dl">
+        <div class="actor">
+          <b>Hilo 1</b>
+          <p class="hold">posee Recurso A</p>
+          <p class="want">espera Recurso B</p>
+        </div>
+        <i class="fa-solid fa-arrows-left-right" style="color:var(--destructive)"></i>
+        <div class="actor">
+          <b>Hilo 2</b>
+          <p class="hold">posee Recurso B</p>
+          <p class="want">espera Recurso A</p>
+        </div>
+      </div>
+      <p class="small" style="margin-top:14px">El ejemplo del material (los amigos que se inclinan): cada <span class="mono">Tarea</span> hace <span class="mono">synchronized(recurso1)</span> y luego <span class="mono">synchronized(recurso2)</span> — pero t1 las toma en orden (A, B) y t2 en orden inverso (B, A). El método <span class="mono">bow</span> adquiere el bloqueo del amigo que saluda y <span class="mono">bowBack</span> necesita el bloqueo del otro: ambos se bloquean para siempre.</p>
+    </div>
+    <div class="note anim d4 small">
+      <p><b>Cómo evitarlo</b> — tres recetas del material:</p>
+      <ul class="clean small" style="margin-top:8px">
+        <li><b>Orden consistente:</b> adquirir siempre los recursos en el mismo orden.</li>
+        <li><b>Tiempo de espera:</b> bloqueos con timeout (<span class="mono">tryLock</span> en <span class="mono">ReentrantLock</span>).</li>
+        <li><b>Diseño cuidadoso:</b> minimizar la necesidad de múltiples bloqueos.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 10 · LIVELOCK ============ -->
+<section class="slide" data-title="Livelock">
+  <div class="inner">
+    <p class="kicker anim d1"><b>10</b>w5_2 · liveness roto II</p>
+    <h2 class="anim d1">Livelock</h2>
+    <p class="lead anim d2">Dos o más hilos <b>no están bloqueados</b>, pero siguen <b>cambiando de estado en respuesta a las acciones del otro</b>, sin avanzar nunca en su trabajo. A diferencia del deadlock (hilos bloqueados esperando recursos), aquí los hilos están <b>activos, atrapados en un ciclo de reacciones inútiles</b>.</p>
+    <div class="demo anim d3">
+      <p class="small" style="margin-bottom:10px">La analogía del material: dos personas en un pasillo estrecho — una se mueve a la izquierda, la otra a la derecha; siguen bloqueándose mutuamente y <b>nadie pasa</b>.</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <span class="chip running">Trabajador 1 · cede el recurso…</span>
+        <span class="chip running">Trabajador 2 · cede el recurso…</span>
+      </div>
+      <p class="small" style="margin-top:14px">En el ejemplo del código: cada trabajador intenta <span class="mono">intentarUsar()</span> el primer recurso; si no logra el segundo, <b>libera el primero</b> y reintenta — como ambos hacen lo mismo, pueden quedarse cediendo y retomando sin progresar indefinidamente.</p>
+    </div>
+    <p class="note anim d4 small">El livelock es <b>más difícil de detectar que el deadlock</b> porque los hilos parecen activos. La solución suele ser introducir <b>esperas aleatorias</b> o <b>reglas claras de prioridad</b> para que los hilos no cedan indefinidamente.</p>
+  </div>
+</section>
+
+<!-- ============ 11 · STARVATION ============ -->
+<section class="slide" data-title="Starvation">
+  <div class="inner">
+    <p class="kicker anim d1"><b>11</b>w5_2 · liveness roto III</p>
+    <h2 class="anim d1">Starvation (inanición)</h2>
+    <p class="lead anim d2">Ocurre cuando un hilo es <b>incapaz de ganar acceso regular a recursos compartidos</b> y no puede hacer progresos. El hilo sigue vivo, pero <b>no progresa</b> porque siempre queda esperando.</p>
+    <div class="demo anim d3">
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:12px">
+        <span class="chip running">hilo codicioso</span>
+        <span class="chip running">hilo codicioso</span>
+        <span class="chip" style="border-color:rgba(236,75,75,.5)">hilo afectado · nunca entra</span>
+      </div>
+      <p class="small">Sucede cuando los recursos compartidos son <b>inaccesibles por largos periodos</b> debido a <b>hilos codiciosos</b> — por ejemplo, cuando se usan <b>prioridades de hilos</b> o cuando el sistema de bloqueo favorece constantemente a ciertos hilos.</p>
+    </div>
+    <p class="note anim d4 small">La starvation es un problema de <b>equidad</b>, no de bloqueo total (como el deadlock). Se mitiga con políticas de planificación más justas — <b>fair locks</b> (<span class="mono">ReentrantLock</span> con opción de equidad) — o evitando el uso excesivo de prioridades.</p>
+  </div>
+</section>
+
+<!-- ============ 12 · MUTEX Y THREAD-SAFE ============ -->
+<section class="slide" data-title="Mutex y thread-safe">
+  <div class="inner">
+    <p class="kicker anim d1"><b>12</b>w5_2 · las garantías</p>
+    <h2 class="anim d1">Mutex (mutua exclusión) y thread-safe</h2>
+    <div class="grid2 anim d2" style="gap:22px">
+      <div class="demo">
+        <h3>Mutex</h3>
+        <p class="small"><b>Solo un hilo</b> puede acceder a un recurso compartido en un momento dado. En Java se logra con <span class="mono">synchronized</span>, que convierte un método o bloque en una <b>sección crítica</b>. Es la base de la programación concurrente segura: con ella, el resultado del contador es <b>siempre 2000</b>; sin ella, los hilos se pisan y queda menor (condición de carrera).</p>
+      </div>
+      <div class="demo">
+        <h3>Thread-safe</h3>
+        <p class="small">Un código puede ser ejecutado por <b>múltiples hilos al mismo tiempo sin producir resultados incorrectos</b> ni condiciones de carrera. En Java se logra con:</p>
+        <ul class="clean small" style="margin-top:8px">
+          <li>Bloqueo intrínseco con <span class="mono">synchronized</span>.</li>
+          <li>Variables <span class="mono">volatile</span> para asegurar visibilidad.</li>
+          <li>Clases de <span class="mono">java.util.concurrent</span> (AtomicInteger, ConcurrentHashMap…).</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note anim d4 small">La idea central: los <b>datos compartidos</b> deben estar <b>protegidos</b> y mantener siempre la <b>consistencia</b>. Es esencial cuando varios hilos comparten y modifican datos.</p>
+  </div>
+</section>
+
+<!-- ============ 13 · SEMAPHORE ============ -->
+<section class="slide" data-title="Semaphore">
+  <div class="inner">
+    <p class="kicker anim d1"><b>13</b>w5_2 · acceso múltiple</p>
+    <h2 class="anim d1">Semaphore</h2>
+    <p class="lead anim d2">Mecanismo de sincronización que controla el acceso a <b>uno o más recursos mediante un contador</b>. A diferencia del mutex (que permite solo 1 acceso), el semáforo permite <b>n accesos simultáneos</b>. La analogía del material: un <b>estacionamiento con 3 espacios</b> — cada auto que entra adquiere un permiso, cada auto que sale lo libera, y si no hay espacios, se espera.</p>
+    <div class="demo anim d3">
+      <div class="parking" id="parking">
+        <div class="spot">espacio 1</div>
+        <div class="spot">espacio 2</div>
+        <div class="spot">espacio 3</div>
+      </div>
+      <p class="small" id="parkLog" style="text-align:center"></p>
+      <div class="code" style="margin-top:14px">Semaphore parking = <span class="k">new</span> Semaphore(3); <span class="c">// 10 hilos "Auto" intentan</span>
+parking.acquire();   <span class="c">// bloquea si no hay permisos disponibles</span>
+<span class="c">// … estaciona, duerme 2s …</span>
+parking.release();   <span class="c">// libera el permiso</span>
+parking.availablePermits()  <span class="c">// espacios restantes</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 14 · LIVENESS ============ -->
+<section class="slide" data-title="Liveness">
+  <div class="inner">
+    <p class="kicker anim d1"><b>14</b>w5_2 · la propiedad global</p>
+    <h2 class="anim d1">Liveness</h2>
+    <p class="lead anim d2"><b>Liveness</b> (capacidad de "seguir vivo") es la propiedad de un sistema concurrente que garantiza que los hilos <b>siempre progresan hacia su objetivo</b>, sin quedarse atascados indefinidamente. Los tres enemigos del liveness que ya conoces:</p>
+    <div class="grid3 anim d3" style="gap:18px">
+      <div class="demo">
+        <h3 style="color:var(--destructive)">Deadlock</h3>
+        <p class="small">Hilos <b>bloqueados permanentemente</b>, cada uno esperando un recurso del otro.</p>
+      </div>
+      <div class="demo">
+        <h3 style="color:var(--warning)">Starvation</h3>
+        <p class="small">Un hilo <b>nunca obtiene</b> acceso al recurso compartido: falta de equidad.</p>
+      </div>
+      <div class="demo">
+        <h3 style="color:var(--info)">Livelock</h3>
+        <p class="small">Hilos <b>activos pero sin progreso</b>: respondiéndose entre sí en un ciclo inútil.</p>
+      </div>
+    </div>
+    <p class="note anim d4 small">Al diseñar secciones críticas, piensa en liveness: resolver la condición de carrera (deadlock posible) o la contención (starvation/livelock posible) — la sincronización correcta es la que protege los datos <b>y</b> deja que todos progresen.</p>
+  </div>
+</section>
+
+<!-- ============ 15 · WAIT/NOTIFY/NOTIFYALL ============ -->
+<section class="slide" data-title="wait, notify, notifyAll">
+  <div class="inner">
+    <p class="kicker anim d1"><b>15</b>Comunicación entre hilos</p>
+    <h2 class="anim d1">wait(), notify() y notifyAll()</h2>
+    <p class="lead anim d2">La comunicación entre hilos permite que un hilo <b>se pause</b> durante una sección crítica y otro pueda entrar. Se implementa con tres métodos de la clase <span class="mono">Object</span>:</p>
+    <div class="demo anim d3">
+      <ul class="clean small" style="margin-bottom:14px">
+        <li><span class="mono">wait()</span>: el hilo <b>libera el bloqueo</b> del objeto y queda en espera, hasta que otro invoque <span class="mono">notify()</span>/<span class="mono">notifyAll()</span> o transcurra un tiempo.</li>
+        <li><span class="mono">notify()</span>: despierta <b>uno</b> de los hilos esperando (elección arbitraria de la JVM).</li>
+        <li><span class="mono">notifyAll()</span>: despierta <b>todos</b> los hilos esperando.</li>
+      </ul>
+      <div class="grid2" style="gap:18px">
+        <div class="panelcard">
+          <h4>Regla de oro</h4>
+          <p class="small">Solo pueden llamarse <b>dentro de un método o bloque synchronized</b>, porque dependen del monitor del objeto: el hilo debe ser <b>dueño del monitor</b>. Si no lo es, se arroja <span class="mono">IllegalMonitorStateException</span>.</p>
+        </div>
+        <div class="panelcard">
+          <h4>Tras despertar</h4>
+          <p class="small">El hilo despertado <b>no puede proceder</b> hasta que el hilo actual <b>libere el bloqueo</b>; los despertados no tienen privilegios ni desventajas por el bloqueo.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 16 · WAIT EN DETALLE + DEMO ============ -->
+<section class="slide" data-title="wait() en acción">
+  <div class="inner">
+    <p class="kicker anim d1"><b>15a</b>Comunicación entre hilos · demo</p>
+    <h2 class="anim d1">wait() en acción: productor y consumidores</h2>
+    <p class="lead anim d2">Patrón del material: el consumidor hace <span class="mono">while(!disponible) wait();</span> y el productor marca <span class="mono">disponible = true</span> y llama <span class="mono">notify()</span>. Pruébalo con tres consumidores esperando:</p>
+    <div class="demo anim d3">
+      <div class="demo-head">
+        <button class="btn brand" id="wnNotify">notify()</button>
+        <button class="btn" id="wnNotifyAll">notifyAll()</button>
+        <button class="btn" id="wnReset">Reiniciar</button>
+        <span class="stat spacer">recurso: <b id="wnAvail">no disponible</b></span>
+      </div>
+      <div class="consumers">
+        <div class="consumer waiting" id="cons1"><span class="st-ico"><i class="fa-solid fa-bed"></i></span><br>Consumidor-1<br><small>wait()</small></div>
+        <div class="consumer waiting" id="cons2"><span class="st-ico"><i class="fa-solid fa-bed"></i></span><br>Consumidor-2<br><small>wait()</small></div>
+        <div class="consumer waiting" id="cons3"><span class="st-ico"><i class="fa-solid fa-bed"></i></span><br>Consumidor-3<br><small>wait()</small></div>
+      </div>
+      <div id="wnLog"></div>
+      <p class="small" style="margin-top:12px">Con <span class="mono">notify()</span> solo <b>uno</b> despierta y consume; los demás siguen en <span class="mono">wait()</span>. Con <span class="mono">notifyAll()</span> <b>todos</b> despiertan y compiten: uno consume y los demás vuelven a esperar.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 17 · NOTIFY VS NOTIFYALL ============ -->
+<section class="slide" data-title="notify() vs notifyAll()">
+  <div class="inner">
+    <p class="kicker anim d1"><b>15b</b>Comunicación entre hilos · decisión</p>
+    <h2 class="anim d1">¿notify() o notifyAll()?</h2>
+    <p class="lead anim d2">La diferencia está en <b>cuántos hilos en espera son despertados</b> al invocarlo sobre un objeto sincronizado:</p>
+    <div class="grid2 anim d3" style="gap:22px">
+      <div class="demo">
+        <h3>notify() · uno</h3>
+        <ul class="clean small">
+          <li>Despierta <b>solo un hilo</b> esperando en el monitor.</li>
+          <li><b>No se puede controlar cuál</b>: la elección depende de la JVM.</li>
+          <li>Útil cuando basta con que <b>un único consumidor</b> continúe.</li>
+        </ul>
+      </div>
+      <div class="demo">
+        <h3>notifyAll() · todos</h3>
+        <ul class="clean small">
+          <li>Despierta <b>todos los hilos esperando</b>.</li>
+          <li>Cada hilo luego <b>competirá por adquirir el bloqueo</b> y continuar.</li>
+          <li>Útil cuando hay varios consumidores y quieres darles la <b>oportunidad de reaccionar</b>.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="note anim d4 small">
+      <p>Comportamiento del ejemplo del material (3 consumidores, 1 recurso):</p>
+      <ul class="clean small" style="margin-top:8px">
+        <li>Con <span class="mono">notify()</span>: uno consume; los demás <b>siguen esperando</b>.</li>
+        <li>Con <span class="mono">notifyAll()</span>: todos despiertan, pero <b>solo uno logra consumir</b> (el recurso se marca no disponible) — los otros vuelven a esperar.</li>
+      </ul>
+      <p class="small" style="margin-top:8px">En resumen: <span class="mono">notify()</span> cuando basta uno; <span class="mono">notifyAll()</span> cuando hay varios esperando y quieres darles la oportunidad de competir.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 18 · LOCK ============ -->
+<section class="slide" data-title="Lock: java.util.concurrent.locks">
+  <div class="inner">
+    <p class="kicker anim d1"><b>16</b>w5_1 · locks explícitos</p>
+    <h2 class="anim d1">Lock: bloqueos más extensivos</h2>
+    <p class="lead anim d2">Las interfaces <span class="mono">Lock</span> (paquete <span class="mono">java.util.concurrent.locks</span>) proporcionan operaciones de bloqueo <b>más extensivas</b> que los métodos sincronizados: estructuración más flexible, distintas propiedades y soporte de múltiples objetos <span class="mono">Condition</span>:</p>
+    <div class="code anim d3">Lock l = ...;
+l.lock();
+<span class="k">try</span> {
+    <span class="c">// access the resource protected by this lock</span>
+} <span class="k">finally</span> {
+    l.unlock();
+}</div>
+    <div class="note anim d4 small">
+      <p><b>Lock vs synchronized:</b> los métodos sincronizados fuerzan adquisiciones y liberaciones <b>estructuradas por bloques</b> (con múltiples bloqueos, se liberan en orden opuesto y en el mismo scope). Los <b>Locks</b> permiten adquirir y liberar en <b>cualquier orden e incluso en distintos scopes</b>, y añaden: intentar adquirir sin bloquearse (<span class="mono">tryLock</span>) y adquisiciones <b>interrumpibles</b>.</p>
+      <p class="small" style="margin-top:10px">Regla de oro: si el bloqueo y desbloqueo ocurren en distintos scopes, <b>todo el código ejecutado durante el bloqueo debe ir en try-finally</b> para garantizar la liberación.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 19 · MÉTODOS LOCK + CONDITION ============ -->
+<section class="slide" data-title="Métodos de Lock y Condition">
+  <div class="inner">
+    <p class="kicker anim d1"><b>16a</b>w5_1 · API completa</p>
+    <h2 class="anim d1">Métodos de Lock y Condition</h2>
+    <div class="grid2 anim d2" style="gap:22px">
+      <div class="demo">
+        <h3>Lock</h3>
+        <table>
+          <tr><td class="mono">lock()</td><td>adquiere el bloqueo</td></tr>
+          <tr><td class="mono">unlock()</td><td>libera el bloqueo</td></tr>
+          <tr><td class="mono">lockInterruptibly()</td><td>adquiere salvo que el hilo actual sea interrumpido</td></tr>
+          <tr><td class="mono">tryLock()</td><td>adquiere <b>solo si está libre</b>; retorna boolean</td></tr>
+          <tr><td class="mono">tryLock(time, unit)</td><td>adquiere si se libera dentro del tiempo de espera dado y no hay interrupción; boolean</td></tr>
+          <tr><td class="mono">newCondition()</td><td>retorna una instancia de <span class="mono">Condition</span> vinculada a este Lock</td></tr>
+        </table>
+      </div>
+      <div class="demo">
+        <h3>Condition</h3>
+        <p class="small" style="margin-bottom:8px">Permite que un hilo suspenda su ejecución hasta ser notificado de que alguna condición de estado podría ya no ser verdadera. <b>Reemplaza</b> al monitor con wait/notify/notifyAll, igual que Lock reemplaza a synchronized:</p>
+        <table>
+          <tr><td class="mono">await()</td><td>espera hasta ser "señalado" o interrumpido</td></tr>
+          <tr><td class="mono">await(time, unit)</td><td>espera señal, interrupción o timeout (boolean)</td></tr>
+          <tr><td class="mono">awaitUninterruptibly()</td><td>espera hasta ser señalado, sin interrupciones</td></tr>
+          <tr><td class="mono">signal()</td><td>despierta un hilo en espera</td></tr>
+          <tr><td class="mono">signalAll()</td><td>despierta todos los hilos en espera</td></tr>
+        </table>
+      </div>
+    </div>
+    <p class="note anim d4 small">Como el acceso al estado compartido ocurre en distintos hilos, debe estar <b>protegido</b>: la condición está asociada a un <b>bloqueo</b> — se obtiene con <span class="mono">newCondition()</span> del Lock.</p>
+  </div>
+</section>
+
+<!-- ============ 20 · VOLATILE ============ -->
+<section class="slide" data-title="volatile">
+  <div class="inner">
+    <p class="kicker anim d1"><b>17</b>w5_3 · visibilidad</p>
+    <h2 class="anim d1">volatile</h2>
+    <p class="lead anim d2">Palabra clave para <b>variables compartidas entre múltiples hilos</b>: indica que la variable no debe ser <b>cacheada</b> por los hilos en registros o memoria local — siempre se lee y escribe desde la <b>memoria principal</b>.</p>
+    <div class="grid2 anim d3" style="gap:22px">
+      <div class="demo">
+        <h3 style="color:var(--success)">Volatile asegura</h3>
+        <ul class="clean small">
+          <li><b>Visibilidad de cambios</b>: todos los hilos leen el valor actualizado.</li>
+          <li>Uso típico: <b>banderas de control</b>, estados de ejecución, variables que cambian de forma simple (true/false, referencias).</li>
+        </ul>
+        <p class="small" style="margin-top:8px">Ejemplo conceptual: un hilo corre en bucle hasta que una variable cambie a false. Sin volatile podría seguir corriendo por siempre con una <b>copia vieja</b>; con volatile detecta el cambio inmediatamente y se detiene.</p>
+      </div>
+      <div class="demo">
+        <h3 style="color:var(--destructive)">Volatile NO hace</h3>
+        <ul class="clean small">
+          <li><b>No asegura atomicidad</b>: no evita condiciones de carrera en operaciones compuestas (<span class="mono">contador++</span>).</li>
+          <li>No es sincronización completa.</li>
+          <li>No reemplaza mecanismos más complejos: para operaciones seguras se necesita <span class="mono">synchronized</span> o clases como <span class="mono">AtomicInteger</span>.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note anim d4 small">Combinación del material: <b>volatile + synchronized juntos</b> — volatile asegura la <b>visibilidad</b> inmediata; synchronized asegura la <b>atomicidad y exclusión mutua</b> en las operaciones compuestas.</p>
+  </div>
+</section>
+
+<!-- ============ 21 · ATOMICINTEGER ============ -->
+<section class="slide" data-title="AtomicInteger">
+  <div class="inner">
+    <p class="kicker anim d1"><b>17a</b>w5_3 · operaciones atómicas</p>
+    <h2 class="anim d1">AtomicInteger</h2>
+    <p class="lead anim d2">Clase de <span class="mono">java.util.concurrent.atomic</span> que permite realizar operaciones sobre enteros de manera <b>atómica</b> (segura en concurrencia). A diferencia de volatile o variables normales, asegura que <span class="mono">incrementAndGet()</span> o <span class="mono">addAndGet()</span> <b>no se solapen entre hilos</b>. Muy usada cuando varios hilos modifican un contador o estado compartido.</p>
+    <div class="grid2 anim d3" style="gap:22px">
+      <div class="demo">
+        <h3>Métodos principales</h3>
+        <table>
+          <tr><td class="mono">get() / set(v)</td><td>leer / escribir el valor</td></tr>
+          <tr><td class="mono">getAndSet(v)</td><td>devuelve el actual y luego lo reemplaza</td></tr>
+          <tr><td class="mono">incrementAndGet()</td><td>incrementa en 1 y devuelve el nuevo</td></tr>
+          <tr><td class="mono">getAndIncrement()</td><td>devuelve el actual y luego incrementa</td></tr>
+          <tr><td class="mono">decrementAndGet() / getAndDecrement()</td><td>decremento (antes/después)</td></tr>
+          <tr><td class="mono">addAndGet(d) / getAndAdd(d)</td><td>suma un delta (antes/después)</td></tr>
+        </table>
+      </div>
+      <div class="demo">
+        <h3>Sincronización sin bloqueos</h3>
+        <table>
+          <tr><td class="mono">compareAndSet(expect, update)</td><td>cambia el valor <b>solo si coincide con el esperado</b>; true si lo logra</td></tr>
+          <tr><td class="mono">weakCompareAndSet(e, u)</td><td>similar, pero puede <b>fallar espuriamente</b> (más rápido)</td></tr>
+        </table>
+        <div class="code" style="margin-top:12px"><span class="k">class</span> ContadorAtomic {
+  <span class="k">private</span> AtomicInteger valor = <span class="k">new</span> AtomicInteger(0);
+  <span class="k">public void</span> incrementar() {
+    valor.incrementAndGet();  <span class="c">// atómico</span>
+  }
+}</div>
+      </div>
+    </div>
+    <p class="note anim d4 small">Con el ejemplo del material (2 hilos × 1000 incrementos): el valor esperado es <b>2000 y el real también</b> — sin synchronized y sin bloqueos.</p>
+  </div>
+</section>
+
+<!-- ============ 22 · BLOCKINGQUEUE ============ -->
+<section class="slide" data-title="BlockingQueue">
+  <div class="inner">
+    <p class="kicker anim d1"><b>18</b>w5_3 · colas bloqueantes</p>
+    <h2 class="anim d1">BlockingQueue y ArrayBlockingQueue</h2>
+    <p class="lead anim d2"><b>BlockingQueue</b> es una <b>interfaz</b> que define el comportamiento de una cola bloqueante: no se puede instanciar directamente, pero permite <b>programar contra la abstracción</b> y cambiar de implementación (ArrayBlockingQueue, LinkedBlockingQueue…) sin tocar el resto del código. <b>ArrayBlockingQueue</b> es la clase concreta: usa un <b>array circular fijo</b> cuya capacidad se define al crearla y no cambia.</p>
+    <div class="demo anim d3">
+      <div style="display:flex;align-items:center;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:14px">
+        <span class="chip running">productor · put()</span>
+        <i class="fa-solid fa-arrow-right arrow"></i>
+        <div class="panelcard" style="border-color:rgba(74,132,240,.5)"><h4>cola (capacidad fija)</h4><p class="small mono">put bloquea si está llena · take bloquea si está vacía</p></div>
+        <i class="fa-solid fa-arrow-right arrow"></i>
+        <span class="chip running">consumidor · take()</span>
+      </div>
+      <p class="small">El ejemplo del material: una cola de capacidad 2 recibe 3 valores — <b>el tercero bloquea</b> al productor hasta que el consumidor saque uno. Cada consumidor procesa lo extraído (suma de cuadrados, factorial). Ambas reglas: <b>bloquean al productor si se excede la capacidad, y al consumidor si la cola está vacía</b>.</p>
+    </div>
+    <p class="note anim d4 small">BlockingQueue = abstracción flexible; ArrayBlockingQueue = implementación concreta acotada y eficiente. El patrón productor-consumidor, resuelto por la librería — sin wait/notify a mano.</p>
+  </div>
+</section>
+
+<!-- ============ 23 · CALLABLE/FUTURE/FUTURETASK ============ -->
+<section class="slide" data-title="Callable, Future, FutureTask">
+  <div class="inner">
+    <p class="kicker anim d1"><b>19</b>w5_3 · tareas con resultado</p>
+    <h2 class="anim d1">Callable, Future y FutureTask</h2>
+    <table class="anim d2">
+      <tr><th style="width:22%">Clase</th><th>Qué es</th><th>Uso diferenciado</th></tr>
+      <tr>
+        <td><span class="mono">Callable&lt;V&gt;</span></td>
+        <td>Interfaz similar a <b>Runnable</b>, pero su método <span class="mono">call()</span> <b>devuelve un resultado</b> y puede <b>lanzar excepciones</b></td>
+        <td>Definir la lógica de la tarea <b>con retorno</b></td>
+      </tr>
+      <tr>
+        <td><span class="mono">Future&lt;V&gt;</span></td>
+        <td>Representa el <b>resultado de una tarea asíncrona</b>: <span class="mono">isDone()</span> consulta si terminó, <span class="mono">cancel()</span> la cancela, <span class="mono">get()</span> obtiene el resultado (bloqueando hasta que exista)</td>
+        <td>Manejar <b>resultados asíncronos</b>: esperar o consultar estado</td>
+      </tr>
+      <tr>
+        <td><span class="mono">FutureTask&lt;V&gt;</span></td>
+        <td>Clase concreta que implementa <b>Runnable y Future</b>: envuelve un Callable o Runnable y se ejecuta en un hilo directo (<span class="mono">new Thread(task).start()</span>) o en un ExecutorService</td>
+        <td><b>Control total</b>: ejecución y resultado en un solo objeto</td>
+      </tr>
+    </table>
+    <div class="code anim d3" style="margin-top:20px">ExecutorService executor = Executors.newFixedThreadPool(2);
+
+Callable&lt;Integer&gt; suma = ...;                       <span class="c">// 1. definir la tarea (1+2+…+5)</span>
+Future&lt;Integer&gt; f = executor.submit(suma);           <span class="c">// 2. enviarla al executor</span>
+System.out.println(f.get());                          <span class="c">// 3. obtener el resultado (bloquea)</span>
+
+FutureTask&lt;Integer&gt; task = <span class="k">new</span> FutureTask&lt;&gt;(factorialCallable);
+<span class="k">new</span> Thread(task).start();                             <span class="c">// FutureTask en un hilo directo</span>
+System.out.println(task.get());                       <span class="c">// 5! = 120</span></div>
+    <p class="note anim d4 small">El flujo del ejemplo del material: <b>Callable</b> define la tarea → <b>Future</b> recibe el resultado del executor → <b>FutureTask</b> combina ejecución y resultado — ambos terminan con <span class="mono">get()</span> y el executor se cierra con <span class="mono">shutdown()</span>.</p>
+  </div>
+</section>
+
+<!-- ============ 24 · THREADPOOL + EXECUTORS ============ -->
+<section class="slide" data-title="ThreadPool y Executors">
+  <div class="inner">
+    <p class="kicker anim d1"><b>20</b>w5_3 · gestión de hilos</p>
+    <h2 class="anim d1">ThreadPool y Executors</h2>
+    <p class="lead anim d2">Un <b>ThreadPool</b> es un conjunto de hilos que ejecutan tareas. Puede ser útil tener <b>más de un pool</b> por tres razones del material:</p>
+    <div class="grid3 anim d3" style="gap:16px;margin-bottom:20px">
+      <div class="panelcard"><h4>Separación de responsabilidades</h4><p class="small">un pool para cálculo intensivo y otro para E/S</p></div>
+      <div class="panelcard"><h4>Control de recursos</h4><p class="small">evitar que tareas pesadas bloqueen a las ligeras</p></div>
+      <div class="panelcard"><h4>Priorización</h4><p class="small">tamaños de pool distintos según importancia</p></div>
+    </div>
+    <p class="small anim d4" style="margin-bottom:10px"><b>Executors</b> es la <b>fábrica</b> que crea los distintos tipos de <span class="mono">ExecutorService</span> — en lugar de crear hilos a mano con <span class="mono">new Thread(...)</span>, simplifica y controla la concurrencia:</p>
+    <div class="grid3 anim d5" style="gap:16px">
+      <div class="demo"><h3>newFixedThreadPool(n)</h3><p class="small">pool con n hilos <b>fijos</b></p></div>
+      <div class="demo"><h3>newCachedThreadPool()</h3><p class="small">pool <b>dinámico</b> que ajusta el número de hilos según la carga</p></div>
+      <div class="demo"><h3>newSingleThreadExecutor()</h3><p class="small">un solo hilo: tareas <b>en orden</b></p></div>
+    </div>
+    <p class="note anim d6 small">El ejemplo del material encadena dos executors: el Executor1 calcula algo sencillo y guarda el resultado en una variable compartida; se espera su terminación; y el Executor2 usa ese resultado para un cálculo pesado — cada uno independiente, pero <b>encadenados en secuencia</b>. Los pools se cierran con <span class="mono">shutdown()</span> (y <span class="mono">awaitTermination</span> para esperarlos).</p>
+  </div>
+</section>
+
+<!-- ============ 25 · SCHEDULED ============ -->
+<section class="slide" data-title="ScheduledExecutorService">
+  <div class="inner">
+    <p class="kicker anim d1"><b>20a</b>w5_3 · tareas programadas</p>
+    <h2 class="anim d1">ScheduledExecutorService</h2>
+    <p class="lead anim d2">Extensión de <span class="mono">ExecutorService</span> que permite <b>programar tareas</b> para que se ejecuten después de un retraso o de forma <b>periódica</b>. Muy útil para temporizadores, tareas repetitivas o procesos que deben ejecutarse cada cierto intervalo. Se crea con <span class="mono">Executors.newScheduledThreadPool(n)</span>:</p>
+    <div class="demo anim d3">
+      <table>
+        <tr><th style="width:45%">Método</th><th>Comportamiento</th></tr>
+        <tr><td class="mono">schedule(task, delay, unit)</td><td>ejecuta una tarea <b>una vez</b> después de un retraso</td></tr>
+        <tr><td class="mono">scheduleAtFixedRate(task, initDelay, period, unit)</td><td>ejecuta periódicamente con <b>intervalo fijo</b> (el período cuenta desde el inicio de la tarea anterior)</td></tr>
+        <tr><td class="mono">scheduleWithFixedDelay(task, initDelay, delay, unit)</td><td>periódica, pero el tiempo se cuenta <b>desde que terminó la tarea anterior</b></td></tr>
+      </table>
+      <div class="code" style="margin-top:14px">ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(3);
+scheduler.schedule(tarea1, 2, TimeUnit.SECONDS);          <span class="c">// una vez, tras 2s</span>
+scheduler.scheduleAtFixedRate(tarea2, 1, 3, TimeUnit.SECONDS); <span class="c">// cada 3s</span></div>
+    </div>
+    <p class="note anim d4 small">Diferencia fina entre las dos periódicas: <b>AtFixedRate</b> mantiene la cadencia (cada 3s, sin importar cuánto dure la tarea); <b>WithFixedDelay</b> respeta el descanso entre el <i>fin</i> de una tarea y el inicio de la siguiente.</p>
+  </div>
+</section>
+
+<!-- ============ 26 · CIERRE ============ -->
+<section class="slide" data-title="Cierre">
+  <div class="inner">
+    <p class="kicker anim d1"><b>21</b>Cierre</p>
+    <h2 class="anim d1">La semana del "un hilo a la vez"</h2>
+    <p class="lead anim d2">El mapa completo de la sincronización en Java, en una tabla:</p>
+    <div class="demo anim d3">
+      <table>
+        <tr><th>Problema</th><th>Herramienta</th></tr>
+        <tr><td>Interferencia / condición de carrera</td><td><span class="mono">synchronized</span> (métodos/bloques), mutex, monitores</td></tr>
+        <tr><td>Visibilidad entre hilos</td><td><span class="mono">volatile</span>, happens-before (start, join, unlock)</td></tr>
+        <tr><td>Operaciones atómicas sin bloqueos</td><td><span class="mono">AtomicInteger</span> (incrementAndGet, compareAndSet)</td></tr>
+        <tr><td>Proteger n recursos (n &gt; 1)</td><td><span class="mono">Semaphore</span> con n permisos</td></tr>
+        <tr><td>Coordinación: esperar y avisar</td><td><span class="mono">wait</span>/<span class="mono">notify</span>/<span class="mono">notifyAll</span> o Condition (await/signal)</td></tr>
+        <tr><td>Bloqueos flexibles e interrumpibles</td><td><span class="mono">Lock</span>, <span class="mono">tryLock</span>, ReentrantLock fair</td></tr>
+        <tr><td>Productor-consumidor</td><td><span class="mono">BlockingQueue</span> / ArrayBlockingQueue</td></tr>
+        <tr><td>Tareas con resultado y pools de hilos</td><td>Callable/Future/FutureTask, Executors, Scheduled</td></tr>
+        <tr><td>A vigilar siempre</td><td>Deadlock, livelock, starvation — el liveness</td></tr>
+      </table>
+    </div>
+    <p class="note anim d4 small">Con esto cierras el ciclo de la concurrencia: crear hilos (W1), comunicar procesos (W3) y ahora <b>coordinarlos sin errores</b>. Quedan pendientes por llenar las páginas de la semana 4 cuando llegue su material.</p>
+  </div>
+</section>
+
+</main>
+
+<nav id="dots"></nav>
+<div id="navBtns">
+  <button class="navBtn" id="prevBtn" title="Anterior"><i class="fa-solid fa-chevron-left"></i></button>
+  <button class="navBtn" id="nextBtn" title="Siguiente"><i class="fa-solid fa-chevron-right"></i></button>
+</div>
+
+<script>
+(function(){
+"use strict";
+const slides=[...document.querySelectorAll('.slide')];
+const N=slides.length;
+let cur=0;
+const timers=[];
+function addT(fn,ms){const id=setInterval(fn,ms);timers.push(id);fn();return id;}
+function addTimeout(fn,ms){const id=setTimeout(fn,ms);timers.push(id);return id;}
+function clearTimers(){timers.forEach(clearInterval);timers.forEach(clearTimeout);timers.length=0;}
+
+const dotsBox=document.getElementById('dots');
+slides.forEach((s,i)=>{
+  const d=document.createElement('div');
+  d.className='dot';d.title=s.dataset.title;
+  d.onclick=()=>go(i);
+  dotsBox.appendChild(d);
+});
+const dots=[...dotsBox.children];
+function go(i){
+  if(i<0||i>=N)return;
+  clearTimers();
+  slides[cur].classList.remove('active');
+  cur=i;
+  slides[cur].classList.add('active');
+  dots.forEach((d,k)=>d.classList.toggle('on',k===cur));
+  document.getElementById('progressFill').style.width=((cur+1)/N*100)+'%';
+  document.getElementById('counter').textContent=(cur+1)+' / '+N;
+  const fx=slideFx[cur]; if(fx)fx();
+  slides[cur].scrollTop=0;
+}
+document.getElementById('prevBtn').onclick=()=>go(cur-1);
+document.getElementById('nextBtn').onclick=()=>go(cur+1);
+document.addEventListener('keydown',e=>{
+  if(e.key===' '&&document.activeElement&&document.activeElement.tagName==='BUTTON')return;
+  if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown')go(cur+1);
+  else if(e.key==='ArrowLeft'||e.key==='PageUp')go(cur-1);
+  else if(e.key==='Home')go(0);
+  else if(e.key==='End')go(N-1);
+});
+const slideFx={};
+
+/* ---------- slide 2: interferencia (auto) ---------- */
+(function(){
+  const steps=[
+    'Hilo A: recupera c (ve 0)',
+    'Hilo B: recupera c (también ve 0)',
+    'Hilo A: incrementa el valor recuperado → 1',
+    'Hilo B: decrementa el valor recuperado → -1',
+    'Hilo A: almacena el resultado en c → c = 1',
+    'Hilo B: almacena el resultado en c → c = -1 (sobrescribe a A)',
+  ];
+  const mems=[0,0,0,0,1,-1];
+  let i=0;
+  const stepEl=document.getElementById('raceStep'),cEl=document.getElementById('raceC'),
+        resEl=document.getElementById('raceRes'),
+        memBox=stepEl.closest('.demo').querySelector('.membox');
+  slideFx[2]=()=>{i=0;
+    addT(()=>{
+      if(i>=steps.length){
+        i=0;
+        resEl.innerHTML='';
+        cEl.textContent='0';
+        stepEl.textContent='Reiniciando el recorrido…';
+        memBox.classList.remove('flash');
+        return;
+      }
+      stepEl.textContent=steps[i];
+      cEl.textContent=mems[i];
+      memBox.classList.add('flash');
+      setTimeout(()=>memBox.classList.remove('flash'),600);
+      if(i===steps.length-1)resEl.innerHTML='<i class="fa-solid fa-triangle-exclamation"></i><b style="color:var(--destructive)">El resultado del hilo A se pierde</b> al ser sobrescrito por el hilo B.';
+      i++;
+    },1500);
+  };
+})();
+
+/* ---------- slide 13: parking (auto) ---------- */
+(function(){
+  const spots=[...document.querySelectorAll('#parking .spot')];
+  const log=document.getElementById('parkLog');
+  let cars=0;
+  slideFx[13]=()=>{cars=0;
+    addT(()=>{
+      const free=spots.filter(s=>!s.classList.contains('full'));
+      if(free.length>0){
+        free[0].classList.add('full');
+        free[0].textContent='Auto-'+(++cars);
+        log.textContent='Auto-'+cars+' acquire() → estacionó. Permisos restantes: '+(3-spots.filter(s=>s.classList.contains('full')).length);
+      }else{
+        const leaving=spots.find(s=>s.classList.contains('full'));
+        if(leaving){leaving.classList.remove('full');leaving.textContent=leaving.textContent.replace('Auto-','espacio ').replace(/espacio (\d+)/,'espacio ');}
+        else{spots.forEach((s,k)=>{s.classList.remove('full');s.textContent='espacio '+(k+1);});}
+        log.textContent='release() → un auto se va y libera su permiso. Si no hay espacios, los autos esperan.';
+      }
+    },1200);
+  };
+})();
+
+/* ---------- slide 16: wait/notify (interactiva) ---------- */
+(function(){
+  const btnN=document.getElementById('wnNotify'),btnA=document.getElementById('wnNotifyAll'),
+        btnR=document.getElementById('wnReset'),log=document.getElementById('wnLog'),
+        avail=document.getElementById('wnAvail');
+  const cons=[document.getElementById('cons1'),document.getElementById('cons2'),document.getElementById('cons3')];
+  function addLine(html){
+    const l=document.createElement('div');
+    l.innerHTML=html;log.appendChild(l);log.scrollTop=log.scrollHeight;
+  }
+  const SLEEP='<i class="fa-solid fa-bed"></i>',RUN='<i class="fa-solid fa-person-running"></i>';
+  function waiting(){
+    cons.forEach(c=>{c.className='consumer waiting';c.querySelector('.st-ico').innerHTML=SLEEP;});
+    avail.textContent='no disponible';
+  }
+  function reset(){log.innerHTML='';waiting();addLine('<span class="info">3 consumidores hacen wait() en el monitor del recurso…</span>');}
+  btnN.onclick=()=>{
+    waiting();log.innerHTML='';
+    addLine('<span class="warn">productor: disponible = true; notify() — despierta UN hilo (elección de la JVM)</span>');
+    avail.textContent='disponible';
+    const lucky=cons[Math.floor(Math.random()*3)];
+    setTimeout(()=>{
+      lucky.className='consumer awake';lucky.querySelector('.st-ico').innerHTML=RUN;
+      addLine('<span class="ok">'+lucky.id.replace('cons','Consumidor-')+': despertó, adquiere el bloqueo y consume el recurso</span>');
+      setTimeout(()=>{
+        waiting();
+        addLine('<span class="info">recurso consumido → disponible = false. Los otros 2 siguen en wait().</span>');
+      },1400);
+    },800);
+  };
+  btnA.onclick=()=>{
+    waiting();log.innerHTML='';
+    addLine('<span class="warn">productor: disponible = true; notifyAll() — despierta a TODOS</span>');
+    avail.textContent='disponible';
+    cons.forEach((c,k)=>setTimeout(()=>{
+      c.className='consumer awake';c.querySelector('.st-ico').innerHTML=RUN;
+      addLine('<span class="info">'+c.id.replace('cons','Consumidor-')+': despertó y compite por el bloqueo…</span>');
+    },400*k));
+    setTimeout(()=>{
+      const winner=cons[Math.floor(Math.random()*3)];
+      winner.className='consumer awake';winner.querySelector('.st-ico').innerHTML=RUN;
+      addLine('<span class="ok">'+winner.id.replace('cons','Consumidor-')+': logró el bloqueo y consume</span>');
+      setTimeout(()=>{
+        waiting();
+        addLine('<span class="info">los otros 2 no encontraron recurso y vuelven a wait().</span>');
+      },1300);
+    },1500);
+  };
+  btnR.onclick=reset;
+  slideFx[16]=reset;
+})();
+
+/* ---------- init ---------- */
+go(0);
+})();
+</script>
+</body>
+</html>

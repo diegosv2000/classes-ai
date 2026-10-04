@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Semana 5 — Sincronización de Hilos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+  :root{
+    --bg:#0C0B12;
+    --surface:#13121A;
+    --card:#17161F;
+    --muted:#1F1D28;
+    --secondary:#22202B;
+    --fg:#F4F3F7;
+    --muted-fg:#9A97A6;
+    --on-brand:#FCFCFC;
+    --primary:#8F5CF0;
+    --blue:#4A84F0;
+    --success:#2CC277;
+    --destructive:#EC4B4B;
+    --warning:#F0B429;
+    --info:#3EB0E0;
+    --border:rgba(255,255,255,.09);
+    --input-border:rgba(255,255,255,.12);
+    --font-sans:'Geist',system-ui,sans-serif;
+    --font-mono:'Geist Mono',Consolas,monospace;
+    --grad-brand:linear-gradient(90deg,var(--primary),var(--blue));
+    --grad-num:linear-gradient(180deg,#F4F3F7,#9A97A6);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    min-height:100vh;background:var(--bg);color:var(--fg);
+    font-family:var(--font-sans);font-size:16px;line-height:1.55;
+    display:flex;align-items:center;justify-content:center;
+    padding:30px 16px;position:relative;
+  }
+  body::before,body::after{
+    content:'';position:fixed;border-radius:50%;pointer-events:none;z-index:0;
+    filter:blur(64px);
+  }
+  body::before{
+    width:56vw;height:56vw;top:-18vw;left:-14vw;
+    background:radial-gradient(circle,rgba(143,92,240,.22),transparent 65%);
+  }
+  body::after{
+    width:50vw;height:50vw;bottom:-18vw;right:-12vw;
+    background:radial-gradient(circle,rgba(74,132,240,.18),transparent 65%);
+  }
+  i.fa-solid{font-size:.85em;margin-right:7px}
+  .wrap{width:100%;max-width:860px;position:relative;z-index:1}
+
+  .card{
+    background:var(--card);border:1px solid var(--border);
+    border-radius:1rem;padding:28px;animation:in .35s ease;
+    box-shadow:0 8px 48px rgba(143,92,240,.1);
+  }
+  @keyframes in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+  h1{font-size:1.8rem;font-weight:600;letter-spacing:-.02em;line-height:1.25;margin-bottom:.5em}
+  h2{font-size:1.25rem;font-weight:600;letter-spacing:-.01em;line-height:1.4;margin-bottom:.7em}
+  h3{font-size:.74rem;text-transform:uppercase;letter-spacing:.2em;color:var(--muted-fg);margin-bottom:.6em;font-weight:600}
+  p{line-height:1.6}
+  .sub{color:var(--muted-fg)}
+  .small{font-size:.86rem;color:var(--muted-fg);line-height:1.6}
+  .small b{color:var(--fg);font-weight:500}
+  .center{text-align:center}
+
+  .btn{
+    background:var(--primary);color:var(--on-brand);border:none;border-radius:9999px;
+    padding:11px 26px;font-size:.9rem;font-weight:600;cursor:pointer;
+    transition:all .2s;font-family:var(--font-sans);
+    box-shadow:0 8px 40px rgba(143,92,240,.25);
+  }
+  .btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 48px rgba(143,92,240,.35)}
+  .btn.ghost{
+    background:var(--secondary);color:var(--fg);border:1px solid var(--border);box-shadow:none;
+  }
+  .btn.ghost:hover{border-color:rgba(143,92,240,.5);box-shadow:0 0 24px rgba(143,92,240,.12)}
+  .btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+
+  #hud{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+  #bar{flex:1;height:6px;background:rgba(255,255,255,.08);border-radius:9999px;overflow:hidden}
+  #barFill{height:100%;width:0;background:var(--grad-brand);transition:width .3s}
+  #cnt{font-size:.8rem;color:var(--muted-fg);white-space:nowrap;font-family:var(--font-mono)}
+
+  .opt{
+    display:flex;align-items:flex-start;gap:12px;width:100%;text-align:left;
+    background:var(--surface);border:1.5px solid var(--border);border-radius:.75rem;
+    color:var(--fg);padding:13px 16px;font-size:.94rem;cursor:pointer;
+    margin-bottom:10px;transition:all .15s;line-height:1.5;font-family:var(--font-sans);
+  }
+  .opt:hover{border-color:var(--input-border)}
+  .opt .mark{
+    flex-shrink:0;width:22px;height:22px;border-radius:9999px;
+    border:2px solid var(--input-border);display:inline-flex;align-items:center;
+    justify-content:center;font-size:.68rem;margin-top:1px;transition:all .15s;color:var(--on-brand);
+  }
+  .opt.sel{
+    border-color:rgba(143,92,240,.6);background:var(--muted);
+    box-shadow:0 0 40px rgba(143,92,240,.15);
+  }
+  .opt.sel .mark{border-color:var(--primary);background:var(--primary)}
+
+  .score{
+    font-family:var(--font-mono);font-size:3rem;font-weight:600;line-height:1;
+    background:var(--grad-num);-webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .badge{
+    display:inline-flex;align-items:center;gap:8px;border-radius:9999px;
+    padding:6px 18px;font-weight:600;font-size:.85rem;
+  }
+  .badge::before{content:'';width:6px;height:6px;border-radius:9999px;background:currentColor}
+  .badge{background:rgba(44,194,119,.15);color:var(--success)}
+  .badge.low{background:rgba(236,75,75,.15);color:var(--destructive)}
+  .badge.mid{background:rgba(240,180,41,.15);color:var(--warning)}
+  .wkgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+  @media(max-width:640px){.wkgrid{grid-template-columns:repeat(2,1fr)}}
+  .wkbox{
+    background:var(--surface);border:1px solid var(--border);border-radius:.75rem;
+    padding:14px;text-align:center;
+  }
+  .wkbox b{
+    font-family:var(--font-mono);color:var(--fg);font-size:1.25rem;font-weight:600;display:block;margin-top:4px;
+  }
+  .rev{border-top:1px solid var(--border);padding:20px 4px}
+  .rev h3{margin-bottom:10px}
+  .tag{
+    display:inline-block;font-size:.68rem;font-weight:600;letter-spacing:.1em;
+    border-radius:9999px;padding:3px 10px;
+    background:var(--grad-brand);color:var(--on-brand);
+  }
+  .ansRow{
+    display:flex;gap:10px;align-items:flex-start;padding:9px 12px;border-radius:.75rem;
+    font-size:.9rem;line-height:1.5;margin-bottom:6px;
+  }
+  .ansRow.ok{background:rgba(44,194,119,.1)}
+  .ansRow.bad{background:rgba(236,75,75,.1)}
+  .ansRow i{margin-top:3px}
+  .ansRow.ok i{color:var(--success)}
+  .ansRow.bad i{color:var(--destructive)}
+  .exp{font-size:.84rem;color:var(--muted-fg);padding:4px 10px 0 30px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ INICIO ============ -->
+  <div class="card" id="scrStart">
+    <h1><i class="fa-solid fa-clipboard-check"></i>Test de repaso · Semana 5</h1>
+    <p class="sub" style="margin-bottom:14px">Sincronización de hilos</p>
+    <p style="margin-bottom:8px">Comprueba cuánto aprendiste de los materiales <span class="mono">w5_1.pdf</span>, <span class="mono">w5_2.pdf</span> y <span class="mono">w5_3.pdf</span>. Son <b>20 preguntas</b> de selección múltiple sobre sincronización de hilos.</p>
+    <ul class="small" style="list-style:none;line-height:2;margin-bottom:20px">
+      <li><i class="fa-solid fa-shuffle" style="color:var(--primary)"></i>El orden de preguntas y opciones es aleatorio en cada intento</li>
+      <li><i class="fa-solid fa-pen" style="color:var(--primary)"></i>Solo marcas tu respuesta; puedes volver y cambiarla antes de finalizar</li>
+      <li><i class="fa-solid fa-chart-column"></i>Al final verás tu nota, el desglose por tema y la revisión de cada pregunta</li>
+    </ul>
+    <button class="btn" id="startBtn"><i class="fa-solid fa-play"></i>Comenzar test</button>
+  </div>
+
+  <!-- ============ PREGUNTAS ============ -->
+  <div class="card" id="scrQuiz" style="display:none">
+    <div id="hud">
+      <div id="bar"><div id="barFill"></div></div>
+      <span id="cnt"></span>
+    </div>
+    <h2 id="qText"></h2>
+    <div id="opts"></div>
+    <div style="display:flex;gap:10px;justify-content:space-between;margin-top:18px">
+      <button class="btn ghost" id="prevBtn"><i class="fa-solid fa-arrow-left"></i>Anterior</button>
+      <button class="btn" id="nextBtn" disabled>Siguiente<i class="fa-solid fa-arrow-right" style="margin-right:0;margin-left:6px"></i></button>
+      <button class="btn" id="finishBtn" style="display:none"><i class="fa-solid fa-flag-checkered"></i>Finalizar test</button>
+    </div>
+    <p class="small" style="margin-top:12px" id="markHint"><i class="fa-solid fa-hand-pointer"></i>Marca una opción para continuar.</p>
+  </div>
+
+  <!-- ============ RESULTADO ============ -->
+  <div class="card" id="scrEnd" style="display:none">
+    <div class="center">
+      <h1><i class="fa-solid fa-award"></i>Tu resultado</h1>
+      <div class="score" id="scoreTxt"></div>
+      <p style="margin:12px 0 6px"><span class="badge" id="gradeBadge"></span></p>
+      <p class="sub" id="msgTxt"></p>
+    </div>
+    <div class="wkgrid" id="wkGrid"></div>
+    <h3 style="margin:28px 0 4px"><i class="fa-solid fa-list-check"></i>Revisión de respuestas</h3>
+    <div id="review"></div>
+    <div class="center" style="margin-top:24px">
+      <button class="btn" id="retryBtn"><i class="fa-solid fa-rotate-right"></i>Reintentar (se rebaraja todo)</button>
+      <p class="small" style="margin-top:14px"><a href="index.html" style="color:var(--muted-fg);text-decoration:none">← volver al contenido de la semana 5</a></p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- Banco de preguntas (fiel a w5_1, w5_2 y w5_3.pdf) ---------- */
+const BANK=[
+/* ----- Interferencia y carrera (3) ----- */
+{w:'Interferencia y carrera',q:'¿Por qué la operación c++ puede causar interferencia entre hilos?',
+ o:['Porque es muy lenta','Porque se descompone en 3 pasos (recuperar, incrementar, almacenar) y las secuencias de los hilos se sobreponen','Porque usa memoria del disco','Porque los hilos no pueden leer variables'],
+ a:1,e:'Una operación simple como c++ se descompone en 3 pasos. Si dos hilos la ejecutan entrelazada sobre la misma data, el resultado de uno se pierde al ser sobrescrito por el otro (interferencia de hilos).'},
+{w:'Interferencia y carrera',q:'Dos hilos incrementan 1000 veces cada uno un contador sin sincronización. ¿Qué resulta?',
+ o:['Siempre 2000','Siempre 0','Un valor no determinista, posiblemente menor a 2000 (ej. 1987, 1995) por la condición de carrera','Un error de compilación'],
+ a:2,e:'La condición de carrera hace que el resultado dependa del orden de ejecución, que es no determinista: el esperado es 2000, pero puede salir menor porque valor++ no es atómica.'},
+{w:'Interferencia y carrera',q:'¿Qué es la condición de carrera?',
+ o:['Un error de sintaxis en hilos','Cuando dos o más hilos acceden y modifican un recurso compartido al mismo tiempo sin la debida sincronización','Un hilo que corre más rápido que otros','Una excepción de Java'],
+ a:1,e:'Condición de carrera: dos o más hilos acceden y modifican un recurso compartido simultáneamente sin sincronización; el resultado depende del orden de ejecución, no determinista.'},
+
+/* ----- Sincronización básica (4) ----- */
+{w:'Sincronización básica',q:'¿Cuáles son los dos efectos de los métodos sincronizados?',
+ o:['Aumentar la velocidad y reducir memoria','No pueden interponerse dos invocaciones sobre el mismo objeto, y al terminar establecen happens-before con invocaciones subsecuentes del mismo objeto','Bloquean todos los hilos del proceso y liberan la memoria','Crean un hilo nuevo por cada llamada'],
+ a:1,e:'Efecto 1: dos invocaciones de métodos sincronizados sobre el mismo objeto no pueden interponerse (los otros hilos se bloquean). Efecto 2: al terminar establece automáticamente una relación happens-before con invocaciones subsecuentes del mismo objeto.'},
+{w:'Sincronización básica',q:'¿Qué es el bloqueo intrínseco (monitor)?',
+ o:['Un bloqueo de red','Una entidad interna asociada a cada objeto, que un hilo debe adquirir para acceso exclusivo y liberar al terminar','Un candado por hilo','Un método estático de Thread'],
+ a:1,e:'La sincronización se construye alrededor del bloqueo intrínseco o monitor de bloqueo: cada objeto tiene uno asociado. Mientras un hilo lo posee, ningún otro puede adquirir el mismo bloqueo; liberarlo establece happens-before con adquisiciones subsecuentes.'},
+{w:'Sincronización básica',q:'En una sentencia sincronizada synchronized(this){...}, ¿qué proporciona el bloqueo intrínseco?',
+ o:['El objeto especificado (aquí this), a diferencia de los métodos sincronizados','La JVM automáticamente','El hilo que lo ejecuta','La clase Thread'],
+ a:0,e:'A diferencia de los métodos sincronizados, las sentencias sincronizadas deben especificar el objeto que proporciona el bloqueo intrínseco — en el ejemplo, this.'},
+{w:'Sincronización básica',q:'¿Qué es la sincronización reentrante?',
+ o:['Que un hilo puede adquirir un bloqueo que ya tiene, permitiendo que código sincronizado invoque otro código sincronizado con el mismo bloqueo','Que un hilo puede robar el bloqueo de otro','Que los bloqueos se ordenan automáticamente','Que se puede sincronizar dos veces seguidas'],
+ a:0,e:'Un hilo no puede adquirir un bloqueo en posesión de otro hilo, pero sí puede adquirir un bloqueo que ya tenga. Así, código sincronizado puede invocar métodos sincronizados usando el mismo bloqueo, sin que el hilo se bloquee a sí mismo.'},
+
+/* ----- volatile y átomos (3) ----- */
+{w:'volatile y átomos',q:'¿Qué garantiza volatile y qué NO garantiza?',
+ o:['Atomicidad y exclusión mutua','Visibilidad (no cachear en memoria local), pero NO atomicidad ni sincronización completa','Orden de ejecución global','Bloqueo del objeto'],
+ a:1,e:'volatile asegura visibilidad: la variable se lee/escribe desde memoria principal y los cambios son visibles inmediatamente. NO asegura atomicidad: operaciones compuestas como contador++ pueden seguir teniendo condiciones de carrera.'},
+{w:'volatile y átomos',q:'¿Para qué casos es típico volatile según el material?',
+ o:['Contadores que se incrementan','Banderas de control, estados de ejecución y variables que cambian de forma simple (true/false, referencias)','Objetos grandes','Todo lo compartido'],
+ a:1,e:'Uso típico de volatile: banderas de control, estados de ejecución y variables que cambian de forma simple. Para operaciones seguras como incrementar, se necesita synchronized o AtomicInteger.'},
+{w:'volatile y átomos',q:'¿Qué hace AtomicInteger.compareAndSet(expect, update)?',
+ o:['Compara dos AtomicInteger','Cambia el valor solo si coincide con el esperado; retorna true si lo logra (sincronización sin bloqueos)','Fuerza el valor siempre','Lanza excepción si no coincide'],
+ a:1,e:'compareAndSet(expect, update) cambia el valor solo si coincide con el esperado; retorna true si lo logra. weakCompareAndSet es similar pero puede fallar espuriamente (más rápido). Útiles para sincronización sin bloqueos.'},
+
+/* ----- Liveness (4) ----- */
+{w:'Liveness',q:'¿Qué es un deadlock y cómo se evita según el material?',
+ o:['Hilos muy lentos; se evita subiendo prioridad','Hilos bloqueados para siempre esperando recursos del otro; se evita con orden consistente de adquisición, tryLock con timeout, o minimizando bloqueos múltiples','Un hilo que nunca termina; se evita con exit()','Un error de compilación'],
+ a:1,e:'Deadlock: cada hilo posee un recurso y espera el que tiene el otro; ninguno libera y quedan bloqueados indefinidamente. Se evita con orden consistente al adquirir recursos, bloqueos con timeout (tryLock en ReentrantLock) y diseño que minimice múltiples bloqueos.'},
+{w:'Liveness',q:'¿Qué caracteriza al livelock frente al deadlock?',
+ o:['Es más fácil de detectar','Los hilos no están bloqueados pero siguen cambiando de estado en respuesta al otro, sin avanzar; es más difícil de detectar porque parecen activos','Solo ocurre con un hilo','Siempre termina solo'],
+ a:1,e:'En el livelock los hilos están activos, atrapados en un ciclo de reacciones inútiles (dos personas cediéndose el paso en un pasillo). Es más difícil de detectar que el deadlock; se soluciona con esperas aleatorias o reglas de prioridad.'},
+{w:'Liveness',q:'¿Qué es la starvation?',
+ o:['Un hilo bloqueado para siempre por un deadlock','Un hilo incapaz de ganar acceso regular a recursos compartidos porque hilos codiciosos o prioridades lo acaparan: sigue vivo pero no progresa','Un hilo que agota la memoria','Un problema solo de CPU de un núcleo'],
+ a:1,e:'Starvation: el hilo no puede hacer progresos porque los recursos compartidos son inaccesibles por largos periodos (hilos codiciosos, exceso de prioridades). Se mitiga con fair locks (ReentrantLock con equidad) y evitando el exceso de prioridades.'},
+{w:'Liveness',q:'¿Qué significa Liveness en un sistema concurrente?',
+ o:['Que los hilos están vivos en memoria','La propiedad que garantiza que los hilos siempre progresan hacia su objetivo, sin atascarse indefinidamente (sus enemigos: deadlock, starvation, livelock)','Que hay muchos hilos ejecutando','Que el programa no lanza excepciones'],
+ a:1,e:'Liveness garantiza que los hilos siempre progresan hacia su objetivo. Sus problemas son: deadlock (bloqueados permanentemente), starvation (nunca obtiene recursos) y livelock (activos sin progreso).'},
+
+/* ----- Semaphore y thread-safe (2) ----- */
+{w:'Semaphore y thread-safe',q:'¿En qué se diferencia un Semaphore de un mutex?',
+ o:['No se diferencia, son lo mismo','El semáforo permite n accesos simultáneos mediante un contador; el mutex solo 1','El semáforo es más rápido siempre','El mutex usa volatile'],
+ a:1,e:'Un Semaphore controla el acceso a uno o más recursos mediante un contador: permite n accesos simultáneos (ej. estacionamiento de 3 espacios: acquire al entrar, release al salir). El mutex permite solo 1.'},
+{w:'Semaphore y thread-safe',q:'¿Qué significa que un código sea thread-safe y cómo se logra en Java?',
+ o:['Que corre en un solo hilo; con synchronized se logra','Que múltiples hilos pueden ejecutarlo a la vez sin resultados incorrectos: con synchronized, volatile y clases de java.util.concurrent (AtomicInteger, ConcurrentHashMap)','Que usa many threads siempre','Que nunca comparte datos'],
+ a:1,e:'Thread-safe: el código funciona correctamente con múltiples hilos simultáneos. Se logra con bloqueo intrínseco (synchronized), variables volatile para visibilidad y clases de java.util.concurrent (AtomicInteger, ConcurrentHashMap, etc.).'},
+
+/* ----- wait/notify (2) ----- */
+{w:'wait/notify',q:'¿Desde dónde pueden llamarse wait() y notify() y qué pasa si no?',
+ o:['Desde cualquier método; no pasa nada','Solo dentro de métodos o bloques synchronized (el hilo debe ser dueño del monitor); si no, IllegalMonitorStateException','Solo desde run(); si no, NullPointerException','Solo desde el main'],
+ a:1,e:'wait(), notify() y notifyAll() solo pueden llamarse dentro de un método o bloque sincronizado porque dependen del monitor del objeto: el hilo debe tener propiedad del monitor, o se arroja IllegalMonitorStateException.'},
+{w:'wait/notify',q:'¿Diferencia entre notify() y notifyAll()?',
+ o:['notify() despierta a un hilo arbitrario esperando; notifyAll() despierta a todos, que luego compiten por el bloqueo','notify() despierta al primero; notifyAll() al último','No hay diferencia','notifyAll() lanza excepción si hay muchos hilos'],
+ a:0,e:'notify() despierta solo un hilo esperando (elección arbitraria de la JVM) — útil si basta un consumidor. notifyAll() despierta a todos: compiten por el bloqueo y solo uno logra consumir; los demás vuelven a esperar — útil para darles la oportunidad de reaccionar.'},
+
+/* ----- Locks y Condition (1) ----- */
+{w:'Locks y Condition',q:'¿Qué ventaja ofrecen tryLock() y lockInterruptibly() sobre synchronized?',
+ o:['Son más rápidos siempre','tryLock() intenta adquirir el bloqueo sin bloquearse (boolean si está libre) y lockInterruptibly() puede interrumpirse: flexibilidad que synchronized no ofrece','Evitan la condición de carrera automáticamente','No requieren unlock()'],
+ a:1,e:'Las implementaciones de Lock proporcionan mayor funcionalidad: tryLock() adquiere el bloqueo solo si está libre (con timeout opcional), lockInterruptibly() adquiere salvo interrupción, y newCondition() crea Conditions (await/signal) que reemplazan a wait/notify. Con Lock, el código protegido debe ir en try-finally para garantizar unlock().'},
+
+/* ----- Executors (1) ----- */
+{w:'Executors',q:'¿Qué es Executors y qué fábricas ofrece?',
+ o:['Un tipo de hilo; ofrece run() y start()','La fábrica de ExecutorService: newFixedThreadPool(n), newCachedThreadPool() (dinámico) y newSingleThreadExecutor() (un hilo, tareas en orden)','Un protocolo de red','Una cola bloqueante'],
+ a:1,e:'Executors es una fábrica que crea distintos tipos de ExecutorService para ejecutar tareas en segundo plano sin crear hilos a mano: newFixedThreadPool(n) (n hilos fijos), newCachedThreadPool() (dinámico según carga) y newSingleThreadExecutor() (un hilo, en orden). Además, ScheduledExecutorService permite schedule() y ejecuciones periódicas (AtFixedRate / WithFixedDelay).'},
+];
+
+/* ---------- utilidades ---------- */
+function shuffle(arr){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+const $=id=>document.getElementById(id);
+
+/* ---------- estado ---------- */
+let order=[],optsMap=[],answers=[],cur=0;
+
+function start(){
+  order=shuffle(BANK);
+  optsMap=order.map(q=>{ // baraja opciones y recuerda dónde quedó la correcta
+    const idx=shuffle(q.o.map((_,k)=>k));
+    return idx;
+  });
+  answers=Array(BANK.length).fill(null);
+  cur=0;
+  show('scrQuiz');
+  render();
+}
+
+function show(id){
+  ['scrStart','scrQuiz','scrEnd'].forEach(s=>$(s).style.display=s===id?'block':'none');
+  window.scrollTo(0,0);
+}
+
+/* ---------- render pregunta ---------- */
+function render(){
+  const q=order[cur];
+  $('barFill').style.width=((cur)/BANK.length*100)+'%';
+  $('cnt').innerHTML='<i class="fa-solid fa-circle-question"></i>Pregunta '+(cur+1)+' de '+BANK.length;
+  $('qText').innerHTML='<span class="tag">'+q.w+'</span> '+q.q;
+  const box=$('opts');box.innerHTML='';
+  optsMap[cur].forEach((origIdx,pos)=>{
+    const b=document.createElement('button');
+    b.className='opt'+(answers[cur]===pos?' sel':'');
+    b.innerHTML='<span class="mark">'+(answers[cur]===pos?'<i class="fa-solid fa-check"></i>':'')+'</span><span>'+q.o[origIdx]+'</span>';
+    b.onclick=()=>{
+      answers[cur]=pos;
+      render();
+      $('nextBtn').disabled=false;
+      $('markHint').style.display='none';
+    };
+    box.appendChild(b);
+  });
+  if(answers[cur]!==null){$('nextBtn').disabled=false;$('markHint').style.display='none';}
+  else{$('nextBtn').disabled=true;$('markHint').style.display='block';}
+
+  $('prevBtn').disabled=cur===0;
+  const last=cur===BANK.length-1;
+  $('nextBtn').style.display=last?'none':'inline-block';
+  $('finishBtn').style.display=last?'inline-block':'none';
+}
+
+$('prevBtn').onclick=()=>{if(cur>0){cur--;render();}};
+$('nextBtn').onclick=()=>{if(cur<BANK.length-1){cur++;render();}};
+$('finishBtn').onclick=finish;
+
+/* ---------- resultado ---------- */
+function finish(){
+  const total=BANK.length;
+  let got=0;
+  const per={};
+  order.forEach((q,i)=>{ // mismo orden barajado que answers/optsMap
+    per[q.w]=per[q.w]||{got:0,total:0};
+    per[q.w].total++;
+    const correctPos=optsMap[i].indexOf(q.a);
+    if(answers[i]===correctPos){got++;per[q.w].got++;}
+  });
+  const pct=Math.round(got/total*100);
+  $('scoreTxt').textContent=got+' / '+total;
+  const badge=$('gradeBadge'),msg=$('msgTxt');
+  if(pct>=85){badge.className='badge';badge.textContent=pct+'% · Excelente';
+    msg.textContent='Dominas la semana 5: tienes toda la maquinaria de sincronización. Curso completado.';}
+  else if(pct>=60){badge.className='badge mid';badge.textContent=pct+'% · Bien, pero repasa';
+    msg.textContent='Buena base. Revisa la revisión de abajo y refuerza los temas más bajos.';}
+  else{badge.className='badge low';badge.textContent=pct+'% · Necesitas repasar';
+    msg.textContent='Conviene volver a la presentación de la semana 5 y luego reintentar este test.';}
+  const wk=$('wkGrid');
+  wk.innerHTML=Object.keys(per).map(w=>
+    '<div class="wkbox"><span class="small">'+w+'</span><b>'+per[w].got+' / '+per[w].total+'</b></div>'
+  ).join('');
+
+  const rev=$('review');rev.innerHTML='';
+  order.forEach((q,i)=>{
+    const correctPos=optsMap[i].indexOf(q.a);
+    const ok=answers[i]===correctPos;
+    const div=document.createElement('div');
+    div.className='rev';
+    let html='<h3><span class="tag">'+q.w+'</span> Pregunta '+(i+1)+' '+
+      (ok?'<i class="fa-solid fa-circle-check" style="color:var(--success)"></i>'
+         :'<i class="fa-solid fa-circle-xmark" style="color:var(--destructive)"></i>')+'</h3>';
+    html+='<p style="margin-bottom:10px">'+q.q+'</p>';
+    html+='<div class="ansRow '+(ok?'ok':'bad')+'"><i class="fa-solid fa-user"></i><span><b>Tu respuesta:</b> '+
+      (answers[i]===null?'Sin responder':q.o[optsMap[i][answers[i]]])+'</span></div>';
+    if(!ok){
+      html+='<div class="ansRow ok"><i class="fa-solid fa-check"></i><span><b>Respuesta correcta:</b> '+q.o[q.a]+'</span></div>';
+    }
+    html+='<div class="exp"><i class="fa-solid fa-circle-info"></i>'+q.e+'</div>';
+    div.innerHTML=html;
+    rev.appendChild(div);
+  });
+  show('scrEnd');
+}
+
+$('startBtn').onclick=start;
+$('retryBtn').onclick=start;
+})();
+</script>
+</body>
+</html>
