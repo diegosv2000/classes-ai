@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Semana 3 — Redes y Sockets</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+  :root{
+    --bg:#0C0B12;
+    --surface:#13121A;
+    --card:#17161F;
+    --muted:#1F1D28;
+    --secondary:#22202B;
+    --fg:#F4F3F7;
+    --muted-fg:#9A97A6;
+    --on-brand:#FCFCFC;
+    --primary:#8F5CF0;
+    --blue:#4A84F0;
+    --success:#2CC277;
+    --destructive:#EC4B4B;
+    --warning:#F0B429;
+    --info:#3EB0E0;
+    --border:rgba(255,255,255,.09);
+    --input-border:rgba(255,255,255,.12);
+    --font-sans:'Geist',system-ui,sans-serif;
+    --font-mono:'Geist Mono',Consolas,monospace;
+    --grad-brand:linear-gradient(90deg,var(--primary),var(--blue));
+    --grad-num:linear-gradient(180deg,#F4F3F7,#9A97A6);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    min-height:100vh;background:var(--bg);color:var(--fg);
+    font-family:var(--font-sans);font-size:16px;line-height:1.55;
+    display:flex;align-items:center;justify-content:center;
+    padding:30px 16px;position:relative;
+  }
+  body::before,body::after{
+    content:'';position:fixed;border-radius:50%;pointer-events:none;z-index:0;
+    filter:blur(64px);
+  }
+  body::before{
+    width:56vw;height:56vw;top:-18vw;left:-14vw;
+    background:radial-gradient(circle,rgba(143,92,240,.22),transparent 65%);
+  }
+  body::after{
+    width:50vw;height:50vw;bottom:-18vw;right:-12vw;
+    background:radial-gradient(circle,rgba(74,132,240,.18),transparent 65%);
+  }
+  i.fa-solid{font-size:.85em;margin-right:7px}
+  .wrap{width:100%;max-width:860px;position:relative;z-index:1}
+
+  .card{
+    background:var(--card);border:1px solid var(--border);
+    border-radius:1rem;padding:28px;animation:in .35s ease;
+    box-shadow:0 8px 48px rgba(143,92,240,.1);
+  }
+  @keyframes in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+  h1{font-size:1.8rem;font-weight:600;letter-spacing:-.02em;line-height:1.25;margin-bottom:.5em}
+  h2{font-size:1.25rem;font-weight:600;letter-spacing:-.01em;line-height:1.4;margin-bottom:.7em}
+  h3{font-size:.74rem;text-transform:uppercase;letter-spacing:.2em;color:var(--muted-fg);margin-bottom:.6em;font-weight:600}
+  p{line-height:1.6}
+  .sub{color:var(--muted-fg)}
+  .small{font-size:.86rem;color:var(--muted-fg);line-height:1.6}
+  .small b{color:var(--fg);font-weight:500}
+  .center{text-align:center}
+
+  .btn{
+    background:var(--primary);color:var(--on-brand);border:none;border-radius:9999px;
+    padding:11px 26px;font-size:.9rem;font-weight:600;cursor:pointer;
+    transition:all .2s;font-family:var(--font-sans);
+    box-shadow:0 8px 40px rgba(143,92,240,.25);
+  }
+  .btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 48px rgba(143,92,240,.35)}
+  .btn.ghost{
+    background:var(--secondary);color:var(--fg);border:1px solid var(--border);box-shadow:none;
+  }
+  .btn.ghost:hover{border-color:rgba(143,92,240,.5);box-shadow:0 0 24px rgba(143,92,240,.12)}
+  .btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+
+  #hud{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+  #bar{flex:1;height:6px;background:rgba(255,255,255,.08);border-radius:9999px;overflow:hidden}
+  #barFill{height:100%;width:0;background:var(--grad-brand);transition:width .3s}
+  #cnt{font-size:.8rem;color:var(--muted-fg);white-space:nowrap;font-family:var(--font-mono)}
+
+  .opt{
+    display:flex;align-items:flex-start;gap:12px;width:100%;text-align:left;
+    background:var(--surface);border:1.5px solid var(--border);border-radius:.75rem;
+    color:var(--fg);padding:13px 16px;font-size:.94rem;cursor:pointer;
+    margin-bottom:10px;transition:all .15s;line-height:1.5;font-family:var(--font-sans);
+  }
+  .opt:hover{border-color:var(--input-border)}
+  .opt .mark{
+    flex-shrink:0;width:22px;height:22px;border-radius:9999px;
+    border:2px solid var(--input-border);display:inline-flex;align-items:center;
+    justify-content:center;font-size:.68rem;margin-top:1px;transition:all .15s;color:var(--on-brand);
+  }
+  .opt.sel{
+    border-color:rgba(143,92,240,.6);background:var(--muted);
+    box-shadow:0 0 40px rgba(143,92,240,.15);
+  }
+  .opt.sel .mark{border-color:var(--primary);background:var(--primary)}
+
+  .score{
+    font-family:var(--font-mono);font-size:3rem;font-weight:600;line-height:1;
+    background:var(--grad-num);-webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .badge{
+    display:inline-flex;align-items:center;gap:8px;border-radius:9999px;
+    padding:6px 18px;font-weight:600;font-size:.85rem;
+  }
+  .badge::before{content:'';width:6px;height:6px;border-radius:9999px;background:currentColor}
+  .badge{background:rgba(44,194,119,.15);color:var(--success)}
+  .badge.low{background:rgba(236,75,75,.15);color:var(--destructive)}
+  .badge.mid{background:rgba(240,180,41,.15);color:var(--warning)}
+  .wkgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+  @media(max-width:640px){.wkgrid{grid-template-columns:repeat(2,1fr)}}
+  .wkbox{
+    background:var(--surface);border:1px solid var(--border);border-radius:.75rem;
+    padding:14px;text-align:center;
+  }
+  .wkbox b{
+    font-family:var(--font-mono);color:var(--fg);font-size:1.25rem;font-weight:600;display:block;margin-top:4px;
+  }
+  .rev{border-top:1px solid var(--border);padding:20px 4px}
+  .rev h3{margin-bottom:10px}
+  .tag{
+    display:inline-block;font-size:.68rem;font-weight:600;letter-spacing:.1em;
+    border-radius:9999px;padding:3px 10px;
+    background:var(--grad-brand);color:var(--on-brand);
+  }
+  .ansRow{
+    display:flex;gap:10px;align-items:flex-start;padding:9px 12px;border-radius:.75rem;
+    font-size:.9rem;line-height:1.5;margin-bottom:6px;
+  }
+  .ansRow.ok{background:rgba(44,194,119,.1)}
+  .ansRow.bad{background:rgba(236,75,75,.1)}
+  .ansRow i{margin-top:3px}
+  .ansRow.ok i{color:var(--success)}
+  .ansRow.bad i{color:var(--destructive)}
+  .exp{font-size:.84rem;color:var(--muted-fg);padding:4px 10px 0 30px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ INICIO ============ -->
+  <div class="card" id="scrStart">
+    <h1><i class="fa-solid fa-clipboard-check"></i>Test de repaso · Semana 3</h1>
+    <p class="sub" style="margin-bottom:14px">Redes y Sockets</p>
+    <p style="margin-bottom:8px">Comprueba cuánto aprendiste de los materiales <span class="mono">w3_3.pdf</span> (Sockets I) y <span class="mono">w3_2.pdf</span> (communication and networks). Son <b>20 preguntas</b> de selección múltiple.</p>
+    <ul class="small" style="list-style:none;line-height:2;margin-bottom:20px">
+      <li><i class="fa-solid fa-shuffle" style="color:var(--primary)"></i>El orden de preguntas y opciones es aleatorio en cada intento</li>
+      <li><i class="fa-solid fa-pen" style="color:var(--primary)"></i>Solo marcas tu respuesta; puedes volver y cambiarla antes de finalizar</li>
+      <li><i class="fa-solid fa-chart-column"></i>Al final verás tu nota, el desglose por tema y la revisión de cada pregunta</li>
+    </ul>
+    <button class="btn" id="startBtn"><i class="fa-solid fa-play"></i>Comenzar test</button>
+  </div>
+
+  <!-- ============ PREGUNTAS ============ -->
+  <div class="card" id="scrQuiz" style="display:none">
+    <div id="hud">
+      <div id="bar"><div id="barFill"></div></div>
+      <span id="cnt"></span>
+    </div>
+    <h2 id="qText"></h2>
+    <div id="opts"></div>
+    <div style="display:flex;gap:10px;justify-content:space-between;margin-top:18px">
+      <button class="btn ghost" id="prevBtn"><i class="fa-solid fa-arrow-left"></i>Anterior</button>
+      <button class="btn" id="nextBtn" disabled>Siguiente<i class="fa-solid fa-arrow-right" style="margin-right:0;margin-left:6px"></i></button>
+      <button class="btn" id="finishBtn" style="display:none"><i class="fa-solid fa-flag-checkered"></i>Finalizar test</button>
+    </div>
+    <p class="small" style="margin-top:12px" id="markHint"><i class="fa-solid fa-hand-pointer"></i>Marca una opción para continuar.</p>
+  </div>
+
+  <!-- ============ RESULTADO ============ -->
+  <div class="card" id="scrEnd" style="display:none">
+    <div class="center">
+      <h1><i class="fa-solid fa-award"></i>Tu resultado</h1>
+      <div class="score" id="scoreTxt"></div>
+      <p style="margin:12px 0 6px"><span class="badge" id="gradeBadge"></span></p>
+      <p class="sub" id="msgTxt"></p>
+    </div>
+    <div class="wkgrid" id="wkGrid"></div>
+    <h3 style="margin:28px 0 4px"><i class="fa-solid fa-list-check"></i>Revisión de respuestas</h3>
+    <div id="review"></div>
+    <div class="center" style="margin-top:24px">
+      <button class="btn" id="retryBtn"><i class="fa-solid fa-rotate-right"></i>Reintentar (se rebaraja todo)</button>
+      <p class="small" style="margin-top:14px"><a href="index.html" style="color:var(--muted-fg);text-decoration:none">← volver al contenido de la semana 3</a></p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- Banco de preguntas (fiel a w3_3.pdf y w3_2.pdf) ---------- */
+const BANK=[
+/* ----- Sockets y conexión (4) ----- */
+{w:'Sockets y conexión',q:'¿Por qué se usa TCP en las aplicaciones cliente-servidor del material?',
+ o:['Porque es más ligero que UDP','Porque la comunicación debe ser confiable: no se descartan datos y llegan en el mismo orden en que se enviaron','Porque no requiere conexión','Porque cifra automáticamente'],
+ a:1,e:'La comunicación cliente-servidor debe ser confiable: sin descartar datos y en el mismo orden de envío. TCP proporciona ese canal punto a punto confiable, y ambos programas vinculan un socket a su extremo de la conexión.'},
+{w:'Sockets y conexión',q:'¿Qué necesita el cliente para solicitar la conexión y cómo se identifica?',
+ o:['La MAC del servidor y su IP','El hostname de la máquina del servidor y el puerto donde escucha; se identifica vinculando un puerto local propio','Solo la IP del servidor','Un certificado digital'],
+ a:1,e:'El cliente debe conocer el hostname de la máquina del servidor y el puerto al que escucha. Además, para identificarse, vincula un número de puerto local que usará durante la conexión.'},
+{w:'Sockets y conexión',q:'Al aceptar una conexión, ¿qué hace el servidor para seguir escuchando nuevas solicitudes?',
+ o:['Cierra el socket original y abre otro en otro puerto','Crea un nuevo socket vinculado al mismo puerto local, con endpoint remoto hacia el cliente, y el original sigue escuchando','Atiende al cliente con el mismo socket y no acepta más','Crea un hilo por cada paquete'],
+ a:1,e:'El servidor vincula un nuevo socket al mismo puerto local con el endpoint remoto establecido a la dirección y puerto del cliente; así el socket original sigue escuchando solicitudes mientras atiende al cliente conectado.'},
+{w:'Sockets y conexión',q:'En los 5 pasos del cliente, ¿cuál es el único que puede diferir entre clientes?',
+ o:['Abrir el socket','Cerrar los streams','Paso 3: leer o escribir según el protocolo del servidor','Cerrar el socket'],
+ a:2,e:'Los 5 pasos: 1) abrir un Socket, 2) abrir streams de entrada y salida, 3) leer/escribir según los protocolos del servidor, 4) cerrar los streams, 5) cerrar el socket. Solo el paso 3 puede diferir según la complejidad del servidor.'},
+
+/* ----- InetAddress (3) ----- */
+{w:'InetAddress',q:'¿Qué representa InetAddress y cómo se crean sus objetos?',
+ o:['Un dominio web; con new InetAddress()','Una dirección IP (IPv4 o IPv6) con su nombre de dominio; sin constructores, mediante métodos de fábrica estáticos','Un puerto abierto; con el constructor por defecto','Una conexión TCP; con connect()'],
+ a:1,e:'InetAddress representa una dirección IP (IPv4 o IPv6) y encapsula también el nombre de dominio. No cuenta con constructores: se usa sus métodos de fábrica estáticos (getLocalHost, getByName, etc.).'},
+{w:'InetAddress',q:'¿Qué retorna InetAddress.getByName(null)?',
+ o:['null','La dirección del host local','Un InetAddress que representa la interfaz de loopback','Lanza una excepción'],
+ a:2,e:'getByName(String host) determina la IP de un host a partir de su hostname (nombre de máquina o texto de IP). Si se entrega null como argumento, retorna un InetAddress representando la interfaz de loopback.'},
+{w:'InetAddress',q:'¿Qué diferencia hay entre getAddress() y getHostAddress()?',
+ o:['Ninguna, son alias','getAddress() retorna la IP sin procesar como byte[]; getHostAddress() la retorna en forma textual como String','getAddress() retorna el nombre del host; getHostAddress() el dominio','Una es estática y la otra no'],
+ a:1,e:'getAddress() retorna la dirección IP sin procesar (byte[], en orden de red), mientras que getHostAddress() la retorna en forma textual (String). Además existen getHostName() (nombre del host) y hashCode().'},
+
+/* ----- ServerSocket y Socket (3) ----- */
+{w:'ServerSocket y Socket',q:'¿Qué excepciones puede arrojar el constructor ServerSocket(int port)?',
+ o:['Solo IOException','IOException (error de I/O), SecurityException (un SecurityManager lo prohíbe) e IllegalArgumentException (puerto fuera de 0-65535)','NullPointerException y ClassCastException','Solo IllegalArgumentException'],
+ a:1,e:'ServerSocket(int port) arroja IOException si hay error de I/O al crear el socket, SecurityException si un administrador de seguridad lo prohíbe, e IllegalArgumentException si el puerto está fuera del rango 0-65535.'},
+{w:'ServerSocket y Socket',q:'Sobre el ServerSocket, ¿qué dicen las observaciones del material?',
+ o:['El puerto 0 es inválido y la cola es ilimitada','Con puerto 0 se asigna uno automáticamente; la cola de solicitudes tiene máximo 50 y las que llegan con la cola llena son rechazadas','La cola máxima es 100 y nunca rechaza','Debe crearse siempre con el puerto 80'],
+ a:1,e:'Si se entrega 0 como puerto, se toma uno asignado automáticamente. La longitud máxima de la cola de solicitudes entrantes es 50: una solicitud que llegue con la cola llena será rechazada.'},
+{w:'ServerSocket y Socket',q:'¿Qué limitación tienen los streams getInputStream()/getOutputStream() de un Socket?',
+ o:['Solo funcionan en el servidor','Solo sirven para leer y escribir arrays de bytes: hay que envolverlos con otras clases para otros tipos u objetos','Solo aceptan Strings','No se pueden cerrar'],
+ a:1,e:'Los streams retornados únicamente pueden usarse para leer y escribir arrays de bytes; es necesario instanciar otras clases sobre el stream (Scanner, PrintWriter, BufferedReader, streams de objetos) para trabajar con otros tipos.'},
+
+/* ----- Streams (3) ----- */
+{w:'Streams',q:'¿Qué hace el booleano del constructor PrintWriter(out, true)?',
+ o:['Activa el modo lectura','Especifica un flush automático del buffer tras println, printf o format','Cierra el stream al terminar','Convierte los datos a binario'],
+ a:1,e:'La segunda forma de instanciar PrintWriter especifica un booleano que indica si se realizará un flush automático del buffer de salida luego de ejecutar println, printf o format.'},
+{w:'Streams',q:'¿Qué retornan BufferedReader.read() y readLine() al final del stream?',
+ o:['0 y cadena vacía','read() retorna -1 y readLine() retorna null','Ambos lanzan EOFException','Ambos retornan null'],
+ a:1,e:'read() retorna el carácter leído como entero, o -1 si se llegó al final. readLine() retorna la línea sin el carácter de terminación, o null al final del stream. Ambos pueden arrojar IOException.'},
+{w:'Streams',q:'Al leer con ObjectInputStream lo escrito con ObjectOutputStream, ¿qué regla debe cumplirse?',
+ o:['Leer en cualquier orden, Java lo resuelve','Leer con los mismos tipos y en el mismo orden en que fueron escritos, casteando readObject() al tipo esperado','Solo se pueden leer Strings','Hay que cerrar y reabrir entre objeto y objeto'],
+ a:1,e:'Los objetos se leen con readObject() y deben castearse al tipo esperado; los datos se leen con los mismos tipos y en el mismo orden en que fueron escritos (ej. writeInt, writeObject("Today"), writeObject(new Date())).'},
+
+/* ----- Redes (4) ----- */
+{w:'Redes',q:'¿Qué es la encapsulación en redes?',
+ o:['Cifrar los datos para que nadie los lea','Añadir header (y tail) al data payload para formar el nuevo paquete','Comprimir el paquete para que ocupe menos','Quitar las cabeceras en el destino'],
+ a:1,e:'Encapsulation: proceso de añadir header y tail al data payload para formar un nuevo paquete. El proceso inverso (removerlas para obtener el payload) es la decapsulation.'},
+{w:'Redes',q:'¿Cuál es la función principal de un router?',
+ o:['Conmutar tramas dentro de la red local','Seleccionar la ruta de reenvío de los paquetes según su dirección de destino','Cifrar las comunicaciones','Conectar los terminales al punto de acceso'],
+ a:1,e:'El router es un dispositivo de capa de red que reenvía paquetes: según la dirección de destino, selecciona el camino al siguiente router o al destino. Mantiene la tabla de ruteo, aísla dominios de broadcast y da acceso WAN con NAT.'},
+{w:'Redes',q:'¿Cómo se clasifican las redes según su cobertura geográfica?',
+ o:['Por velocidad: 3G, 4G, 5G','LAN (área local), MAN (una ciudad) y WAN (amplia, decenas a miles de km; Internet es una WAN típica)','Por protocolo: TCP, UDP, IP','Por medio: cable, fibra, aire'],
+ a:1,e:'Según la cobertura: LAN cubre un área local (oficina, casa); MAN se establece dentro de una ciudad; la WAN cubre decenas a miles de kilómetros y conecta redes de múltiples ciudades o países. Internet es una WAN típica.'},
+{w:'Redes',q:'¿En qué tipos se clasifican las topologías de red según el material?',
+ o:['Estrella, bus, anillo, árbol, malla total y malla parcial','Circular, cuadrada y triangular','Interna, externa y mixta','Alámbrica e inalámbrica'],
+ a:0,e:'Las topologías de red se clasifican en: estrella, bus, anillo, árbol, malla total (full-mesh) y malla parcial (partial-mesh). La topología es la disposición estructurada con que se interconectan los dispositivos.'},
+
+/* ----- Capas y protocolos (2) ----- */
+{w:'Capas y protocolos',q:'¿Por qué el modelo TCP/IP se convirtió en el marco dominante frente a OSI?',
+ o:['Es más barato de implementar','La pila OSI es compleja y los protocolos TCP e IP están ampliamente usados en la industria','Los gobiernos lo exigieron','OSI solo funciona en LANs'],
+ a:1,e:'El stack de protocolos OSI es complejo y TCP e IP están ampliamente usados en la industria, por lo que el modelo de referencia TCP/IP se convirtió en el marco mainstream para la comunicación de red.'},
+{w:'Capas y protocolos',q:'¿Qué papel juega la capa de transporte y qué identifica un puerto?',
+ o:['Conecta hosts entre sí; el puerto identifica la máquina','Encapsula los datos de aplicación y establece la conexión extremo a extremo (puerto a puerto); el puerto identifica la aplicación a la que van destinados los datos','Convierte bits en señales; el puerto mide la velocidad','Enruta paquetes; el puerto cuenta los saltos'],
+ a:1,e:'Un protocolo de transporte recibe los datos de la capa de aplicación, los encapsula con su cabecera y ayuda a establecer una conexión extremo a extremo, de puerto a puerto. El socket está vinculado a un puerto para que la capa TCP identifique la aplicación destinataria.'},
+
+/* ----- Desempeño (1) ----- */
+{w:'Desempeño',q:'El material w3_1 sobre desempeño y latencia enfatiza reducir los retrasos en…',
+ o:['El encendido del equipo y la memoria RAM','La transmisión de datos y el procesamiento dentro de los sistemas','La batería y la pantalla','El diseño de la interfaz'],
+ a:1,e:'El deck de desempeño de esta semana define la optimización como las estrategias y técnicas para mejorar la eficiencia y reducir los retrasos en la transmisión de datos y el procesamiento dentro de los sistemas — el mismo contenido base de la semana 2 (cuellos de botella: propagación, transmisión, procesamiento y colas).'},
+];
+
+/* ---------- utilidades ---------- */
+function shuffle(arr){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+const $=id=>document.getElementById(id);
+
+/* ---------- estado ---------- */
+let order=[],optsMap=[],answers=[],cur=0;
+
+function start(){
+  order=shuffle(BANK);
+  optsMap=order.map(q=>{ // baraja opciones y recuerda dónde quedó la correcta
+    const idx=shuffle(q.o.map((_,k)=>k));
+    return idx;
+  });
+  answers=Array(BANK.length).fill(null);
+  cur=0;
+  show('scrQuiz');
+  render();
+}
+
+function show(id){
+  ['scrStart','scrQuiz','scrEnd'].forEach(s=>$(s).style.display=s===id?'block':'none');
+  window.scrollTo(0,0);
+}
+
+/* ---------- render pregunta ---------- */
+function render(){
+  const q=order[cur];
+  $('barFill').style.width=((cur)/BANK.length*100)+'%';
+  $('cnt').innerHTML='<i class="fa-solid fa-circle-question"></i>Pregunta '+(cur+1)+' de '+BANK.length;
+  $('qText').innerHTML='<span class="tag">'+q.w+'</span> '+q.q;
+  const box=$('opts');box.innerHTML='';
+  optsMap[cur].forEach((origIdx,pos)=>{
+    const b=document.createElement('button');
+    b.className='opt'+(answers[cur]===pos?' sel':'');
+    b.innerHTML='<span class="mark">'+(answers[cur]===pos?'<i class="fa-solid fa-check"></i>':'')+'</span><span>'+q.o[origIdx]+'</span>';
+    b.onclick=()=>{
+      answers[cur]=pos;
+      render();
+      $('nextBtn').disabled=false;
+      $('markHint').style.display='none';
+    };
+    box.appendChild(b);
+  });
+  if(answers[cur]!==null){$('nextBtn').disabled=false;$('markHint').style.display='none';}
+  else{$('nextBtn').disabled=true;$('markHint').style.display='block';}
+
+  $('prevBtn').disabled=cur===0;
+  const last=cur===BANK.length-1;
+  $('nextBtn').style.display=last?'none':'inline-block';
+  $('finishBtn').style.display=last?'inline-block':'none';
+}
+
+$('prevBtn').onclick=()=>{if(cur>0){cur--;render();}};
+$('nextBtn').onclick=()=>{if(cur<BANK.length-1){cur++;render();}};
+$('finishBtn').onclick=finish;
+
+/* ---------- resultado ---------- */
+function finish(){
+  const total=BANK.length;
+  let got=0;
+  const per={};
+  order.forEach((q,i)=>{ // mismo orden barajado que answers/optsMap
+    per[q.w]=per[q.w]||{got:0,total:0};
+    per[q.w].total++;
+    const correctPos=optsMap[i].indexOf(q.a);
+    if(answers[i]===correctPos){got++;per[q.w].got++;}
+  });
+  const pct=Math.round(got/total*100);
+  $('scoreTxt').textContent=got+' / '+total;
+  const badge=$('gradeBadge'),msg=$('msgTxt');
+  if(pct>=85){badge.className='badge';badge.textContent=pct+'% · Excelente';
+    msg.textContent='Dominas la semana 3. Listo para avanzar a la semana 5.';}
+  else if(pct>=60){badge.className='badge mid';badge.textContent=pct+'% · Bien, pero repasa';
+    msg.textContent='Buena base. Revisa la revisión de abajo y refuerza los temas más bajos.';}
+  else{badge.className='badge low';badge.textContent=pct+'% · Necesitas repasar';
+    msg.textContent='Conviene volver a la presentación de la semana 3 y luego reintentar este test.';}
+  const wk=$('wkGrid');
+  wk.innerHTML=Object.keys(per).map(w=>
+    '<div class="wkbox"><span class="small">'+w+'</span><b>'+per[w].got+' / '+per[w].total+'</b></div>'
+  ).join('');
+
+  const rev=$('review');rev.innerHTML='';
+  order.forEach((q,i)=>{
+    const correctPos=optsMap[i].indexOf(q.a);
+    const ok=answers[i]===correctPos;
+    const div=document.createElement('div');
+    div.className='rev';
+    let html='<h3><span class="tag">'+q.w+'</span> Pregunta '+(i+1)+' '+
+      (ok?'<i class="fa-solid fa-circle-check" style="color:var(--success)"></i>'
+         :'<i class="fa-solid fa-circle-xmark" style="color:var(--destructive)"></i>')+'</h3>';
+    html+='<p style="margin-bottom:10px">'+q.q+'</p>';
+    html+='<div class="ansRow '+(ok?'ok':'bad')+'"><i class="fa-solid fa-user"></i><span><b>Tu respuesta:</b> '+
+      (answers[i]===null?'Sin responder':q.o[optsMap[i][answers[i]]])+'</span></div>';
+    if(!ok){
+      html+='<div class="ansRow ok"><i class="fa-solid fa-check"></i><span><b>Respuesta correcta:</b> '+q.o[q.a]+'</span></div>';
+    }
+    html+='<div class="exp"><i class="fa-solid fa-circle-info"></i>'+q.e+'</div>';
+    div.innerHTML=html;
+    rev.appendChild(div);
+  });
+  show('scrEnd');
+}
+
+$('startBtn').onclick=start;
+$('retryBtn').onclick=start;
+})();
+</script>
+</body>
+</html>

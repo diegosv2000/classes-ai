@@ -1,1 +1,173 @@
-TODO
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Semana 3 · Redes y Sockets</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+  :root{
+    --bg:#0C0B12;
+    --surface:#13121A;
+    --card:#17161F;
+    --muted:#1F1D28;
+    --secondary:#22202B;
+    --fg:#F4F3F7;
+    --muted-fg:#9A97A6;
+    --on-brand:#FCFCFC;
+    --primary:#8F5CF0;
+    --blue:#4A84F0;
+    --success:#2CC277;
+    --destructive:#EC4B4B;
+    --warning:#F0B429;
+    --info:#3EB0E0;
+    --border:rgba(255,255,255,.09);
+    --input-border:rgba(255,255,255,.12);
+    --font-sans:'Geist',system-ui,sans-serif;
+    --font-mono:'Geist Mono',Consolas,monospace;
+    --grad-brand:linear-gradient(90deg,var(--primary),var(--blue));
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    min-height:100vh;background:var(--bg);color:var(--fg);
+    font-family:var(--font-sans);font-size:16px;line-height:1.6;
+    padding:60px 24px 80px;position:relative;
+  }
+  body::before,body::after{
+    content:'';position:fixed;border-radius:50%;pointer-events:none;z-index:0;
+    filter:blur(64px);
+  }
+  body::before{
+    width:56vw;height:56vw;top:-18vw;left:-14vw;
+    background:radial-gradient(circle,rgba(143,92,240,.22),transparent 65%);
+  }
+  body::after{
+    width:50vw;height:50vw;bottom:-18vw;right:-12vw;
+    background:radial-gradient(circle,rgba(74,132,240,.18),transparent 65%);
+  }
+  i.fa-solid{font-size:.85em;margin-right:7px}
+  code,.mono{font-family:var(--font-mono);font-size:.92em}
+  .wrap{max-width:860px;margin:0 auto;position:relative;z-index:1}
+
+  .kicker{font-size:.72rem;text-transform:uppercase;letter-spacing:.3em;color:var(--muted-fg);margin-bottom:16px;font-weight:500}
+  .kicker b{font-family:var(--font-mono);font-weight:600;background:var(--grad-brand);-webkit-background-clip:text;background-clip:text;color:transparent;margin-right:10px}
+  h1{font-size:2.4rem;font-weight:600;letter-spacing:-.02em;line-height:1.2;margin-bottom:.5em}
+  h2{font-size:1.15rem;font-weight:600;letter-spacing:-.01em;margin:42px 0 12px}
+  h3{font-size:.72rem;text-transform:uppercase;letter-spacing:.2em;color:var(--muted-fg);font-weight:600;margin-bottom:12px}
+  p{color:var(--muted-fg);line-height:1.65}
+  p b{color:var(--fg);font-weight:500}
+  .lead{font-size:1.05rem;margin-bottom:10px}
+  .small{font-size:.88rem}
+
+  .panel{
+    background:var(--surface);border:1px solid var(--border);border-radius:1rem;
+    padding:22px;margin-top:16px;box-shadow:0 8px 48px rgba(143,92,240,.1);
+  }
+
+  /* diagrama sockets */
+  .net{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;padding:8px 0}
+  .host{
+    background:var(--card);border:1px solid var(--border);border-radius:1rem;
+    padding:14px 18px;text-align:center;min-width:120px;
+  }
+  .host h4{font-size:.64rem;text-transform:uppercase;letter-spacing:.2em;color:var(--muted-fg);margin-bottom:8px}
+  .sock{
+    display:block;background:var(--secondary);border:1px solid rgba(143,92,240,.5);
+    border-radius:9999px;padding:6px 14px;font-size:.76rem;font-family:var(--font-mono);
+    color:var(--fg);margin-top:6px;animation:pulse 2.6s infinite;
+  }
+  .sock.s2{animation-delay:.8s}
+  @keyframes pulse{0%,100%{border-color:rgba(143,92,240,.5)}50%{border-color:var(--primary)}}
+  .layers{display:flex;flex-direction:column;gap:5px;margin-top:6px}
+  .layers span{
+    display:block;background:var(--muted);border:1px solid var(--border);border-radius:.5rem;
+    padding:6px 10px;font-size:.7rem;font-family:var(--font-mono);color:var(--muted-fg);text-align:center;
+  }
+  .dlabel{text-align:center;font-size:.7rem;color:var(--muted-fg);letter-spacing:.08em}
+
+  .agenda{list-style:none;margin-top:4px}
+  .agenda li{
+    display:flex;align-items:baseline;gap:14px;padding:10px 0;
+    border-bottom:1px solid var(--border);color:var(--fg);font-size:.95rem;
+  }
+  .agenda .n{
+    font-family:var(--font-mono);font-size:.85rem;font-weight:600;min-width:26px;
+    background:var(--grad-brand);-webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+
+  .cta{margin-top:36px;text-align:center}
+  .cta-btn{
+    display:inline-flex;align-items:center;gap:10px;
+    background:var(--primary);color:var(--on-brand);text-decoration:none;
+    padding:14px 30px;border-radius:9999px;font-weight:600;font-size:.95rem;
+    box-shadow:0 8px 40px rgba(143,92,240,.25);transition:all .2s;
+  }
+  .cta-btn:hover{transform:translateY(-2px);box-shadow:0 12px 48px rgba(143,92,240,.35)}
+  .cta-btn i{margin:0}
+  .crumbs{margin-top:14px;text-align:center}
+  .crumbs a{color:var(--muted-fg);font-size:.85rem;text-decoration:none}
+  .crumbs a:hover{color:var(--fg)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="kicker"><b>Semana 3</b>Programación Concurrente y Distribuida</p>
+  <h1>Redes y Sockets</h1>
+  <p class="lead">Ya sabes qué son los sistemas distribuidos. Esta semana las máquinas <b>empiezan a hablar entre sí</b>: primero cómo funciona la red por dentro, y después cómo escribir programas Java que se comunican por ella con <b>sockets</b>.</p>
+
+  <h2>¿Qué aprenderemos?</h2>
+  <p>Por un lado, <b>la red misma</b>: cómo viajan los datos (paquetes, cabeceras, encapsulación), qué hacen los switches, routers y firewalls, y el modelo en capas que lo ordena todo (OSI y TCP/IP). Por otro, <b>la programación</b>: TCP conecta a cliente y servidor, cada programa vincula un socket a su extremo, y en Java las clases <span class="mono">ServerSocket</span> y <span class="mono">Socket</span> (con sus streams) hacen el resto.</p>
+
+  <div class="panel">
+    <h3>La imagen mental de la semana</h3>
+    <div class="net">
+      <div class="host">
+        <h4>cliente</h4>
+        <div class="layers">
+          <span>HTTP · app</span><span>TCP/UDP</span><span>IP</span><span>Ethernet</span><span>bits</span>
+        </div>
+        <span class="sock">Socket</span>
+      </div>
+      <div style="text-align:center">
+        <p class="dlabel" style="margin-bottom:6px">la red transporta<br>los paquetes</p>
+        <i class="fa-solid fa-arrows-left-right" style="color:var(--muted-fg);font-size:1.2rem"></i>
+      </div>
+      <div class="host">
+        <h4>servidor</h4>
+        <div class="layers">
+          <span>HTTP · app</span><span>TCP/UDP</span><span>IP</span><span>Ethernet</span><span>bits</span>
+        </div>
+        <span class="sock s2">ServerSocket</span>
+      </div>
+    </div>
+    <p class="small" style="margin-top:14px">Dos programas, un socket en cada extremo (IP + puerto), y el mensaje viaja encapsulado por las capas. En Java escribes contra <span class="mono">Socket</span>/<span class="mono">ServerSocket</span> y lees/escribes en sus streams — sin importar lo que pasa abajo.</p>
+  </div>
+
+  <h2>Lo que veremos en el contenido completo</h2>
+  <div class="panel">
+    <ul class="agenda">
+      <li><span class="n">01</span>Cliente-servidor con TCP: la conexión y su socket doble</li>
+      <li><span class="n">02</span>InetAddress: direcciones IP desde Java</li>
+      <li><span class="n">03</span>ServerSocket y Socket: constructores, accept() y streams</li>
+      <li><span class="n">04</span>Los 5 pasos del cliente y cómo cerrar bien</li>
+      <li><span class="n">05</span>Streams: Scanner, PrintWriter, BufferedReader, objetos serializados</li>
+      <li><span class="n">06</span>Redes: términos, dispositivos y LAN/MAN/WAN</li>
+      <li><span class="n">07</span>Topologías de red</li>
+      <li><span class="n">08</span>Modelos OSI y TCP/IP, capa por capa</li>
+      <li><span class="n">09</span>Encapsulación extremo a extremo y qué es un protocolo</li>
+      <li><span class="n">10</span>Desempeño y latencia (refuerzo de la semana 2)</li>
+    </ul>
+  </div>
+
+  <div class="cta">
+    <a class="cta-btn" href="index.html"><i class="fa-solid fa-play"></i>Abrir el contenido de la semana 3</a>
+  </div>
+  <p class="crumbs"><a href="../course_introduction/index.html">← volver a la introducción del curso</a></p>
+
+</div>
+</body>
+</html>

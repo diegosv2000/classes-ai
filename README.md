@@ -55,9 +55,9 @@ entiendo-ai/
 
 Cada `week_N/` sigue la misma plantilla:
 
-- `index.html` — presentación completa del material de la semana (weeks 1 y 2 listas; 3-5 pendientes).
-- `introduction.html` — resumen de una página con el mapa mental de la semana (weeks 1 y 2 listas; 3-5 solo contienen `TODO`).
-- `test.html` — test de repaso de la semana (existe para weeks 1 y 2 por ahora).
+- `index.html` — presentación completa del material de la semana (weeks 1, 2 y 3 listas; 5 pendiente).
+- `introduction.html` — resumen de una página con el mapa mental de la semana (weeks 1, 2 y 3 listas; 5 solo contiene `TODO`).
+- `test.html` — test de repaso de la semana (existe para weeks 1, 2 y 3 por ahora).
 - `files/` — los PDFs entregados por el profesor, nombrados `wN_X.pdf` (semana N, material X).
 
 No existe material para la **semana 4**, así que su carpeta se mantiene con la plantilla pero sin PDFs.
@@ -102,6 +102,7 @@ Cada semana con contenido incluye su propio test de repaso con el mismo formato 
 
 - **Week 1** (`week_1/test.html`) — **16 preguntas** sobre `w1_1.pdf`: concurrencia, hilos y procesos, crear hilos, estados y prioridades, métodos esenciales (`currentThread`, `sleep`, `join`), interrupciones y daemon threads.
 - **Week 2** (`week_2/test.html`) — **20 preguntas** sobre `w2_1.pdf` y `w2_2.pdf`: sistemas distribuidos, desafíos, fallos y transparencia, concurrencia, desempeño y paralelización/SMT.
+- **Week 3** (`week_3/test.html`) — **20 preguntas** sobre `w3_3.pdf` y `w3_2.pdf`: sockets y conexión, InetAddress, ServerSocket/Socket, streams, redes (dispositivos, LAN/MAN/WAN, topologías), capas y protocolos, y desempeño.
 
 ## styles.md
 
@@ -132,5 +133,6 @@ Nota: las páginas cargan **Geist** (Google Fonts) y **Font Awesome** (cdnjs) de
 - [x] Guía de estilo (`styles.md`).
 - [x] Week 1: presentación (17 slides), introducción y test de repaso (16 preguntas).
 - [x] Week 2: presentación (25 slides), introducción y test de repaso (20 preguntas).
-- [ ] Weeks 3 y 5: páginas semanales (`index.html`, `introduction.html`, `test.html`) — pendientes.
+- [x] Week 3: presentación (23 slides), introducción y test de repaso (20 preguntas).
+- [ ] Week 5: páginas semanales (`index.html`, `introduction.html`, `test.html`) — pendiente.
 - [ ] Material de la semana 4 — aún no entregado.

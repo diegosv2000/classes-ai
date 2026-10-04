@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Semana 3 — Redes y Sockets</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+  :root{
+    --bg:#0C0B12;
+    --surface:#13121A;
+    --card:#17161F;
+    --muted:#1F1D28;
+    --secondary:#22202B;
+    --fg:#F4F3F7;
+    --muted-fg:#9A97A6;
+    --on-brand:#FCFCFC;
+    --primary:#8F5CF0;
+    --blue:#4A84F0;
+    --success:#2CC277;
+    --destructive:#EC4B4B;
+    --warning:#F0B429;
+    --info:#3EB0E0;
+    --border:rgba(255,255,255,.09);
+    --input-border:rgba(255,255,255,.12);
+    --font-sans:'Geist',system-ui,sans-serif;
+    --font-mono:'Geist Mono',Consolas,monospace;
+    --grad-brand:linear-gradient(90deg,var(--primary),var(--blue));
+    --grad-num:linear-gradient(180deg,#F4F3F7,#9A97A6);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg);color:var(--fg);
+    font-family:var(--font-sans);font-size:16px;line-height:1.55;
+    overflow:hidden;position:relative;
+  }
+  body::before,body::after{
+    content:'';position:fixed;border-radius:50%;pointer-events:none;z-index:0;
+    filter:blur(64px);
+  }
+  body::before{
+    width:56vw;height:56vw;top:-18vw;left:-14vw;
+    background:radial-gradient(circle,rgba(143,92,240,.22),transparent 65%);
+  }
+  body::after{
+    width:50vw;height:50vw;bottom:-18vw;right:-12vw;
+    background:radial-gradient(circle,rgba(74,132,240,.18),transparent 65%);
+  }
+
+  i.fa-solid{font-size:.85em;margin-right:7px}
+  code,.mono{font-family:var(--font-mono);font-size:.92em}
+
+  #progress{position:fixed;top:0;left:0;right:0;height:2px;background:rgba(255,255,255,.08);z-index:60}
+  #progressFill{height:100%;width:0;background:var(--grad-brand);transition:width .4s ease}
+  #counter,#brand,#hint{
+    position:fixed;z-index:60;font-size:.72rem;letter-spacing:.18em;
+    background:rgba(12,11,18,.7);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border:1px solid var(--border);border-radius:9999px;padding:6px 14px;
+  }
+  #brand{top:16px;left:22px;text-transform:uppercase;color:var(--muted-fg)}
+  #counter{top:16px;right:22px;color:var(--muted-fg);font-family:var(--font-mono)}
+  #hint{bottom:22px;left:22px;color:var(--muted-fg)}
+
+  .slide{
+    position:fixed;inset:0;display:none;flex-direction:column;
+    align-items:center;justify-content:center;
+    padding:80px 64px 96px;overflow-y:auto;z-index:1;
+  }
+  .slide.active{display:flex;animation:fade .5s ease}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .inner{width:100%;max-width:1060px;position:relative}
+
+  .kicker{font-size:.72rem;text-transform:uppercase;letter-spacing:.3em;color:var(--muted-fg);margin-bottom:18px;font-weight:500}
+  .kicker b{font-family:var(--font-mono);font-weight:600;background:var(--grad-brand);-webkit-background-clip:text;background-clip:text;color:transparent;margin-right:10px}
+  h1{font-size:3rem;font-weight:600;letter-spacing:-.02em;line-height:1.15;color:var(--fg);margin-bottom:.45em}
+  h2{font-size:2.1rem;font-weight:600;letter-spacing:-.02em;line-height:1.2;color:var(--fg);margin-bottom:.55em}
+  h3{font-size:.74rem;text-transform:uppercase;letter-spacing:.2em;color:var(--muted-fg);font-weight:600;margin-bottom:14px}
+  h4{font-size:.64rem;text-transform:uppercase;letter-spacing:.2em;color:var(--muted-fg);font-weight:600;margin-bottom:9px}
+  p{line-height:1.6}
+  .lead{color:var(--muted-fg);font-size:1.02rem;max-width:68ch;margin-bottom:1.4em}
+  .lead b{color:var(--fg);font-weight:500}
+  .small{font-size:.88rem;color:var(--muted-fg);line-height:1.6}
+  .small b{color:var(--fg);font-weight:500}
+  .rule{border:none;border-top:1px solid var(--border);margin:30px 0}
+  .note{border-left:2px solid var(--primary);padding:4px 0 4px 18px;margin-top:26px}
+
+  ul.clean{list-style:none}
+  ul.clean li{padding:7px 0 7px 24px;position:relative;line-height:1.55}
+  ul.clean li::before{content:"\f0da";font-family:"Font Awesome 6 Free";font-weight:900;position:absolute;left:4px;top:9px;color:var(--primary);font-size:.75em}
+  ul.check li::before{content:"\f00c";color:var(--success)}
+
+  .code{
+    background:var(--surface);border:1px solid var(--border);border-radius:.75rem;
+    padding:18px 20px;font-family:var(--font-mono);font-size:.8rem;
+    line-height:1.6;overflow-x:auto;white-space:pre;color:var(--fg);
+  }
+  .code .k{color:var(--primary);font-weight:600}
+  .code .c{color:var(--muted-fg);font-style:italic}
+
+  table{width:100%;border-collapse:collapse;font-size:.95rem}
+  th{font-size:.7rem;text-transform:uppercase;letter-spacing:.18em;color:var(--muted-fg);text-align:left;padding:0 16px 12px 0;font-weight:600}
+  td{padding:12px 16px 12px 0;border-top:1px solid var(--border);vertical-align:top;line-height:1.55;color:var(--muted-fg)}
+  td:first-child{color:var(--fg);font-weight:500}
+  td.mono{font-family:var(--font-mono);font-size:.82rem}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:40px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  @media(max-width:860px){.grid2,.grid3{grid-template-columns:1fr}}
+
+  .anim{opacity:0}
+  .slide.active .anim{animation:up .55s ease forwards}
+  @keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  .d1{animation-delay:.08s!important}.d2{animation-delay:.18s!important}.d3{animation-delay:.28s!important}
+  .d4{animation-delay:.38s!important}.d5{animation-delay:.5s!important}.d6{animation-delay:.62s!important}
+
+  .demo{
+    background:var(--surface);border:1px solid rgba(143,92,240,.25);border-radius:1rem;
+    padding:24px;margin:6px 0;box-shadow:0 8px 48px rgba(143,92,240,.12);
+  }
+  .panelcard{
+    background:var(--card);border:1px solid var(--border);border-radius:.75rem;padding:14px;
+  }
+  .demo-head{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+  .demo-head .spacer{margin-left:auto}
+  .stat{font-size:.8rem;color:var(--muted-fg);letter-spacing:.04em;font-family:var(--font-mono)}
+  .stat b{color:var(--fg);font-weight:600}
+
+  .chip{
+    display:inline-block;background:var(--card);border:1px solid var(--border);
+    border-radius:9999px;padding:4px 12px;font-size:.78rem;margin:3px 3px 0 0;
+    font-family:var(--font-mono);transition:all .3s;color:var(--muted-fg);
+  }
+  .chip.hi{border-color:rgba(143,92,240,.5);color:var(--fg)}
+  .chip.running{
+    background:var(--primary);color:var(--on-brand);font-weight:600;
+    border-color:var(--primary);animation:glow 1.1s infinite;
+  }
+  @keyframes glow{0%,100%{box-shadow:0 0 0 rgba(143,92,240,0)}50%{box-shadow:0 0 18px rgba(143,92,240,.45)}}
+
+  .btn{
+    background:var(--secondary);color:var(--fg);border:1px solid var(--border);
+    border-radius:.5rem;padding:7px 16px;font-size:.8rem;letter-spacing:.06em;
+    cursor:pointer;transition:all .2s;font-family:var(--font-sans);font-weight:500;
+  }
+  .btn:hover{border-color:rgba(143,92,240,.5);box-shadow:0 0 24px rgba(143,92,240,.12)}
+  input.txt{
+    background:var(--card);border:1px solid var(--input-border);border-radius:.5rem;
+    color:var(--fg);padding:8px 12px;font-size:.85rem;font-family:var(--font-mono);outline:none;
+  }
+  input.txt:focus{border-color:var(--primary);box-shadow:0 0 16px rgba(143,92,240,.2)}
+
+  .chan{position:relative;height:110px;background:var(--card);border:1px solid var(--border);border-radius:1rem;overflow:hidden}
+  .node{
+    position:absolute;top:50%;transform:translateY(-50%);width:86px;height:86px;
+    border-radius:9999px;border:1px solid var(--input-border);display:flex;flex-direction:column;
+    align-items:center;justify-content:center;font-size:.7rem;font-weight:600;
+    color:var(--fg);background:var(--surface);text-align:center;
+  }
+  .node span{color:var(--muted-fg);font-weight:400;font-size:.6rem;margin-top:3px}
+  .node.c{left:20px}.node.s{right:20px}
+  .packet{
+    position:absolute;top:50%;transform:translateY(-50%);left:14%;
+    background:var(--grad-brand);color:var(--on-brand);font-weight:600;font-size:.74rem;
+    letter-spacing:.06em;padding:5px 12px;border-radius:9999px;white-space:nowrap;
+    transition:left 1s ease,opacity .3s;opacity:0;box-shadow:0 0 24px rgba(143,92,240,.35);
+    max-width:44%;overflow:hidden;text-overflow:ellipsis;
+  }
+  .packet.show{opacity:1}
+
+  #echoLog,#connLog{
+    font-family:var(--font-mono);font-size:.78rem;color:var(--muted-fg);
+    background:var(--bg);border:1px solid var(--border);border-radius:.5rem;
+    padding:12px 14px;min-height:96px;text-align:left;line-height:1.7;margin-top:14px;
+    overflow-y:auto;max-height:150px;
+  }
+  #echoLog .ok,#connLog .ok{color:var(--success)}
+  #echoLog .info,#connLog .info{color:var(--info)}
+  #echoLog .brand,#connLog .brand{color:var(--primary)}
+
+  .topo{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:700px){.topo{grid-template-columns:repeat(2,1fr)}}
+  .topo .t{
+    background:var(--card);border:1px solid var(--border);border-radius:.75rem;
+    padding:14px 12px;text-align:center;
+  }
+  .topo .t b{font-weight:600;font-size:.92rem;color:var(--fg);display:block}
+  .topo .t small{color:var(--muted-fg);font-size:.72rem;line-height:1.4;display:block;margin-top:4px}
+
+  .layers-stack{display:flex;flex-direction:column;gap:6px}
+  .layers-stack span{
+    display:block;background:var(--card);border:1px solid var(--border);border-radius:.5rem;
+    padding:9px 12px;font-size:.78rem;color:var(--muted-fg);text-align:center;
+    font-family:var(--font-mono);transition:all .4s;
+  }
+  .layers-stack span b{color:var(--fg);font-weight:600}
+  .layers-stack span.on{border-color:rgba(143,92,240,.6);box-shadow:0 0 18px rgba(143,92,240,.15)}
+
+  .agenda{list-style:none;columns:2;column-gap:60px}
+  .agenda li{display:flex;align-items:baseline;gap:16px;padding:11px 0;border-bottom:1px solid var(--border);break-inside:avoid}
+  .agenda .n{font-family:var(--font-mono);font-size:.95rem;font-weight:600;min-width:26px;background:var(--grad-brand);-webkit-background-clip:text;background-clip:text;color:transparent}
+  @media(max-width:760px){.agenda{columns:1}}
+
+  #dots{position:fixed;bottom:32px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:60}
+  .dot{width:6px;height:6px;border-radius:9999px;background:rgba(255,255,255,.18);cursor:pointer;transition:all .3s}
+  .dot.on{background:var(--primary);transform:scale(1.4);box-shadow:0 0 10px rgba(143,92,240,.5)}
+  #navBtns{position:fixed;bottom:20px;right:22px;display:flex;gap:8px;z-index:60}
+  .navBtn{
+    width:40px;height:40px;border-radius:9999px;border:1px solid var(--border);
+    background:rgba(23,22,31,.7);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    color:var(--muted-fg);font-size:.85rem;cursor:pointer;transition:all .25s;
+  }
+  .navBtn:hover{border-color:rgba(143,92,240,.6);color:var(--fg);box-shadow:0 0 24px rgba(143,92,240,.15)}
+
+  @media(max-width:640px){
+    .slide{padding:76px 20px 96px}
+    h1{font-size:2.1rem}
+    h2{font-size:1.55rem}
+    .demo{padding:16px}
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"><div id="progressFill"></div></div>
+<div id="brand">PCCD · Semana 3</div>
+<div id="counter">1 / 23</div>
+<div id="hint">← &nbsp;→</div>
+
+<main id="deck">
+
+<!-- ============ 0 · PORTADA ============ -->
+<section class="slide" data-title="Portada">
+  <div class="inner">
+    <p class="kicker anim d1">Semana 3 · Programación Concurrente y Distribuida</p>
+    <h1 class="anim d2">Redes y Sockets</h1>
+    <p class="lead anim d3">Contenido de los materiales <span class="mono">w3_3.pdf</span> (programación en red: Sockets I), <span class="mono">w3_2.pdf</span> (communication and networks) y <span class="mono">w3_1.pdf</span> (desempeño para la latencia, refuerzo de la semana 2).</p>
+    <hr class="rule anim d4">
+    <ul class="agenda anim d5">
+      <li><span class="n">01</span>Cliente-servidor con TCP</li>
+      <li><span class="n">02</span>Establecer la conexión</li>
+      <li><span class="n">03</span>InetAddress</li>
+      <li><span class="n">04</span>Socket y java.net</li>
+      <li><span class="n">05</span>ServerSocket</li>
+      <li><span class="n">06</span>Socket del cliente y streams</li>
+      <li><span class="n">07</span>Los 5 pasos del cliente</li>
+      <li><span class="n">08</span>Streams: Scanner y PrintWriter</li>
+      <li><span class="n">09</span>Streams: BufferedReader</li>
+      <li><span class="n">10</span>Streams de objetos</li>
+      <li><span class="n">11</span>Términos de comunicación de red</li>
+      <li><span class="n">12</span>Dispositivos de red</li>
+      <li><span class="n">13</span>LAN, MAN, WAN</li>
+      <li><span class="n">14</span>Topologías de red</li>
+      <li><span class="n">15</span>Modelo OSI</li>
+      <li><span class="n">16</span>Modelo TCP/IP</li>
+      <li><span class="n">17</span>Capa de aplicación</li>
+      <li><span class="n">18</span>Capa de transporte</li>
+      <li><span class="n">19</span>Capas de red, enlace y física</li>
+      <li><span class="n">20</span>Encapsulación y protocolos</li>
+      <li><span class="n">21</span>Desempeño y latencia</li>
+      <li><span class="n">22</span>Cierre</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ 1 · CLIENTE-SERVIDOR TCP ============ -->
+<section class="slide" data-title="Cliente-servidor con TCP">
+  <div class="inner">
+    <p class="kicker anim d1"><b>01</b>Sockets I · el marco</p>
+    <h2 class="anim d1">Cliente-servidor con TCP</h2>
+    <p class="lead anim d2">En aplicaciones cliente-servidor, el <b>servidor</b> proporciona algún servicio y el <b>cliente</b> hace uso de él. La comunicación debe ser <b>confiable</b>: no se puede descartar datos, y estos deben llegar al cliente <b>en el mismo orden</b> en que el servidor los envió.</p>
+    <div class="demo anim d3">
+      <p class="small" style="margin-bottom:12px">El protocolo <b>TCP</b> proporciona ese canal de comunicación <b>punto a punto confiable</b> que usan las aplicaciones cliente-servidor en Internet. Para comunicarse por TCP, ambos programas <b>establecen una conexión</b>: cada uno <b>vincula un socket a su extremo</b> de la conexión, y escriben y leen en ese socket para comunicarse.</p>
+      <div style="display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap">
+        <div class="panelcard" style="text-align:center"><h4>cliente</h4><span class="chip hi">su socket</span></div>
+        <i class="fa-solid fa-arrows-left-right" style="color:var(--muted-fg)"></i>
+        <div class="panelcard" style="text-align:center;border-color:rgba(143,92,240,.5)"><h4>conexión TCP confiable y en orden</h4></div>
+        <i class="fa-solid fa-arrows-left-right" style="color:var(--muted-fg)"></i>
+        <div class="panelcard" style="text-align:center"><h4>servidor</h4><span class="chip hi">su socket</span></div>
+      </div>
+    </div>
+    <p class="note anim d4 small">Ese contrato — fiable, en orden, punto a punto — es lo que hace que Java pueda abstraerte del detalle: escribes y lees del socket como si fuera un archivo.</p>
+  </div>
+</section>
+
+<!-- ============ 2 · ESTABLECER LA CONEXIÓN ============ -->
+<section class="slide" data-title="Establecer la conexión">
+  <div class="inner">
+    <p class="kicker anim d1"><b>02</b>Sockets I · la cita</p>
+    <h2 class="anim d1">Establecer la conexión</h2>
+    <p class="lead anim d2">El <b>cliente</b> debe conocer el <b>hostname</b> de la máquina del servidor y el <b>puerto</b> donde escucha. Para solicitar la conexión intenta encontrarse con esa máquina y puerto, y para identificarse <b>vincula un puerto local</b> propio. Mira el proceso completo:</p>
+    <div class="demo anim d3">
+      <div class="chan">
+        <div class="node c">CLIENTE<span>puerto local</span></div>
+        <div class="node s">SERVIDOR<span>escuchando :puerto</span></div>
+        <div class="packet" id="cxPk">solicitud</div>
+      </div>
+      <div id="connLog"></div>
+      <div class="demo-head" style="margin:12px 0 0">
+        <span class="stat"><i class="fa-solid fa-arrows-rotate"></i>Se repite automáticamente</span>
+      </div>
+    </div>
+    <div class="note anim d4 small">
+      <p>Detalle clave del material: al aceptar la conexión, el servidor necesita un <b>nuevo socket</b> para seguir escuchando al socket original (nuevas solicitudes) <b>mientras atiende</b> al cliente conectado. Para ello vincula el nuevo socket al <b>mismo puerto local</b>, con su endpoint remoto establecido a la <b>dirección y puerto del cliente</b>. Cada conexión TCP queda identificada por sus <b>dos endpoints</b>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3 · INETADDRESS ============ -->
+<section class="slide" data-title="InetAddress">
+  <div class="inner">
+    <p class="kicker anim d1"><b>03</b>Java · direcciones IP</p>
+    <h2 class="anim d1">InetAddress</h2>
+    <p class="lead anim d2">Representa una <b>dirección IP</b> (IPv4 o IPv6) y encapsula también el <b>nombre de dominio</b> de dicha dirección. <b>No tiene constructores</b>: se crean objetos con sus <b>métodos de fábrica</b> (estáticos que devuelven una instancia de la misma clase).</p>
+    <div class="grid2 anim d3" style="gap:22px">
+      <div class="demo">
+        <h3>Métodos de fábrica (estáticos)</h3>
+        <table>
+          <tr><td class="mono">getLocalHost()</td><td>dirección del host local</td></tr>
+          <tr><td class="mono">getLoopbackAddress()</td><td>dirección de loopback</td></tr>
+          <tr><td class="mono">getByName(host)</td><td>IP de un host dado su hostname (nombre de máquina o texto de la IP). Con <span class="mono">null</span> retorna la interfaz de loopback</td></tr>
+          <tr><td class="mono">getByAddress(addr)</td><td>objeto desde una IP sin procesar, en <b>orden de red</b> (byte de mayor orden primero): 4 bytes IPv4, 16 bytes IPv6</td></tr>
+        </table>
+      </div>
+      <div class="demo">
+        <h3>Métodos de instancia</h3>
+        <table>
+          <tr><td class="mono">getAddress()</td><td>la IP sin procesar (byte[])</td></tr>
+          <tr><td class="mono">getHostAddress()</td><td>la IP en forma textual (String)</td></tr>
+          <tr><td class="mono">getHostName()</td><td>el nombre de host de esta IP</td></tr>
+          <tr><td class="mono">hashCode()</td><td>código hash de la dirección IP</td></tr>
+        </table>
+      </div>
+    </div>
+    <p class="note anim d4 small">Patrón de diseño a observar: cuando la construcción es compleja o quieres cachear resultados (como resolver un DNS), los <b>métodos de fábrica estáticos</b> son la solución de Java — aquí por diseño, porque la clase ni siquiera expone constructores.</p>
+  </div>
+</section>
+
+<!-- ============ 4 · SOCKET Y JAVA.NET ============ -->
+<section class="slide" data-title="Socket y java.net">
+  <div class="inner">
+    <p class="kicker anim d1"><b>04</b>Java · definición</p>
+    <h2 class="anim d1">Socket y el paquete java.net</h2>
+    <p class="lead anim d2">Un <b>socket</b> es un <b>endpoint de un enlace de comunicación bidireccional</b> entre dos programas que se ejecutan en la red. Un socket está vinculado a un <b>número de puerto</b> para que la capa TCP pueda identificar la aplicación a la que van destinados los datos.</p>
+    <div class="demo anim d3">
+      <p class="small" style="margin-bottom:10px">Un <b>endpoint</b> es una combinación de una <b>dirección IP</b> y un <b>número de puerto</b>. Cada conexión TCP puede ser únicamente identificada por <b>sus dos endpoints</b>:</p>
+      <div style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap">
+        <div class="panelcard" style="text-align:center"><h4>endpoint A</h4><p class="small mono">IP + puerto</p></div>
+        <i class="fa-solid fa-arrows-left-right" style="color:var(--muted-fg)"></i>
+        <div class="panelcard" style="text-align:center"><h4>endpoint B</h4><p class="small mono">IP + puerto</p></div>
+        <i class="fa-solid fa-equals" style="color:var(--muted-fg)"></i>
+        <div class="panelcard" style="text-align:center;border-color:rgba(143,92,240,.5)"><h4>conexión TCP única</h4></div>
+      </div>
+      <hr class="rule" style="margin:18px 0">
+      <p class="small">El paquete <span class="mono">java.net</span> incluye un par de clases para una conexión bidireccional entre un programa Java y otro en la red: <span class="mono">ServerSocket</span> y <span class="mono">Socket</span>. Adicionalmente, <span class="mono">URL</span> (y <span class="mono">URLConnection</span>, <span class="mono">URLEncoder</span>) se prefieren si lo que quieres es conectarte a la web.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5 · SERVERSOCKET ============ -->
+<section class="slide" data-title="ServerSocket">
+  <div class="inner">
+    <p class="kicker anim d1"><b>05</b>Java · lado servidor</p>
+    <h2 class="anim d1">ServerSocket</h2>
+    <p class="lead anim d2">Implementa un <b>socket de servidor</b>: espera solicitudes que llegan por la red, realiza operaciones en base a ellas y posiblemente retorna un resultado. Para instanciarlo basta indicar el <b>puerto a vincular</b> — y sus excepciones cuentan la historia completa:</p>
+    <div class="anim d3">
+      <div class="code"><span class="c">// Constructor</span>
+ServerSocket(<span class="k">int</span> port)   <span class="c">// puede arrojar:</span>
+<span class="c">// - IOException          : error de I/O al crear el socket</span>
+<span class="c">// - SecurityException    : un SecurityManager lo prohíbe</span>
+<span class="c">// - IllegalArgumentException : puerto fuera de 0-65535</span></div>
+    </div>
+    <div class="grid2 anim d4" style="gap:22px;margin-top:22px">
+      <div class="demo">
+        <h3>Dos observaciones del material</h3>
+        <ul class="clean small">
+          <li>Con puerto <span class="mono">0</span>, se toma un número de puerto <b>asignado automáticamente</b>.</li>
+          <li>La cola de solicitudes de conexión entrante tiene una <b>longitud máxima de 50</b>: si llega una solicitud con la cola llena, la conexión será <b>rechazada</b>.</li>
+        </ul>
+      </div>
+      <div class="demo">
+        <h3>Los dos métodos esenciales</h3>
+        <ul class="clean small">
+          <li><span class="mono">Socket accept()</span>: entra en estado de escucha y <b>acepta</b> una conexión. <b>Bloquea el hilo</b> hasta realizarla. Retorna un <span class="mono">Socket</span> vinculado a la nueva conexión.</li>
+          <li><span class="mono">synchronized void close()</span>: cierra el socket; cualquier hilo bloqueado en <span class="mono">accept()</span> arrojará <span class="mono">SocketException</span> y liberará el bloqueo.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6 · SOCKET CLIENTE ============ -->
+<section class="slide" data-title="Socket del cliente y streams">
+  <div class="inner">
+    <p class="kicker anim d1"><b>06</b>Java · lado cliente</p>
+    <h2 class="anim d1">Socket: el cliente y sus streams</h2>
+    <p class="lead anim d2">La clase <span class="mono">Socket</span> implementa un <b>socket de cliente</b> para comunicación bidireccional entre dos máquinas. Para instanciarlo necesitas la <b>dirección IP (o hostname) del servidor</b> y su <b>puerto</b>:</p>
+    <div class="anim d3">
+      <div class="code"><span class="c">// Dos constructores equivalentes</span>
+Socket(InetAddress address, <span class="k">int</span> port)  <span class="c">// por objeto InetAddress</span>
+Socket(String host, <span class="k">int</span> port)          <span class="c">// por hostname textual</span></div>
+    </div>
+    <div class="grid2 anim d4" style="gap:22px;margin-top:22px">
+      <div class="demo">
+        <h3>Los medios de la comunicación</h3>
+        <ul class="clean small">
+          <li><span class="mono">InputStream getInputStream()</span>: para <b>leer</b>. Arroja IOException si hay error de I/O, el socket está cerrado, no conectado, o su entrada fue apagada con <span class="mono">shutdownInput()</span>.</li>
+          <li><span class="mono">OutputStream getOutputStream()</span>: para <b>escribir</b>. IOException ante error de I/O o socket no conectado.</li>
+        </ul>
+      </div>
+      <div class="demo">
+        <h3>Observación importante</h3>
+        <p class="small">Estos streams <b>solo sirven para leer y escribir arrays de bytes</b>. Para trabajar con otros tipos u objetos hay que <b>instanciar otras clases sobre el stream obtenido</b> — exactamente lo que haremos en las siguientes slides con Scanner, PrintWriter, BufferedReader y los streams de objetos.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 7 · 5 PASOS + DEMO ============ -->
+<section class="slide" data-title="Los 5 pasos del cliente">
+  <div class="inner">
+    <p class="kicker anim d1"><b>07</b>Java · el ciclo completo</p>
+    <h2 class="anim d1">Cerrar bien y los 5 pasos del cliente</h2>
+    <p class="lead anim d2">Cerrado con <span class="mono">close()</span>: los hilos bloqueados en I/O sobre el socket arrojan <span class="mono">SocketException</span>; un socket cerrado <b>no se puede reconectar</b> (se crea uno nuevo); y <b>cierra también</b> su InputStream y OutputStream.</p>
+    <p class="lead anim d2" style="margin-top:14px">Del lado del cliente, la comunicación son <b>5 pasos básicos</b> — solo el tercero varía según la complejidad del servidor. Pruébalo con un eco:</p>
+    <div class="demo anim d3">
+      <div class="demo-head">
+        <input class="txt" id="echoMsg" value="Hola, servidor" maxlength="40">
+        <button class="btn" id="echoBtn">Ejecutar los 5 pasos</button>
+        <span class="stat spacer">servidor eco · :8181</span>
+      </div>
+      <div class="chan">
+        <div class="node c">CLIENTE<span>:puerto local</span></div>
+        <div class="node s">SERVIDOR<span>:8181</span></div>
+        <div class="packet" id="echoPk">solicitud</div>
+      </div>
+      <div id="echoLog"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 8 · SCANNER + PRINTWRITER ============ -->
+<section class="slide" data-title="Streams: Scanner y PrintWriter">
+  <div class="inner">
+    <p class="kicker anim d1"><b>08</b>Streams sobre el socket · I</p>
+    <h2 class="anim d1">Scanner y PrintWriter</h2>
+    <div class="grid2 anim d2" style="gap:26px">
+      <div class="demo">
+        <h3>InputStream con Scanner</h3>
+        <p class="small" style="margin-bottom:10px"><span class="mono">Scanner</span> se instancia sobre cualquier <span class="mono">InputStream</span> — por ejemplo, el del socket — y da acceso a todos sus métodos conocidos:</p>
+        <div class="code">ServerSocket s = <span class="k">new</span> ServerSocket(8181);
+Socket cliente = s.accept();
+InputStream streamIn = cliente.getInputStream();
+Scanner in = <span class="k">new</span> Scanner(streamIn);
+
+String msg = in.nextLine();  <span class="c">// espera una línea</span>
+System.out.println(msg);</div>
+      </div>
+      <div class="demo">
+        <h3>PrintWriter</h3>
+        <p class="small" style="margin-bottom:10px">Imprime <b>representaciones formateadas</b> de objetos en un stream de salida de texto, a partir del <span class="mono">OutputStream</span> del socket:</p>
+        <div class="code">PrintWriter out = <span class="k">new</span> PrintWriter(
+    cliente.getOutputStream());
+PrintWriter out2 = <span class="k">new</span> PrintWriter(
+    cliente.getOutputStream(), <span class="k">true</span>); <span class="c">// autoflush</span>
+
+out.println(<span class="c">"mensaje"</span>);  <span class="c">// print / println / printf</span></div>
+        <p class="small" style="margin-top:10px">La variante con <span class="mono">true</span> activa el <b>flush automático</b> del buffer tras cada <span class="mono">println</span>, <span class="mono">printf</span> o <span class="mono">format</span> — sin ella, el mensaje puede quedarse en el buffer y nunca salir.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 9 · INPUTSTREAMREADER + BUFFEREDREADER ============ -->
+<section class="slide" data-title="Streams: InputStreamReader y BufferedReader">
+  <div class="inner">
+    <p class="kicker anim d1"><b>09</b>Streams sobre el socket · II</p>
+    <h2 class="anim d1">InputStreamReader y BufferedReader</h2>
+    <div class="grid2 anim d2" style="gap:26px">
+      <div class="demo">
+        <h3>InputStreamReader · el puente</h3>
+        <p class="small">Es un puente entre <b>stream de bytes</b> y <b>stream de caracteres</b>: lee bytes y los decodifica en caracteres con un charset especificado o el <b>charset por defecto</b>. Se construye tomando como base un <span class="mono">InputStream</span> ya existente:</p>
+        <div class="code" style="margin-top:10px">InputStreamReader(InputStream in)</div>
+        <p class="small" style="margin-top:10px">Para máxima eficiencia, el material recomienda <b>envolverlo con un BufferedReader</b>.</p>
+      </div>
+      <div class="demo">
+        <h3>BufferedReader · lectura eficiente</h3>
+        <p class="small">Lee texto almacenando caracteres en un <b>búfer</b> (se instancia sobre un <span class="mono">Reader</span>; InputStreamReader es una subclase de Reader). Con tamaño opcional (<span class="mono">IllegalArgumentException</span> si <span class="mono">sz ≤ 0</span>):</p>
+        <div class="code" style="margin-top:10px">ServerSocket s = <span class="k">new</span> ServerSocket(8181);
+Socket client = s.accept();
+BufferedReader in = <span class="k">new</span> BufferedReader(
+    <span class="k">new</span> InputStreamReader(
+        client.getInputStream()));
+String line = in.readLine();
+in.close();</div>
+        <ul class="clean small" style="margin-top:10px">
+          <li><span class="mono">read()</span>: el carácter como entero, o <b>-1</b> al final del stream.</li>
+          <li><span class="mono">readLine()</span>: la línea <b>sin</b> el salto de línea, o <b>null</b> al final.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note anim d4 small">El patrón "socket → InputStreamReader → BufferedReader" es el estándar para leer texto de un socket en Java: el primero traduce bytes a caracteres, el segundo los agrupa en líneas de forma eficiente.</p>
+  </div>
+</section>
+
+<!-- ============ 10 · STREAMS DE OBJETOS ============ -->
+<section class="slide" data-title="Streams de objetos">
+  <div class="inner">
+    <p class="kicker anim d1"><b>10</b>Streams sobre el socket · III</p>
+    <h2 class="anim d1">ObjectOutputStream y ObjectInputStream</h2>
+    <p class="lead anim d2">Cuando lo que viaja no es texto sino <b>objetos Java completos</b>, se serializan:</p>
+    <div class="grid2 anim d3" style="gap:26px">
+      <div class="demo">
+        <h3>Escribir (serializar)</h3>
+        <div class="code"><span class="c">// ObjectOutputStream escribe primitivos y</span>
+<span class="c">// grafos de objetos en un OutputStream</span>
+OutputStream outStream = client.getOutputStream();
+ObjectOutputStream out = <span class="k">new</span> ObjectOutputStream(outStream);
+
+out.writeInt(12345);
+out.writeObject(<span class="c">"Today"</span>);
+out.writeObject(<span class="k">new</span> Date());
+out.close();</div>
+      </div>
+      <div class="demo">
+        <h3>Leer (deserializar)</h3>
+        <div class="code"><span class="c">// ObjectInputStream deserializa lo escrito</span>
+InputStream inStream = client.getInputStream();
+ObjectInputStream in = <span class="k">new</span> ObjectInputStream(inStream);
+
+<span class="k">int</span> i = in.readInt();
+String today = (String) in.readObject();
+Date date = (Date) in.readObject();
+in.close();</div>
+      </div>
+    </div>
+    <div class="note anim d4 small">
+      <p>Reglas del material: los objetos se leen con <span class="mono">readObject()</span> y hay que <b>castearlos al tipo esperado</b>; deben leerse con <b>los mismos tipos y en el mismo orden</b> en que fueron escritos. Los primitivos van con sus métodos apropiados (<span class="mono">readInt</span>, etc.).</p>
+      <p class="small" style="margin-top:10px">Y la pieza que queda: <span class="mono">FilterOutputStream</span> es la <b>superclase de todas las clases que filtran streams de salida</b> — se apoyan en un stream ya existente (que usan como sumidero básico), posiblemente transformando los datos o añadiendo funcionalidad en el camino.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 11 · TÉRMINOS DE RED ============ -->
+<section class="slide" data-title="Términos de comunicación de red">
+  <div class="inner">
+    <p class="kicker anim d1"><b>11</b>Redes · vocabulario</p>
+    <h2 class="anim d1">Términos de comunicación de red</h2>
+    <p class="lead anim d2">La <b>comunicación</b> es la transferencia e intercambio de información entre personas, entre personas y cosas, y entre cosas. La <b>comunicación de red</b> es la que ocurre entre dispositivos terminales a través de una red de computadoras. La transferencia virtual de información funciona como la transferencia de un objeto real. El vocabulario:</p>
+    <table class="anim d3">
+      <tr><th style="width:26%">Término</th><th>Significado</th></tr>
+      <tr><td>Data payload</td><td>La información que se transporta</td></tr>
+      <tr><td>Packet</td><td>La unidad de datos que se conmuta y transmite por la red</td></tr>
+      <tr><td>Header / Tail</td><td>Segmento de información añadido <b>antes</b> (cabecera) o <b>después</b> (cola) del payload</td></tr>
+      <tr><td>Encapsulation</td><td>Añadir header y tail al payload para <b>formar el nuevo paquete</b></td></tr>
+      <tr><td>Decapsulation</td><td>Quitar header y tail del paquete para <b>obtener el payload</b></td></tr>
+      <tr><td>Gateway</td><td>Dispositivo con conversión de protocolos, selección de rutas e intercambio de datos</td></tr>
+      <tr><td>Router</td><td>Dispositivo que <b>selecciona la ruta de reenvío</b> de los paquetes</td></tr>
+      <tr><td>Terminal device</td><td>Dispositivo final del sistema de comunicación: emisor o receptor de datos</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ============ 12 · DISPOSITIVOS ============ -->
+<section class="slide" data-title="Dispositivos de red">
+  <div class="inner">
+    <p class="kicker anim d1"><b>11a</b>Redes · el hardware</p>
+    <h2 class="anim d1">Switch, router y firewall</h2>
+    <div class="grid3 anim d2" style="gap:18px">
+      <div class="demo">
+        <h3>Switch</h3>
+        <p class="small">El dispositivo <b>más cercano a los usuarios</b>, usado para acceder a la red y conmutar <b>tramas de datos</b> (data frames). Da acceso de red a los terminales — PCs y servidores. Trabaja en la <b>capa 2</b>.</p>
+      </div>
+      <div class="demo">
+        <h3>Router</h3>
+        <p class="small">Dispositivo de <b>capa de red</b> que reenvía paquetes en Internet: según la <b>dirección de destino</b> de cada paquete, elige el camino hacia el siguiente router o el destino. Mantiene la <b>tabla de ruteo</b>, ejecuta protocolos de ruteo, aísla <b>dominios de broadcast</b>, da acceso WAN y hace <b>NAT</b>.</p>
+      </div>
+      <div class="demo">
+        <h3>Firewall</h3>
+        <p class="small">Dispositivo de <b>seguridad</b> entre dos redes: <b>monitoriza, restringe y modifica</b> los flujos que lo atraviesan para blindar la información y el funcionamiento de la red interna. Control de acceso por políticas, autenticación, cifrado y <b>VPN</b>.</p>
+      </div>
+    </div>
+    <p class="note anim d4 small">La jerarquía típica: el <b>switch</b> conecta tus terminales, el <b>router</b> decide hacia dónde viajan los paquetes entre redes, y el <b>firewall</b> vigila la frontera.</p>
+  </div>
+</section>
+
+<!-- ============ 13 · LAN MAN WAN ============ -->
+<section class="slide" data-title="LAN, MAN, WAN">
+  <div class="inner">
+    <p class="kicker anim d1"><b>11b</b>Redes · cobertura</p>
+    <h2 class="anim d1">LAN, MAN y WAN</h2>
+    <p class="lead anim d2">Según la <b>cobertura geográfica</b>, las redes se clasifican en tres tamaños:</p>
+    <div class="grid3 anim d3" style="gap:18px">
+      <div class="demo">
+        <h3>LAN · Local</h3>
+        <p class="small">Computadoras, servidores y dispositivos en <b>un área geográfica reducida</b> (generalmente unos miles de metros cuadrados). Ejemplos: la red de una oficina, un ciber, una casa.</p>
+      </div>
+      <div class="demo">
+        <h3>MAN · Metropolitana</h3>
+        <p class="small">Red de comunicación establecida <b>dentro de una ciudad</b>. Ejemplos: MAN de banda ancha, redes educativas, enlaces privados municipales o provinciales.</p>
+      </div>
+      <div class="demo">
+        <h3>WAN · Amplia</h3>
+        <p class="small">Cubre desde decenas hasta <b>miles de kilómetros</b>: conecta redes de múltiples ciudades o incluso países, con comunicación de larga distancia. <b>Internet es una WAN típica</b>.</p>
+      </div>
+    </div>
+    <p class="note anim d4 small">El material usa la industria educativa como caso: campus con LAN por edificio, interconectados en una MAN universitaria, que a su vez se apoya en WAN para las sedes remotas.</p>
+  </div>
+</section>
+
+<!-- ============ 14 · TOPOLOGÍAS ============ -->
+<section class="slide" data-title="Topologías de red">
+  <div class="inner">
+    <p class="kicker anim d1"><b>11c</b>Redes · disposición</p>
+    <h2 class="anim d1">Topologías de red</h2>
+    <p class="lead anim d2">Una <b>topología de red</b> es la disposición estructurada con la que se interconectan los dispositivos (terminales, routers, switches) mediante medios de transmisión — pares trenzados, fibra óptica, etc. Se clasifican en:</p>
+    <div class="topo anim d3">
+      <div class="t"><b>Estrella</b><small>todos los nodos hacia un punto central</small></div>
+      <div class="t"><b>Bus</b><small>un medio común por el que circulan todos</small></div>
+      <div class="t"><b>Anillo</b><small>cada nodo conectado al siguiente, en círculo</small></div>
+      <div class="t"><b>Árbol</b><small>jerarquía de nodos, ramas que se subdividen</small></div>
+      <div class="t"><b>Malla total</b><small>todos con todos: máxima redundancia</small></div>
+      <div class="t"><b>Malla parcial</b><small>solo algunos enlaces directos: compromiso costo-resiliencia</small></div>
+    </div>
+    <p class="note anim d4 small">La topología define qué tan tolerante a fallos y qué tan costosa es la red — conecta directo con el desafío de tolerancia a fallos de la semana 2.</p>
+  </div>
+</section>
+
+<!-- ============ 15 · MODELO OSI ============ -->
+<section class="slide" data-title="Modelo OSI">
+  <div class="inner">
+    <p class="kicker anim d1"><b>12</b>Redes · el marco conceptual</p>
+    <h2 class="anim d1">El modelo de referencia OSI</h2>
+    <p class="lead anim d2">Siete capas, cada una con una responsabilidad clara — de la aplicación del usuario hasta el cable:</p>
+    <div class="demo anim d3">
+      <div class="layers-stack">
+        <span data-l="7"><b>7 · Aplicación</b> — provee interfaces para las aplicaciones</span>
+        <span data-l="6"><b>6 · Presentación</b> — traduce formatos de datos para que un sistema entienda al otro</span>
+        <span data-l="5"><b>5 · Sesión</b> — establece, gestiona y termina sesiones entre aplicaciones</span>
+        <span data-l="4"><b>4 · Transporte</b> — conexiones extremo a extremo (puerto a puerto)</span>
+        <span data-l="3"><b>3 · Red</b> — transmite datos de un host a otro (direcciones IP)</span>
+        <span data-l="2"><b>2 · Enlace de datos</b> — PDUs, Ethernet, direcciones MAC</span>
+        <span data-l="1"><b>1 · Física</b> — convierte señales: ópticas, eléctricas u ondas electromagnéticas</span>
+      </div>
+      <p id="osiLog" class="stat" style="margin-top:14px"></p>
+    </div>
+    <p class="note anim d4 small">El recorrido automático sigue el viaje de un paquete que <b>baja</b> por las capas en el emisor y <b>sube</b> en el receptor. El modelo OSI es conceptual — el que rige Internet real es el siguiente: TCP/IP.</p>
+  </div>
+</section>
+
+<!-- ============ 16 · MODELO TCP/IP ============ -->
+<section class="slide" data-title="Modelo TCP/IP">
+  <div class="inner">
+    <p class="kicker anim d1"><b>12a</b>Redes · el marco real</p>
+    <h2 class="anim d1">El modelo de referencia TCP/IP</h2>
+    <p class="lead anim d2">La pila OSI es compleja; los protocolos <b>TCP</b> e <b>IP</b> están ampliamente usados en la industria, por lo que el <b>modelo de referencia TCP/IP</b> se convirtió en el marco dominante para describir la comunicación de red.</p>
+    <div class="demo anim d3">
+      <div class="grid2" style="gap:22px">
+        <div>
+          <h3>El stack TCP/IP</h3>
+          <div class="layers-stack">
+            <span><b>Aplicación</b> — HTTP, FTP, Telnet, DNS…</span>
+            <span><b>Transporte</b> — TCP, UDP</span>
+            <span><b>Internet (red)</b> — IP, IPv6, ICMP…</span>
+            <span><b>Acceso a red</b> — Ethernet, WiFi, medios</span>
+          </div>
+        </div>
+        <div>
+          <h3>¿Quién estandariza?</h3>
+          <p class="small">La pila define una serie de <b>protocolos estándar</b>. Los estandariza principalmente el <b>IETF</b> (Internet Engineering Task Force): una <b>organización voluntaria</b> responsable de desarrollar y mantener los protocolos y estándares de Internet.</p>
+          <p class="small" style="margin-top:10px">A diferencia de OSI (teórico, 7 capas), TCP/IP es el modelo <b>práctico</b>: lo implementan todos los sistemas reales.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 17 · CAPA DE APLICACIÓN ============ -->
+<section class="slide" data-title="Capa de aplicación">
+  <div class="inner">
+    <p class="kicker anim d1"><b>12b</b>TCP/IP · capa por capa</p>
+    <h2 class="anim d1">Capa de aplicación</h2>
+    <p class="lead anim d2">Provee <b>interfaces para el software de aplicación</b> para que las aplicaciones usen los servicios de red. Sus protocolos <b>designan qué protocolo de transporte</b> usarán (normalmente TCP o UDP). Los tres protocolos clásicos del material:</p>
+    <div class="grid3 anim d3" style="gap:18px">
+      <div class="demo">
+        <h3>FTP</h3>
+        <p class="small"><b>File Transfer Protocol</b>: transfiere archivos de un host a otro para descargarlos o subirlos. Uno de los protocolos de aplicación más antiguos y simples.</p>
+      </div>
+      <div class="demo">
+        <h3>Telnet</h3>
+        <p class="small">Protocolo estándar de <b>inicio de sesión remoto</b>: da a los usuarios la capacidad de operar un equipo a distancia como si estuvieran frente a él.</p>
+      </div>
+      <div class="demo">
+        <h3>HTTP</h3>
+        <p class="small"><b>Hypertext Transfer Protocol</b>: uno de los <b>protocolos más usados</b> de Internet. Fue diseñado originalmente para publicar y recuperar páginas HTML — la base de la web.</p>
+      </div>
+    </div>
+    <p class="note anim d4 small">Cuando en la semana pasada vimos <span class="mono">URL</span>/<span class="mono">URLConnection</span> en <span class="mono">java.net</span>, era precisamente para hablar HTTP sin gestionar el socket a mano.</p>
+  </div>
+</section>
+
+<!-- ============ 18 · CAPA DE TRANSPORTE ============ -->
+<section class="slide" data-title="Capa de transporte">
+  <div class="inner">
+    <p class="kicker anim d1"><b>12c</b>TCP/IP · capa por capa</p>
+    <h2 class="anim d1">Capa de transporte: TCP y UDP</h2>
+    <p class="lead anim d2">Un protocolo de transporte <b>recibe datos del protocolo de aplicación</b>, los encapsula con su <b>cabecera</b> propia, y ayuda a establecer una conexión <b>extremo a extremo — puerto a puerto</b>. La capa se divide en dos protocolos estrella:</p>
+    <div class="grid2 anim d3" style="gap:22px">
+      <div class="demo">
+        <h3>TCP</h3>
+        <p class="small"><b>Confiable</b> y orientado a conexión: retransmite lo perdido y entrega en orden. Su cabecera es más grande (más control: números de secuencia, acks, ventana). Es lo que usan los <b>sockets</b> de la primera mitad de esta semana.</p>
+      </div>
+      <div class="demo">
+        <h3>UDP</h3>
+        <p class="small"><b>Ligero</b> y sin conexión: cabecera mínima, sin garantías de entrega ni orden. La contrapartida: menor latencia y sobrecarga. Ideal para audio, video y juegos donde llegar "tarde" es lo mismo que nunca.</p>
+      </div>
+    </div>
+    <p class="note anim d4 small"><b>Los números de puerto</b>: como la capa de transporte conecta proceso con proceso (puerto a puerto), el puerto identifica <b>qué aplicación</b> dentro del host recibe los datos — es la razón de ser del parámetro <span class="mono">port</span> de <span class="mono">ServerSocket</span> y <span class="mono">Socket</span>.</p>
+  </div>
+</section>
+
+<!-- ============ 19 · RED, ENLACE, FÍSICA ============ -->
+<section class="slide" data-title="Red, enlace y física">
+  <div class="inner">
+    <p class="kicker anim d1"><b>12d</b>TCP/IP · capa por capa</p>
+    <h2 class="anim d1">Red, enlace de datos y física</h2>
+    <div class="grid3 anim d2" style="gap:18px">
+      <div class="demo">
+        <h3>Capa de red</h3>
+        <p class="small">Mientras el transporte conecta <b>procesos</b> en los hosts, la capa de red es responsable de transmitir los datos <b>de un host a otro</b>. Su protocolo de trabajo: cada router recibe el paquete, mira la <b>dirección de destino</b> y lo reenvía al siguiente salto hasta el host final.</p>
+      </div>
+      <div class="demo">
+        <h3>Capa de enlace de datos</h3>
+        <p class="small">Entre la capa de red y la física: provee servicios a IP/IPv6. Sus PDUs viajan por la red local: <b>Ethernet</b> y las <b>direcciones MAC</b> (fuente y destino) identifican los dispositivos dentro del mismo segmento.</p>
+      </div>
+      <div class="demo">
+        <h3>Capa física</h3>
+        <p class="small">Convierte los bits en <b>señales físicas</b>: ópticas, eléctricas u ondas electromagnéticas, según el <b>medio de transmisión</b> — par trenzado, fibra óptica, aire (WiFi). Aquí viajan los datos de verdad.</p>
+      </div>
+    </div>
+    <p class="note anim d4 small">Recuerda la analogía de la introducción: tu <span class="mono">Socket</span> en Java vive en la capa de aplicación/transporte, pero cada mensaje baja — encapsulado — hasta convertirse en bits sobre un medio físico, y en el receptor sube de vuelta.</p>
+  </div>
+</section>
+
+<!-- ============ 20 · ENCAPSULACIÓN + PROTOCOLO ============ -->
+<section class="slide" data-title="Encapsulación extremo a extremo">
+  <div class="inner">
+    <p class="kicker anim d1"><b>12e</b>TCP/IP · el viaje completo</p>
+    <h2 class="anim d1">Encapsulación de extremo a extremo</h2>
+    <p class="lead anim d2">En el <b>emisor</b>, los datos bajan por las capas y cada una añade su cabecera (encapsulación). El paquete ya encapsulado <b>viaja por la red intermedia</b> (routers que solo leen las capas bajas). En el <b>receptor</b>, sube y cada capa quita su cabecera (decapsulación). Observa:</p>
+    <div class="demo anim d3">
+      <div class="layers-stack" id="encapStack">
+        <span id="enc0"><b>datos</b> · payload de la aplicación</span>
+        <span id="enc1"><b>+ cabecera TCP</b> · transporte</span>
+        <span id="enc2"><b>+ cabecera IP</b> · red (host a host)</span>
+        <span id="enc3"><b>+ cabecera Ethernet</b> · enlace (salto a salto)</span>
+        <span id="enc4"><b>bits</b> · sobre el medio físico</span>
+      </div>
+      <p id="encLog" class="stat" style="margin-top:14px"></p>
+    </div>
+    <div class="note anim d4 small">
+      <p>Y la definición final que ata todo: un <b>protocolo</b> es un <b>conjunto de reglas que rigen el intercambio de mensajes entre dos entidades que se comunican para lograr un fin</b> — por ejemplo, pedir la hora. TCP es un protocolo; HTTP es un protocolo; el formato de tu mensaje en el socket es tu propio mini-protocolo.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 21 · DESEMPEÑO ============ -->
+<section class="slide" data-title="Desempeño y latencia">
+  <div class="inner">
+    <p class="kicker anim d1"><b>13</b>w3_1.pdf · refuerzo</p>
+    <h2 class="anim d1">Desempeño y latencia (refuerzo)</h2>
+    <p class="lead anim d2">El tercer material de la semana repite el deck de <b>desempeño y optimización para la latencia</b> de la semana 2, con un añadido de enfoque: las estrategias y técnicas para mejorar la eficiencia y reducir los retrasos en <b>la transmisión de datos</b> y <b>el procesamiento dentro de estos sistemas</b>.</p>
+    <div class="grid2 anim d3" style="gap:22px">
+      <div class="demo">
+        <h3>Lo que ya dominas</h3>
+        <ul class="clean small">
+          <li>Latencia: tiempo de ida y vuelta de una solicitud.</li>
+          <li>Throughput: tareas completadas por período (ops/s, TPS, req/s…).</li>
+          <li>Cuellos de botella: propagación, transmisión, procesamiento, colas.</li>
+        </ul>
+      </div>
+      <div class="demo">
+        <h3>Por qué reaparece aquí</h3>
+        <p class="small">Ahora sabes <b>qué viaja</b> por la red: paquetes con cabeceras, por routers, sobre medios físicos. Cada capa y cada salto añade su retraso — el modelo de capas de esta semana es el mapa donde viven esos cuellos de botella.</p>
+      </div>
+    </div>
+    <p class="note anim d4 small">Si el test te pregunta por latencia o throughput aquí, es el mismo contenido de la semana 2: "transmisión de datos" y "procesamiento" son los dos retrasos que este deck subraya.</p>
+  </div>
+</section>
+
+<!-- ============ 22 · CIERRE ============ -->
+<section class="slide" data-title="Cierre">
+  <div class="inner">
+    <p class="kicker anim d1"><b>14</b>Cierre</p>
+    <h2 class="anim d1">Conexión hecha</h2>
+    <p class="lead anim d2">La semana cierra el círculo de los sistemas distribuidos: ya no solo sabes <i>qué</i> son — sabes <b>cómo se comunican</b> y cómo programar esa comunicación.</p>
+    <div class="grid2 anim d3" style="gap:22px">
+      <div class="demo">
+        <h3>Lo que te llevas de Java</h3>
+        <ul class="clean small">
+          <li><span class="mono">InetAddress</span>: resolver nombres y direcciones con métodos de fábrica.</li>
+          <li><span class="mono">ServerSocket</span>: escuchar, <span class="mono">accept()</span> (bloquea) y atender con el socket nuevo.</li>
+          <li><span class="mono">Socket</span>: conectar y obtener los streams I/O — solo bytes.</li>
+          <li>Wrappers: Scanner, PrintWriter, BufferedReader y streams de objetos.</li>
+          <li>Los <b>5 pasos</b> del cliente, y cerrar bien.</li>
+        </ul>
+      </div>
+      <div class="demo">
+        <h3>Lo que te llevas de redes</h3>
+        <ul class="clean small">
+          <li>Vocabulario: payload, paquete, header/tail, encapsulación.</li>
+          <li>Dispositivos: switch (capa 2), router (rutas, NAT), firewall (frontera).</li>
+          <li>LAN/MAN/WAN y las 6 topologías.</li>
+          <li>OSI como mapa, TCP/IP como realidad, capa por capa.</li>
+          <li>Un protocolo: reglas que rigen el intercambio de mensajes.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note anim d4 small">Siguiente paso — <b>semana 5</b>: cuando varios clientes conectan a tu servidor a la vez, varios hilos tocan los mismos datos. Ahí entran los monitores, los semáforos y toda la maquinaria de <b>sincronización</b>.</p>
+  </div>
+</section>
+
+</main>
+
+<nav id="dots"></nav>
+<div id="navBtns">
+  <button class="navBtn" id="prevBtn" title="Anterior"><i class="fa-solid fa-chevron-left"></i></button>
+  <button class="navBtn" id="nextBtn" title="Siguiente"><i class="fa-solid fa-chevron-right"></i></button>
+</div>
+
+<script>
+(function(){
+"use strict";
+const slides=[...document.querySelectorAll('.slide')];
+const N=slides.length;
+let cur=0;
+const timers=[];
+function addT(fn,ms){const id=setInterval(fn,ms);timers.push(id);fn();return id;}
+function addTimeout(fn,ms){const id=setTimeout(fn,ms);timers.push(id);return id;}
+function clearTimers(){timers.forEach(clearInterval);timers.forEach(clearTimeout);timers.length=0;}
+
+const dotsBox=document.getElementById('dots');
+slides.forEach((s,i)=>{
+  const d=document.createElement('div');
+  d.className='dot';d.title=s.dataset.title;
+  d.onclick=()=>go(i);
+  dotsBox.appendChild(d);
+});
+const dots=[...dotsBox.children];
+function go(i){
+  if(i<0||i>=N)return;
+  clearTimers();
+  slides[cur].classList.remove('active');
+  cur=i;
+  slides[cur].classList.add('active');
+  dots.forEach((d,k)=>d.classList.toggle('on',k===cur));
+  document.getElementById('progressFill').style.width=((cur+1)/N*100)+'%';
+  document.getElementById('counter').textContent=(cur+1)+' / '+N;
+  const fx=slideFx[cur]; if(fx)fx();
+  slides[cur].scrollTop=0;
+}
+document.getElementById('prevBtn').onclick=()=>go(cur-1);
+document.getElementById('nextBtn').onclick=()=>go(cur+1);
+document.addEventListener('keydown',e=>{
+  if(e.key===' '&&document.activeElement&&document.activeElement.tagName==='BUTTON')return;
+  if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown')go(cur+1);
+  else if(e.key==='ArrowLeft'||e.key==='PageUp')go(cur-1);
+  else if(e.key==='Home')go(0);
+  else if(e.key==='End')go(N-1);
+});
+const slideFx={};
+
+/* helpers de paquetes */
+function movePk(pk,label,dir,cb){
+  pk.textContent=label;
+  pk.style.transition='none';pk.classList.remove('show');
+  pk.style.left=dir>0?'12%':'64%';
+  void pk.offsetWidth;
+  pk.style.transition='left 1s ease,opacity .3s';
+  pk.classList.add('show');
+  requestAnimationFrame(()=>{pk.style.left=dir>0?'64%':'12%';});
+  addTimeout(()=>{pk.classList.remove('show');cb&&cb();},1200);
+}
+
+/* ---------- slide 2: conexión (auto) ---------- */
+(function(){
+  const pk=document.getElementById('cxPk'),log=document.getElementById('connLog');
+  const serverChip=()=>document.querySelector('.slide[data-title="Establecer la conexión"] .node.s');
+  let newSock=null;
+  function addLine(html){
+    const l=document.createElement('div');
+    l.innerHTML=html;log.appendChild(l);log.scrollTop=log.scrollHeight;
+  }
+  slideFx[2]=()=>{
+    log.innerHTML='';newSock=false;
+    const s=document.querySelector('.slide[data-title="Establecer la conexión"] .node.s');
+    const chip=document.createElement('span');
+    addLine('<span class="info">cliente: conoce hostname + puerto del servidor; vincula su puerto local</span>');
+    addTimeout(()=>{
+      movePk(pk,'solicitud de conexión',1,()=>{
+        addLine('<span class="brand">servidor: accept() — la conexión es aceptada</span>');
+        if(!newSock){
+          chip.textContent='nuevo socket → cliente';
+          chip.className='chip running';
+          s.appendChild(chip);
+          newSock=true;
+        }
+        addTimeout(()=>{
+          movePk(pk,'confirmación',-1,()=>{
+            addLine('<span class="ok">socket del cliente creado: puede comunicarse</span>');
+            addLine('<span class="info">servidor: socket nuevo atiende al cliente; el original sigue escuchando</span>');
+            addTimeout(()=>{log.innerHTML='';if(chip&&chip.parentNode)chip.remove();newSock=false;},1600);
+          });
+        },700);
+      });
+    },600);
+  };
+})();
+
+/* ---------- slide 7: echo demo (interactiva) ---------- */
+(function(){
+  const btn=document.getElementById('echoBtn'),input=document.getElementById('echoMsg'),
+        pk=document.getElementById('echoPk'),log=document.getElementById('echoLog');
+  let busy=false;
+  function addLine(html){
+    const l=document.createElement('div');
+    l.innerHTML=html;log.appendChild(l);log.scrollTop=log.scrollHeight;
+  }
+  btn.onclick=()=>{
+    if(busy)return;
+    busy=true;btn.disabled=true;
+    const msg=(input.value||'Hola, servidor').trim();
+    log.innerHTML='';
+    addLine('<span class="info">cliente: abriendo socket hacia servidor:8181…</span>');
+    addTimeout(()=>{
+      movePk(pk,msg,1,()=>{
+        addLine('<span class="brand">3. Leer / escribir según el protocolo del servidor</span>');
+        addLine('<span class="info">servidor: in.readLine() lee → "'+msg+'"</span>');
+        addTimeout(()=>{
+          movePk(pk,'echo: '+msg,-1,()=>{
+            addLine('<span class="ok">cliente: leyó la respuesta → "'+msg+'"</span>');
+            addTimeout(()=>{busy=false;btn.disabled=false;},400);
+          });
+        },500);
+      });
+    },600);
+    void steps;
+  };
+})();
+
+/* ---------- slide 15: OSI (auto) ---------- */
+(function(){
+  const spans=[...document.querySelectorAll('.layers-stack span[data-l]')];
+  const log=document.getElementById('osiLog');
+  const msgs={
+    '7':'La aplicación genera los datos.',
+    '6':'Presentación traduce el formato.',
+    '5':'La sesión gestiona la conversación.',
+    '4':'Transporte encapsula con TCP/UDP: puerto a puerto.',
+    '3':'Red añade IP: host a host.',
+    '2':'Enlace añade Ethernet/MAC: salto a salto.',
+    '1':'Física convierte todo en señales sobre el medio.'
+  };
+  const order=['7','6','5','4','3','2','1'];
+  let i=0;
+  slideFx[15]=()=>{i=0;
+    addT(()=>{
+      spans.forEach(s=>s.classList.remove('on'));
+      const l=order[i%order.length];i++;
+      spans.find(s=>s.dataset.l===l).classList.add('on');
+      log.textContent=l+' · '+msgs[l];
+    },1300);
+  };
+})();
+
+/* ---------- slide 20: encapsulación (auto) ---------- */
+(function(){
+  const ids=['enc0','enc1','enc2','enc3','enc4'];
+  const spans=ids.map(id=>document.getElementById(id));
+  const log=document.getElementById('encLog');
+  let i=0;
+  slideFx[20]=()=>{i=0;
+    addT(()=>{
+      spans.forEach(s=>s.classList.remove('on'));
+      if(i<spans.length){
+        spans[i].classList.add('on');
+        log.textContent=[
+          'aplicación: solo el payload',
+          'transporte añade su cabecera (TCP)',
+          'red añade la suya (IP)',
+          'enlace añade la última (Ethernet)',
+          'física: el paquete sale como bits al medio'
+        ][i];
+      }
+      i++;
+      if(i>spans.length+1){
+        i=0;
+        log.textContent='y en el receptor, el proceso inverso: decapsulación capa por capa.';
+      }
+    },1300);
+  };
+})();
+
+/* ---------- init ---------- */
+go(0);
+})();
+</script>
+</body>
+</html>
