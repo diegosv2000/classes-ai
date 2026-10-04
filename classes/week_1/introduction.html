@@ -1,1 +1,177 @@
-TODO
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Semana 1 · Programación concurrente con hilos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+  :root{
+    --bg:#0C0B12;
+    --surface:#13121A;
+    --card:#17161F;
+    --muted:#1F1D28;
+    --secondary:#22202B;
+    --fg:#F4F3F7;
+    --muted-fg:#9A97A6;
+    --on-brand:#FCFCFC;
+    --primary:#8F5CF0;
+    --blue:#4A84F0;
+    --success:#2CC277;
+    --destructive:#EC4B4B;
+    --warning:#F0B429;
+    --info:#3EB0E0;
+    --border:rgba(255,255,255,.09);
+    --input-border:rgba(255,255,255,.12);
+    --font-sans:'Geist',system-ui,sans-serif;
+    --font-mono:'Geist Mono',Consolas,monospace;
+    --grad-brand:linear-gradient(90deg,var(--primary),var(--blue));
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    min-height:100vh;background:var(--bg);color:var(--fg);
+    font-family:var(--font-sans);font-size:16px;line-height:1.6;
+    padding:60px 24px 80px;position:relative;
+  }
+  body::before,body::after{
+    content:'';position:fixed;border-radius:50%;pointer-events:none;z-index:0;
+    filter:blur(64px);
+  }
+  body::before{
+    width:56vw;height:56vw;top:-18vw;left:-14vw;
+    background:radial-gradient(circle,rgba(143,92,240,.22),transparent 65%);
+  }
+  body::after{
+    width:50vw;height:50vw;bottom:-18vw;right:-12vw;
+    background:radial-gradient(circle,rgba(74,132,240,.18),transparent 65%);
+  }
+  i.fa-solid{font-size:.85em;margin-right:7px}
+  code,.mono{font-family:var(--font-mono);font-size:.92em}
+  .wrap{max-width:860px;margin:0 auto;position:relative;z-index:1}
+
+  .kicker{font-size:.72rem;text-transform:uppercase;letter-spacing:.3em;color:var(--muted-fg);margin-bottom:16px;font-weight:500}
+  .kicker b{font-family:var(--font-mono);font-weight:600;background:var(--grad-brand);-webkit-background-clip:text;background-clip:text;color:transparent;margin-right:10px}
+  h1{font-size:2.4rem;font-weight:600;letter-spacing:-.02em;line-height:1.2;margin-bottom:.5em}
+  h2{font-size:1.15rem;font-weight:600;letter-spacing:-.01em;margin:42px 0 12px}
+  h3{font-size:.72rem;text-transform:uppercase;letter-spacing:.2em;color:var(--muted-fg);font-weight:600;margin-bottom:12px}
+  p{color:var(--muted-fg);line-height:1.65}
+  p b{color:var(--fg);font-weight:500}
+  .lead{font-size:1.05rem;margin-bottom:10px}
+  .small{font-size:.88rem}
+
+  .panel{
+    background:var(--surface);border:1px solid var(--border);border-radius:1rem;
+    padding:22px;margin-top:16px;box-shadow:0 8px 48px rgba(143,92,240,.1);
+  }
+
+  /* diagrama proceso/hilos */
+  .diagram{display:flex;flex-direction:column;gap:14px;align-items:stretch}
+  .cores{display:flex;gap:12px;justify-content:center}
+  .core{
+    background:var(--card);border:1px solid var(--border);border-radius:.75rem;
+    padding:10px 22px;text-align:center;font-size:.7rem;text-transform:uppercase;
+    letter-spacing:.18em;color:var(--muted-fg);font-weight:600;
+  }
+  .process{
+    background:var(--card);border:1px solid rgba(143,92,240,.35);border-radius:1rem;
+    padding:16px;box-shadow:0 8px 48px rgba(143,92,240,.14);
+  }
+  .process h4{font-size:.68rem;text-transform:uppercase;letter-spacing:.2em;color:var(--muted-fg);font-weight:600;margin-bottom:12px;text-align:center}
+  .threads{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+  .th{
+    background:var(--secondary);border:1px solid var(--border);border-radius:9999px;
+    padding:7px 16px;font-size:.8rem;font-family:var(--font-mono);color:var(--fg);
+    animation:pulse 2.4s infinite;
+  }
+  .th:nth-child(2){animation-delay:.6s}
+  .th:nth-child(3){animation-delay:1.2s}
+  @keyframes pulse{0%,100%{border-color:var(--border)}50%{border-color:rgba(143,92,240,.6)}}
+  .mem{
+    margin-top:12px;background:var(--muted);border:1px dashed var(--input-border);
+    border-radius:.75rem;padding:9px;text-align:center;
+    font-size:.7rem;text-transform:uppercase;letter-spacing:.2em;color:var(--muted-fg);font-weight:600;
+  }
+  .dlabel{text-align:center;font-size:.7rem;color:var(--muted-fg);letter-spacing:.08em}
+
+  .agenda{list-style:none;margin-top:4px}
+  .agenda li{
+    display:flex;align-items:baseline;gap:14px;padding:10px 0;
+    border-bottom:1px solid var(--border);color:var(--fg);font-size:.95rem;
+  }
+  .agenda .n{
+    font-family:var(--font-mono);font-size:.85rem;font-weight:600;min-width:26px;
+    background:var(--grad-brand);-webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .agenda li span.t{color:var(--muted-fg);font-size:.85rem}
+
+  .cta{margin-top:36px;text-align:center}
+  .cta-btn{
+    display:inline-flex;align-items:center;gap:10px;
+    background:var(--primary);color:var(--on-brand);text-decoration:none;
+    padding:14px 30px;border-radius:9999px;font-weight:600;font-size:.95rem;
+    box-shadow:0 8px 40px rgba(143,92,240,.25);transition:all .2s;
+  }
+  .cta-btn:hover{transform:translateY(-2px);box-shadow:0 12px 48px rgba(143,92,240,.35)}
+  .cta-btn i{margin:0}
+  .crumbs{margin-top:14px;text-align:center}
+  .crumbs a{color:var(--muted-fg);font-size:.85rem;text-decoration:none}
+  .crumbs a:hover{color:var(--fg)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="kicker"><b>Semana 1</b>Programación Concurrente y Distribuida</p>
+  <h1>Programación concurrente con hilos</h1>
+  <p class="lead">Esta semana aprendemos a escribir programas que hacen <b>varias cosas a la vez</b> usando hilos. Antes de abrir el material completo, este es el mapa mental de lo que veremos.</p>
+
+  <h2>¿Qué es la programación concurrente?</h2>
+  <p>Tomas por hecho que tu computadora hace varias cosas a la vez: escribes en un procesador de textos mientras descargas archivos, se imprime y suena música. Incluso esperas que <b>una sola aplicación</b> responda al teclado sin importar lo ocupada que esté. Un software capaz de eso es un <b>software concurrente</b>. La herramienta para lograrlo son los <b>hilos (threads)</b>: unidades de ejecución que viven dentro de un proceso y comparten su memoria.</p>
+
+  <div class="panel">
+    <h3>La imagen mental de la semana</h3>
+    <div class="diagram">
+      <div class="cores">
+        <div class="core">Núcleo CPU 1</div>
+        <div class="core">Núcleo CPU 2</div>
+      </div>
+      <p class="dlabel">el sistema operativo reparte los hilos entre los núcleos</p>
+      <div class="process">
+        <h4>un proceso</h4>
+        <div class="threads">
+          <div class="th">main thread</div>
+          <div class="th">hilo trabajador</div>
+          <div class="th">hilo trabajador</div>
+        </div>
+        <div class="mem">memoria y recursos compartidos por todos los hilos</div>
+      </div>
+    </div>
+    <p class="small" style="margin-top:14px">Un proceso tiene su <b>propia memoria privada</b>. Sus hilos son <i>ligeros</i> de crear y comparten esa memoria: comunicación eficiente… pero peligrosa si no se coordina (eso será la semana 5). Todo programa Java arranca con un hilo principal, el <span class="mono">main thread</span>, que puede crear más.</p>
+  </div>
+
+  <h2>Lo que veremos en el contenido completo</h2>
+  <div class="panel">
+    <ul class="agenda">
+      <li><span class="n">01</span>Concurrencia: qué es y por qué existe</li>
+      <li><span class="n">02</span>Hilos y procesos: las dos unidades de ejecución</li>
+      <li><span class="n">03</span>Hilos en múltiples CPUs vs compartiendo una CPU</li>
+      <li><span class="n">04</span>Multi-threading en Java y sus riesgos</li>
+      <li><span class="n">05</span>Estados y prioridades de un hilo</li>
+      <li><span class="n">06</span>Crear hilos: Runnable vs extender Thread</li>
+      <li><span class="n">07</span>Métodos esenciales: currentThread(), sleep(), join()</li>
+      <li><span class="n">08</span>Interrupciones y la bandera Interrupt Status</li>
+      <li><span class="n">09</span>Hilos daemon vs user threads</li>
+    </ul>
+  </div>
+
+  <div class="cta">
+    <a class="cta-btn" href="index.html"><i class="fa-solid fa-play"></i>Abrir el contenido de la semana 1</a>
+  </div>
+  <p class="crumbs"><a href="../course_introduction/index.html">← volver a la introducción del curso</a></p>
+
+</div>
+</body>
+</html>

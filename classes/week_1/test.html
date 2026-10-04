@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Semana 1 — Programación Concurrente con Hilos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+  :root{
+    --bg:#0C0B12;
+    --surface:#13121A;
+    --card:#17161F;
+    --muted:#1F1D28;
+    --secondary:#22202B;
+    --fg:#F4F3F7;
+    --muted-fg:#9A97A6;
+    --on-brand:#FCFCFC;
+    --primary:#8F5CF0;
+    --blue:#4A84F0;
+    --success:#2CC277;
+    --destructive:#EC4B4B;
+    --warning:#F0B429;
+    --info:#3EB0E0;
+    --border:rgba(255,255,255,.09);
+    --input-border:rgba(255,255,255,.12);
+    --font-sans:'Geist',system-ui,sans-serif;
+    --font-mono:'Geist Mono',Consolas,monospace;
+    --grad-brand:linear-gradient(90deg,var(--primary),var(--blue));
+    --grad-num:linear-gradient(180deg,#F4F3F7,#9A97A6);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    min-height:100vh;background:var(--bg);color:var(--fg);
+    font-family:var(--font-sans);font-size:16px;line-height:1.55;
+    display:flex;align-items:center;justify-content:center;
+    padding:30px 16px;position:relative;
+  }
+  body::before,body::after{
+    content:'';position:fixed;border-radius:50%;pointer-events:none;z-index:0;
+    filter:blur(64px);
+  }
+  body::before{
+    width:56vw;height:56vw;top:-18vw;left:-14vw;
+    background:radial-gradient(circle,rgba(143,92,240,.22),transparent 65%);
+  }
+  body::after{
+    width:50vw;height:50vw;bottom:-18vw;right:-12vw;
+    background:radial-gradient(circle,rgba(74,132,240,.18),transparent 65%);
+  }
+  i.fa-solid{font-size:.85em;margin-right:7px}
+  .wrap{width:100%;max-width:860px;position:relative;z-index:1}
+
+  .card{
+    background:var(--card);border:1px solid var(--border);
+    border-radius:1rem;padding:28px;animation:in .35s ease;
+    box-shadow:0 8px 48px rgba(143,92,240,.1);
+  }
+  @keyframes in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+  h1{font-size:1.8rem;font-weight:600;letter-spacing:-.02em;line-height:1.25;margin-bottom:.5em}
+  h2{font-size:1.25rem;font-weight:600;letter-spacing:-.01em;line-height:1.4;margin-bottom:.7em}
+  h3{font-size:.74rem;text-transform:uppercase;letter-spacing:.2em;color:var(--muted-fg);margin-bottom:.6em;font-weight:600}
+  p{line-height:1.6}
+  .sub{color:var(--muted-fg)}
+  .small{font-size:.86rem;color:var(--muted-fg);line-height:1.6}
+  .small b{color:var(--fg);font-weight:500}
+  .center{text-align:center}
+
+  .btn{
+    background:var(--primary);color:var(--on-brand);border:none;border-radius:9999px;
+    padding:11px 26px;font-size:.9rem;font-weight:600;cursor:pointer;
+    transition:all .2s;font-family:var(--font-sans);
+    box-shadow:0 8px 40px rgba(143,92,240,.25);
+  }
+  .btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 48px rgba(143,92,240,.35)}
+  .btn.ghost{
+    background:var(--secondary);color:var(--fg);border:1px solid var(--border);box-shadow:none;
+  }
+  .btn.ghost:hover{border-color:rgba(143,92,240,.5);box-shadow:0 0 24px rgba(143,92,240,.12)}
+  .btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+
+  #hud{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+  #bar{flex:1;height:6px;background:rgba(255,255,255,.08);border-radius:9999px;overflow:hidden}
+  #barFill{height:100%;width:0;background:var(--grad-brand);transition:width .3s}
+  #cnt{font-size:.8rem;color:var(--muted-fg);white-space:nowrap;font-family:var(--font-mono)}
+
+  .opt{
+    display:flex;align-items:flex-start;gap:12px;width:100%;text-align:left;
+    background:var(--surface);border:1.5px solid var(--border);border-radius:.75rem;
+    color:var(--fg);padding:13px 16px;font-size:.94rem;cursor:pointer;
+    margin-bottom:10px;transition:all .15s;line-height:1.5;font-family:var(--font-sans);
+  }
+  .opt:hover{border-color:var(--input-border)}
+  .opt .mark{
+    flex-shrink:0;width:22px;height:22px;border-radius:9999px;
+    border:2px solid var(--input-border);display:inline-flex;align-items:center;
+    justify-content:center;font-size:.68rem;margin-top:1px;transition:all .15s;color:var(--on-brand);
+  }
+  .opt.sel{
+    border-color:rgba(143,92,240,.6);background:var(--muted);
+    box-shadow:0 0 40px rgba(143,92,240,.15);
+  }
+  .opt.sel .mark{border-color:var(--primary);background:var(--primary)}
+
+  .score{
+    font-family:var(--font-mono);font-size:3rem;font-weight:600;line-height:1;
+    background:var(--grad-num);-webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .badge{
+    display:inline-flex;align-items:center;gap:8px;border-radius:9999px;
+    padding:6px 18px;font-weight:600;font-size:.85rem;
+  }
+  .badge::before{content:'';width:6px;height:6px;border-radius:9999px;background:currentColor}
+  .badge{background:rgba(44,194,119,.15);color:var(--success)}
+  .badge.low{background:rgba(236,75,75,.15);color:var(--destructive)}
+  .badge.mid{background:rgba(240,180,41,.15);color:var(--warning)}
+  .wkgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}
+  @media(max-width:640px){.wkgrid{grid-template-columns:repeat(2,1fr)}}
+  .wkbox{
+    background:var(--surface);border:1px solid var(--border);border-radius:.75rem;
+    padding:14px;text-align:center;
+  }
+  .wkbox b{
+    font-family:var(--font-mono);color:var(--fg);font-size:1.25rem;font-weight:600;display:block;margin-top:4px;
+  }
+  .rev{border-top:1px solid var(--border);padding:20px 4px}
+  .rev h3{margin-bottom:10px}
+  .tag{
+    display:inline-block;font-size:.68rem;font-weight:600;letter-spacing:.1em;
+    border-radius:9999px;padding:3px 10px;
+    background:var(--grad-brand);color:var(--on-brand);
+  }
+  .ansRow{
+    display:flex;gap:10px;align-items:flex-start;padding:9px 12px;border-radius:.75rem;
+    font-size:.9rem;line-height:1.5;margin-bottom:6px;
+  }
+  .ansRow.ok{background:rgba(44,194,119,.1)}
+  .ansRow.bad{background:rgba(236,75,75,.1)}
+  .ansRow i{margin-top:3px}
+  .ansRow.ok i{color:var(--success)}
+  .ansRow.bad i{color:var(--destructive)}
+  .exp{font-size:.84rem;color:var(--muted-fg);padding:4px 10px 0 30px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ INICIO ============ -->
+  <div class="card" id="scrStart">
+    <h1><i class="fa-solid fa-clipboard-check"></i>Test de repaso · Semana 1</h1>
+    <p class="sub" style="margin-bottom:14px">Programación concurrente con hilos</p>
+    <p style="margin-bottom:8px">Comprueba cuánto aprendiste del material <span class="mono">w1_1.pdf</span>. Son <b>16 preguntas</b> de selección múltiple sobre concurrencia, hilos, sus métodos y las interrupciones.</p>
+    <ul class="small" style="list-style:none;line-height:2;margin-bottom:20px">
+      <li><i class="fa-solid fa-shuffle" style="color:var(--primary)"></i>El orden de preguntas y opciones es aleatorio en cada intento</li>
+      <li><i class="fa-solid fa-pen" style="color:var(--primary)"></i>Solo marcas tu respuesta; puedes volver y cambiarla antes de finalizar</li>
+      <li><i class="fa-solid fa-chart-column"></i>Al final verás tu nota, el desglose por tema y la revisión de cada pregunta</li>
+    </ul>
+    <button class="btn" id="startBtn"><i class="fa-solid fa-play"></i>Comenzar test</button>
+  </div>
+
+  <!-- ============ PREGUNTAS ============ -->
+  <div class="card" id="scrQuiz" style="display:none">
+    <div id="hud">
+      <div id="bar"><div id="barFill"></div></div>
+      <span id="cnt"></span>
+    </div>
+    <h2 id="qText"></h2>
+    <div id="opts"></div>
+    <div style="display:flex;gap:10px;justify-content:space-between;margin-top:18px">
+      <button class="btn ghost" id="prevBtn"><i class="fa-solid fa-arrow-left"></i>Anterior</button>
+      <button class="btn" id="nextBtn" disabled>Siguiente<i class="fa-solid fa-arrow-right" style="margin-right:0;margin-left:6px"></i></button>
+      <button class="btn" id="finishBtn" style="display:none"><i class="fa-solid fa-flag-checkered"></i>Finalizar test</button>
+    </div>
+    <p class="small" style="margin-top:12px" id="markHint"><i class="fa-solid fa-hand-pointer"></i>Marca una opción para continuar.</p>
+  </div>
+
+  <!-- ============ RESULTADO ============ -->
+  <div class="card" id="scrEnd" style="display:none">
+    <div class="center">
+      <h1><i class="fa-solid fa-award"></i>Tu resultado</h1>
+      <div class="score" id="scoreTxt"></div>
+      <p style="margin:12px 0 6px"><span class="badge" id="gradeBadge"></span></p>
+      <p class="sub" id="msgTxt"></p>
+    </div>
+    <div class="wkgrid" id="wkGrid"></div>
+    <h3 style="margin:28px 0 4px"><i class="fa-solid fa-list-check"></i>Revisión de respuestas</h3>
+    <div id="review"></div>
+    <div class="center" style="margin-top:24px">
+      <button class="btn" id="retryBtn"><i class="fa-solid fa-rotate-right"></i>Reintentar (se rebaraja todo)</button>
+      <p class="small" style="margin-top:14px"><a href="index.html" style="color:var(--muted-fg);text-decoration:none">← volver al contenido de la semana 1</a></p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- Banco de preguntas (fiel a w1_1.pdf) ---------- */
+const BANK=[
+/* ----- Concurrencia (2) ----- */
+{w:'Concurrencia',q:'¿Qué es un software concurrente?',
+ o:['Un software que corre obligatoriamente en varias máquinas','Un software capaz de hacer más de una cosa a la vez, como un procesador de textos que responde al teclado mientras actualiza la pantalla','Un software escrito en varios lenguajes de programación','Un software que usa varios monitores a la vez'],
+ a:1,e:'Los usuarios esperan que el sistema (y una sola aplicación) haga varias cosas a la vez: descargar, imprimir, reproducir audio, responder al mouse. El software capaz de eso es concurrente.'},
+{w:'Concurrencia',q:'Un thread o hilo de ejecución es…',
+ o:['la ejecución secuencial de una serie de instrucciones dentro de un programa','una conexión de red entre dos procesos','un programa con varios archivos fuente','una función recursiva'],
+ a:0,e:'Un thread es la ejecución secuencial de una serie de instrucciones dentro de un programa. De forma simple: procesos ejecutados por un programa.'},
+
+/* ----- Hilos y procesos (2) ----- */
+{w:'Hilos y procesos',q:'¿Qué diferencia a un proceso de un hilo?',
+ o:['El proceso tiene un entorno autónomo con su propio espacio de memoria; el hilo vive dentro de un proceso y comparte su memoria y archivos abiertos','El hilo es más costoso de crear que el proceso','El proceso comparte memoria con todos los demás procesos','No hay diferencia: son lo mismo'],
+ a:0,e:'Un proceso tiene un conjunto completo y privado de recursos (propia memoria). Los hilos son "procesos ligeros": crearlos cuesta menos y comparten los recursos de su proceso.'},
+{w:'Hilos y procesos',q:'¿Para qué sirven los mecanismos IPC como pipes o sockets?',
+ o:['Para que un hilo comparta su pila con otro','Para facilitar la comunicación entre procesos, incluso entre sistemas diferentes','Para aumentar la prioridad de un hilo','Para almacenar el código de los hilos'],
+ a:1,e:'La mayoría de SO admite IPC (pipes, sockets) para comunicar procesos. Los IPC permiten además comunicación de procesos entre diferentes sistemas.'},
+
+/* ----- Crear hilos (3) ----- */
+{w:'Crear hilos',q:'En Java, ¿cuáles son las dos formas de definir e iniciar un hilo?',
+ o:['Usar Runnable pasado a un Thread, o crear una subclase de Thread sobrescribiendo run()','Usar main() con varios argumentos','Importar la clase OSThread del sistema operativo','Declarar la clase como static'],
+ a:0,e:'Cada hilo se asocia con una instancia de la clase Thread. Se define el trabajo con un objeto Runnable (interfaz con el método run) o creando una subclase de Thread (que ya implementa Runnable, aunque su run no hace nada).'},
+{w:'Crear hilos',q:'¿Qué se debe invocar SIEMPRE para iniciar el nuevo hilo?',
+ o:['run() directamente','init()','Thread.start()','main()'],
+ a:2,e:'Ambas formas requieren invocar Thread.start() para iniciar el nuevo hilo. Llamar run() directo solo ejecuta el método en el hilo actual, sin concurrencia.'},
+{w:'Crear hilos',q:'¿Por qué el material dice que usar Runnable es "más general"?',
+ o:['Porque Runnable compila más rápido','Porque podemos crear una subclase de cualquier clase que no sea Thread e igualmente implementar Runnable','Porque Runnable crea más de un hilo a la vez','Porque Thread está obsoleto'],
+ a:1,e:'Extender Thread nos limita a descender de Thread (y gasta la única herencia de Java). Con Runnable la clase puede extender cualquier otra; extender Thread solo facilita el trabajo en aplicaciones simples.'},
+
+/* ----- Estados y prioridades (3) ----- */
+{w:'Estados y prioridades',q:'Un hilo en estado Blocked está…',
+ o:['ejecutando con el control de la CPU','esperando por algún recurso o que ocurra un evento','listo para ejecutar pero sin la orden','terminado'],
+ a:1,e:'Blocked: espera por algún recurso o que ocurra un evento. (Running = con el control de la CPU; Runnable = ready to run pero sin la orden).'},
+{w:'Estados y prioridades',q:'¿Qué significa que un hilo esté en estado Resumed?',
+ o:['Que fue eliminado de memoria','Que está ready to run después de haber estado suspendido o bloqueado','Que cedió voluntariamente la CPU','Que es un daemon thread'],
+ a:1,e:'Resumed: ready to run después de haber estado suspendido o bloqueado. (Suspended = cede voluntariamente la CPU para que otros threads se ejecuten).'},
+{w:'Estados y prioridades',q:'Sobre las prioridades de un thread en Java, ¿cuál afirmación es correcta?',
+ o:['Van de 1 a 10, la default es 5 (NORM_PRIORITY), y mayor valor da mayor oportunidad de ejecutarse primero, aunque no es garantizado','Van de 0 a 100 y siempre se respetan de forma exacta','Son iguales para todos los hilos y no se pueden cambiar','Van de 1 a 10 y la default es 10 (MAX_PRIORITY)'],
+ a:0,e:'Prioridades 1-10 con constantes MIN_PRIORITY (1), NORM_PRIORITY (5, la default) y MAX_PRIORITY (10). Mayor valor = mayor oportunidad, pero no es garantizado: depende de la JVM y del SO; con la misma prioridad, decide el sistema operativo.'},
+
+/* ----- Métodos esenciales (3) ----- */
+{w:'Métodos esenciales',q:'¿Qué retorna Thread.currentThread()?',
+ o:['El hilo principal siempre','Una referencia al objeto Thread que se está ejecutando actualmente','El número de hilos activos','El estado del hilo'],
+ a:1,e:'Es un método estático que retorna una referencia al objeto Thread ejecutándose actualmente (por ejemplo, el main thread si lo llamas desde main).'},
+{w:'Métodos esenciales',q:'Sobre Thread.sleep(ms), ¿cuál afirmación del material es correcta?',
+ o:['Garantiza una pausa exacta al milisegunto','Los tiempos no son precisos: están limitados por el SO y pueden ser detenidos por interrupciones','Solo funciona en el hilo main','Bloquea todos los hilos del proceso'],
+ a:1,e:'sleep() suspende al hilo actual por un periodo, pero no se garantiza precisión (depende de las facilidades del SO) y el descanso puede ser detenido por una interrupción, lanzando InterruptedException.'},
+{w:'Métodos esenciales',q:'¿Qué hace t.join() si t es un Thread en ejecución?',
+ o:['Destruye el hilo t inmediatamente','Hace que t espere al hilo actual','Pausa la ejecución del hilo actual hasta que el hilo de t termine','Une a t con otro hilo en uno solo'],
+ a:2,e:'join() permite a un hilo esperar por la terminación de otro. Permite especificar un periodo de espera y, como sleep(), responde a interrupciones con InterruptedException.'},
+
+/* ----- Interrupciones (2) ----- */
+{w:'Interrupciones',q:'¿Qué es una interrupción en Java?',
+ o:['Un error que crashea el hilo','Una indicación a un hilo de que debe detenerse y hacer algo más, enviada con interrupt()','Una señal del SO que no puede controlarse','Un tipo de excepción que siempre termina la JVM'],
+ a:1,e:'Una interrupción es una indicación a un hilo de que debe detenerse y hacer algo más. Se envía con interrupt() y es cooperativa: el hilo debe ser capaz de manejar su propia interrupción (lo común es terminar).'},
+{w:'Interrupciones',q:'¿Diferencia entre Thread.interrupted() e isInterrupted()?',
+ o:['No hay diferencia, son alias','interrupted() (estático) verifica y limpia la bandera del hilo actual; isInterrupted() verifica el estado de otro hilo sin modificar la bandera','interrupted() lanza la excepción; isInterrupted() la captura','isInterrupted() limpia la bandera; interrupted() no'],
+ a:1,e:'La bandera Interrupt Status se establece con interrupt(). El estático Thread.interrupted() verifica si el hilo actual fue interrumpido y LIMPIA la bandera; el método de instancia isInterrupted() consulta el estado de otro hilo sin modificarla. Por convención, lanzar InterruptedException también la limpia.'},
+
+/* ----- Daemon (1) ----- */
+{w:'Daemon',q:'Sobre los daemon threads, ¿cuál afirmación es correcta?',
+ o:['Son hilos de alta prioridad que bloquean a los user threads','Cuando todos los hilos de usuario terminan, la JVM termina los daemon threads automáticamente; y setDaemon(true) debe llamarse antes de start() o lanza IllegalThreadStateException','Pueden convertirlos en daemon en cualquier momento sin consecuencias','La JVM espera a que los daemon threads terminen antes de cerrarse'],
+ a:1,e:'Un daemon thread proporciona servicios a los hilos de usuario (ej. el garbage collector). Cuando todos los user threads terminan, la JVM termina los daemons automáticamente. Además, marcar como daemon un hilo ya iniciado arroja IllegalThreadStateException.'},
+];
+
+/* ---------- utilidades ---------- */
+function shuffle(arr){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+const $=id=>document.getElementById(id);
+
+/* ---------- estado ---------- */
+let order=[],optsMap=[],answers=[],cur=0;
+
+function start(){
+  order=shuffle(BANK);
+  optsMap=order.map(q=>{ // baraja opciones y recuerda dónde quedó la correcta
+    const idx=shuffle(q.o.map((_,k)=>k));
+    return idx;
+  });
+  answers=Array(BANK.length).fill(null);
+  cur=0;
+  show('scrQuiz');
+  render();
+}
+
+function show(id){
+  ['scrStart','scrQuiz','scrEnd'].forEach(s=>$(s).style.display=s===id?'block':'none');
+  window.scrollTo(0,0);
+}
+
+/* ---------- render pregunta ---------- */
+function render(){
+  const q=order[cur];
+  $('barFill').style.width=((cur)/BANK.length*100)+'%';
+  $('cnt').innerHTML='<i class="fa-solid fa-circle-question"></i>Pregunta '+(cur+1)+' de '+BANK.length;
+  $('qText').innerHTML='<span class="tag">'+q.w+'</span> '+q.q;
+  const box=$('opts');box.innerHTML='';
+  optsMap[cur].forEach((origIdx,pos)=>{
+    const b=document.createElement('button');
+    b.className='opt'+(answers[cur]===pos?' sel':'');
+    b.innerHTML='<span class="mark">'+(answers[cur]===pos?'<i class="fa-solid fa-check"></i>':'')+'</span><span>'+q.o[origIdx]+'</span>';
+    b.onclick=()=>{
+      answers[cur]=pos;
+      render();
+      $('nextBtn').disabled=false;
+      $('markHint').style.display='none';
+    };
+    box.appendChild(b);
+  });
+  if(answers[cur]!==null){$('nextBtn').disabled=false;$('markHint').style.display='none';}
+  else{$('nextBtn').disabled=true;$('markHint').style.display='block';}
+
+  $('prevBtn').disabled=cur===0;
+  const last=cur===BANK.length-1;
+  $('nextBtn').style.display=last?'none':'inline-block';
+  $('finishBtn').style.display=last?'inline-block':'none';
+}
+
+$('prevBtn').onclick=()=>{if(cur>0){cur--;render();}};
+$('nextBtn').onclick=()=>{if(cur<BANK.length-1){cur++;render();}};
+$('finishBtn').onclick=finish;
+
+/* ---------- resultado ---------- */
+function finish(){
+  const total=BANK.length;
+  let got=0;
+  const per={};
+  order.forEach((q,i)=>{ // mismo orden barajado que answers/optsMap
+    per[q.w]=per[q.w]||{got:0,total:0};
+    per[q.w].total++;
+    const correctPos=optsMap[i].indexOf(q.a);
+    if(answers[i]===correctPos){got++;per[q.w].got++;}
+  });
+  const pct=Math.round(got/total*100);
+  $('scoreTxt').textContent=got+' / '+total;
+  const badge=$('gradeBadge'),msg=$('msgTxt');
+  if(pct>=85){badge.className='badge';badge.textContent=pct+'% · Excelente';
+    msg.textContent='Dominas la semana 1. Listo para avanzar a la semana 2.';}
+  else if(pct>=60){badge.className='badge mid';badge.textContent=pct+'% · Bien, pero repasa';
+    msg.textContent='Buena base. Revisa la revisión de abajo y refuerza los temas más bajos.';}
+  else{badge.className='badge low';badge.textContent=pct+'% · Necesitas repasar';
+    msg.textContent='Conviene volver a la presentación de la semana 1 y luego reintentar este test.';}
+  const wk=$('wkGrid');
+  wk.innerHTML=Object.keys(per).map(w=>
+    '<div class="wkbox"><span class="small">'+w+'</span><b>'+per[w].got+' / '+per[w].total+'</b></div>'
+  ).join('');
+
+  const rev=$('review');rev.innerHTML='';
+  order.forEach((q,i)=>{
+    const correctPos=optsMap[i].indexOf(q.a);
+    const ok=answers[i]===correctPos;
+    const div=document.createElement('div');
+    div.className='rev';
+    let html='<h3><span class="tag">'+q.w+'</span> Pregunta '+(i+1)+' '+
+      (ok?'<i class="fa-solid fa-circle-check" style="color:var(--success)"></i>'
+         :'<i class="fa-solid fa-circle-xmark" style="color:var(--destructive)"></i>')+'</h3>';
+    html+='<p style="margin-bottom:10px">'+q.q+'</p>';
+    html+='<div class="ansRow '+(ok?'ok':'bad')+'"><i class="fa-solid fa-user"></i><span><b>Tu respuesta:</b> '+
+      (answers[i]===null?'Sin responder':q.o[optsMap[i][answers[i]]])+'</span></div>';
+    if(!ok){
+      html+='<div class="ansRow ok"><i class="fa-solid fa-check"></i><span><b>Respuesta correcta:</b> '+q.o[q.a]+'</span></div>';
+    }
+    html+='<div class="exp"><i class="fa-solid fa-circle-info"></i>'+q.e+'</div>';
+    div.innerHTML=html;
+    rev.appendChild(div);
+  });
+  show('scrEnd');
+}
+
+$('startBtn').onclick=start;
+$('retryBtn').onclick=start;
+})();
+</script>
+</body>
+</html>
