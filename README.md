@@ -13,6 +13,7 @@ Repositorio personal de estudio para el curso **Programación Concurrente y Dist
 ```text
 entiendo-ai/
 ├── README.md                     ← este archivo
+├── index.html                    ← índice del proyecto: menú con enlaces a todo
 ├── styles.md                     ← guía de estilo visual (paleta y reglas de diseño)
 └── classes/
     ├── course_introduction/
@@ -111,9 +112,12 @@ Guía de estilo visual del proyecto: paleta dark (casi negro con tinte violeta),
 
 ## Cómo usarlo
 
-Es todo HTML estático, sin build ni dependencias de proyecto. Solo abre las páginas en el navegador:
+Es todo HTML estático, sin build ni dependencias de proyecto. Abre el índice raíz y navega desde el menú (o abre cada página directamente):
 
 ```bash
+# índice del proyecto (menú con enlaces a todo)
+xdg-open index.html
+
 # presentación interactiva
 xdg-open classes/course_introduction/index.html
 

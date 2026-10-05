@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>entiendo-ai · Programación Concurrente y Distribuida</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+  :root{
+    --bg:#0C0B12;
+    --surface:#13121A;
+    --card:#17161F;
+    --muted:#1F1D28;
+    --secondary:#22202B;
+    --fg:#F4F3F7;
+    --muted-fg:#9A97A6;
+    --on-brand:#FCFCFC;
+    --primary:#8F5CF0;
+    --blue:#4A84F0;
+    --success:#2CC277;
+    --destructive:#EC4B4B;
+    --warning:#F0B429;
+    --info:#3EB0E0;
+    --border:rgba(255,255,255,.09);
+    --input-border:rgba(255,255,255,.12);
+    --font-sans:'Geist',system-ui,sans-serif;
+    --font-mono:'Geist Mono',Consolas,monospace;
+    --grad-brand:linear-gradient(90deg,var(--primary),var(--blue));
+    --grad-num:linear-gradient(180deg,#F4F3F7,#9A97A6);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    min-height:100vh;background:var(--bg);color:var(--fg);
+    font-family:var(--font-sans);font-size:16px;line-height:1.6;
+    padding:56px 24px 60px;position:relative;
+  }
+  body::before,body::after{
+    content:'';position:fixed;border-radius:50%;pointer-events:none;z-index:0;
+    filter:blur(64px);
+  }
+  body::before{
+    width:56vw;height:56vw;top:-18vw;left:-14vw;
+    background:radial-gradient(circle,rgba(143,92,240,.22),transparent 65%);
+  }
+  body::after{
+    width:50vw;height:50vw;bottom:-18vw;right:-12vw;
+    background:radial-gradient(circle,rgba(74,132,240,.18),transparent 65%);
+  }
+  i.fa-solid{font-size:.85em;margin-right:7px}
+  code,.mono{font-family:var(--font-mono);font-size:.92em}
+  .wrap{max-width:980px;margin:0 auto;position:relative;z-index:1}
+
+  .kicker{font-size:.72rem;text-transform:uppercase;letter-spacing:.3em;color:var(--muted-fg);margin-bottom:16px;font-weight:500}
+  h1{font-size:2.8rem;font-weight:600;letter-spacing:-.02em;line-height:1.15;margin-bottom:.4em}
+  h1 span{background:var(--grad-brand);-webkit-background-clip:text;background-clip:text;color:transparent}
+  h2{font-size:.74rem;text-transform:uppercase;letter-spacing:.22em;color:var(--muted-fg);font-weight:600;margin:42px 0 16px}
+  .lead{color:var(--muted-fg);font-size:1.02rem;max-width:70ch}
+  .lead b{color:var(--fg);font-weight:500}
+
+  .card{
+    background:var(--card);border:1px solid var(--border);border-radius:1rem;
+    padding:22px;box-shadow:0 8px 48px rgba(143,92,240,.1);
+    transition:transform .2s,box-shadow .2s,border-color .2s;
+    display:flex;flex-direction:column;gap:12px;
+  }
+  a.card{color:var(--fg);text-decoration:none}
+  .card:hover{transform:translateY(-3px);border-color:rgba(143,92,240,.5);box-shadow:0 12px 56px rgba(143,92,240,.2)}
+
+  .start-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .week-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:760px){.start-grid,.week-grid{grid-template-columns:1fr}}
+
+  .card h3{font-size:1.05rem;font-weight:600;letter-spacing:-.01em;margin:0;color:var(--fg)}
+  .card .desc{font-size:.86rem;color:var(--muted-fg);line-height:1.55}
+  .card .desc b{color:var(--fg);font-weight:500}
+
+  .badge{
+    display:inline-flex;align-items:center;gap:8px;border-radius:9999px;
+    padding:4px 14px;font-weight:600;font-size:.72rem;align-self:flex-start;
+  }
+  .badge::before{content:'';width:6px;height:6px;border-radius:9999px;background:currentColor}
+  .badge.ok{background:rgba(44,194,119,.15);color:var(--success)}
+
+  .mini{
+    display:inline-flex;align-items:center;gap:7px;
+    background:var(--secondary);color:var(--fg);border:1px solid var(--border);
+    border-radius:9999px;padding:7px 15px;font-size:.8rem;font-weight:500;
+    text-decoration:none;transition:all .2s;
+  }
+  .mini:hover{border-color:rgba(143,92,240,.6);box-shadow:0 0 20px rgba(143,92,240,.15)}
+  .minis{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}
+
+  .pdfs{font-size:.76rem;color:var(--muted-fg);line-height:1.8;border-top:1px solid var(--border);padding-top:10px}
+  .pdfs a{color:var(--muted-fg);text-decoration:none;font-family:var(--font-mono)}
+  .pdfs a:hover{color:var(--primary)}
+  .pdfs i{margin-right:5px;font-size:.7rem}
+
+  .week-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .wk-num{
+    font-family:var(--font-mono);font-size:.8rem;font-weight:600;letter-spacing:.1em;
+    background:var(--grad-num);-webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+
+  footer{
+    margin-top:48px;padding-top:18px;border-top:1px solid var(--border);
+    font-size:.8rem;color:var(--muted-fg);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  }
+  footer a{color:var(--muted-fg);text-decoration:none}
+  footer a:hover{color:var(--fg)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="kicker">Índice del proyecto</p>
+  <h1><span>entiendo-ai</span></h1>
+  <p class="lead">Material de estudio del curso <b>Programación Concurrente y Distribuida</b>: presentación de conceptos previos, contenido semana a semana con sus tests de repaso, y los PDFs del profesor.</p>
+
+  <h2><i class="fa-solid fa-flag-checkered"></i>Empieza aquí</h2>
+  <div class="start-grid">
+    <a class="card" href="classes/course_introduction/index.html">
+      <span class="badge ok">Conceptos previos</span>
+      <h3><i class="fa-solid fa-brain"></i>Introducción al curso</h3>
+      <p class="desc">Los conceptos que debes dominar antes de empezar: <b>CPU y núcleos</b>, proceso vs hilo, estados, concurrencia vs paralelismo, race conditions, redes y la conexión TCP — con demos interactivas.</p>
+    </a>
+    <a class="card" href="classes/course_introduction/test.html">
+      <span class="badge ok">Diagnóstico</span>
+      <h3><i class="fa-solid fa-clipboard-check"></i>Test del curso</h3>
+      <p class="desc"><b>20 preguntas</b> barajadas que cubren las semanas 1, 2, 3 y 5. Mide tu nivel con nota, desglose por semana y revisión explicada.</p>
+    </a>
+  </div>
+
+  <h2><i class="fa-solid fa-calendar-week"></i>Semanas del curso</h2>
+  <div class="week-grid">
+
+    <div class="card">
+      <div class="week-head">
+        <span class="wk-num">WEEK 1</span>
+        <span class="badge ok">Lista</span>
+      </div>
+      <h3>Programación concurrente con hilos</h3>
+      <p class="desc">Concurrencia, hilos vs procesos, crear hilos en Java, estados, prioridades, interrupciones, join() y daemon threads.</p>
+      <div class="minis">
+        <a class="mini" href="classes/week_1/introduction.html"><i class="fa-solid fa-map"></i>Introducción</a>
+        <a class="mini" href="classes/week_1/index.html"><i class="fa-solid fa-book-open"></i>Contenido</a>
+        <a class="mini" href="classes/week_1/test.html"><i class="fa-solid fa-circle-question"></i>Test</a>
+      </div>
+      <div class="pdfs">
+        <i class="fa-solid fa-file-pdf"></i><a href="classes/week_1/files/w1_1.pdf">w1_1.pdf</a> · Presentación de PowerPoint (27 páginas)
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="week-head">
+        <span class="wk-num">WEEK 2</span>
+        <span class="badge ok">Lista</span>
+      </div>
+      <h3>Sistemas distribuidos y desempeño</h3>
+      <p class="desc">Desafíos de los sistemas distribuidos, middleware, transparencia, concurrencia, ventajas e inconvenientes, latencia y throughput, paralelización y SMT.</p>
+      <div class="minis">
+        <a class="mini" href="classes/week_2/introduction.html"><i class="fa-solid fa-map"></i>Introducción</a>
+        <a class="mini" href="classes/week_2/index.html"><i class="fa-solid fa-book-open"></i>Contenido</a>
+        <a class="mini" href="classes/week_2/test.html"><i class="fa-solid fa-circle-question"></i>Test</a>
+      </div>
+      <div class="pdfs">
+        <i class="fa-solid fa-file-pdf"></i><a href="classes/week_2/files/w2_1.pdf">w2_1.pdf</a> · Desafío de los Sistemas Distribuidos (44 p)<br>
+        <i class="fa-solid fa-file-pdf"></i><a href="classes/week_2/files/w2_2.pdf">w2_2.pdf</a> · Desempeño y Optimización para la Latencia (30 p)
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="week-head">
+        <span class="wk-num">WEEK 3</span>
+        <span class="badge ok">Lista</span>
+      </div>
+      <h3>Redes y Sockets</h3>
+      <p class="desc">InetAddress, ServerSocket y Socket, streams y los 5 pasos del cliente; dispositivos de red, LAN/MAN/WAN, topologías y modelos OSI/TCP-IP.</p>
+      <div class="minis">
+        <a class="mini" href="classes/week_3/introduction.html"><i class="fa-solid fa-map"></i>Introducción</a>
+        <a class="mini" href="classes/week_3/index.html"><i class="fa-solid fa-book-open"></i>Contenido</a>
+        <a class="mini" href="classes/week_3/test.html"><i class="fa-solid fa-circle-question"></i>Test</a>
+      </div>
+      <div class="pdfs">
+        <i class="fa-solid fa-file-pdf"></i><a href="classes/week_3/files/w3_1.pdf">w3_1.pdf</a> · Desempeño y Optimización para la Latencia (24 p)<br>
+        <i class="fa-solid fa-file-pdf"></i><a href="classes/week_3/files/w3_2.pdf">w3_2.pdf</a> · Communication and Networks (36 p)<br>
+        <i class="fa-solid fa-file-pdf"></i><a href="classes/week_3/files/w3_3.pdf">w3_3.pdf</a> · Sockets (22 p)
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="week-head">
+        <span class="wk-num">WEEK 5</span>
+        <span class="badge ok">Lista</span>
+      </div>
+      <h3>Sincronización de hilos</h3>
+      <p class="desc">Interferencia y condición de carrera, monitores, deadlock/livelock/starvation, semáforos, wait/notify, Locks, volatile, AtomicInteger y Executors.</p>
+      <div class="minis">
+        <a class="mini" href="classes/week_5/introduction.html"><i class="fa-solid fa-map"></i>Introducción</a>
+        <a class="mini" href="classes/week_5/index.html"><i class="fa-solid fa-book-open"></i>Contenido</a>
+        <a class="mini" href="classes/week_5/test.html"><i class="fa-solid fa-circle-question"></i>Test</a>
+      </div>
+      <div class="pdfs">
+        <i class="fa-solid fa-file-pdf"></i><a href="classes/week_5/files/w5_1.pdf">w5_1.pdf</a> · Sincronización de Hilos (26 p)<br>
+        <i class="fa-solid fa-file-pdf"></i><a href="classes/week_5/files/w5_2.pdf">w5_2.pdf</a> · Monitores, Deadlock, Semáforos… (19 p)<br>
+        <i class="fa-solid fa-file-pdf"></i><a href="classes/week_5/files/w5_3.pdf">w5_3.pdf</a> · Threads en Java: Volatile, Executors… (21 p)
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <span><i class="fa-solid fa-circle-info"></i>Las páginas cargan Geist y Font Awesome desde CDN: requieren internet para iconos y tipografía.</span>
+    <a href="README.md"><i class="fa-solid fa-book"></i>README</a>
+  </footer>
+
+</div>
+</body>
+</html>
