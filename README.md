@@ -30,7 +30,7 @@ entiendo-ai/
 └── classes/
     ├── course_introduction/
     │   ├── index.html            ← presentación interactiva de conceptos previos (11 slides)
-    │   └── test.html             ← test de diagnóstico (20 preguntas)
+    │   └── test.html             ← test de repaso de la introducción (20 preguntas)
     ├── week_1/
     │   ├── index.html            ← presentación de la semana (17 slides)
     │   ├── introduction.html     ← resumen de una página
@@ -133,7 +133,7 @@ Todos los tests del proyecto comparten el mismo motor y formato:
 
 | Test | Preguntas | Temas |
 |---|---|---|
-| `classes/course_introduction/test.html` | 20 | W1 (5) · W2 (4) · W3 (5) · W5 (6) |
+| `classes/course_introduction/test.html` | 20 | Hilos (6) · Concurrencia (4) · Java (4) · Redes (6) |
 | `classes/week_1/test.html` | 16 | Concurrencia (2) · Hilos y procesos (2) · Crear hilos (3) · Estados y prioridades (3) · Métodos esenciales (3) · Interrupciones (2) · Daemon (1) |
 | `classes/week_2/test.html` | 20 | Sistemas distribuidos (2) · Desafíos (4) · Fallos y transparencia (4) · Concurrencia (4) · Desempeño (3) · Paralelización (3) |
 | `classes/week_3/test.html` | 20 | Sockets y conexión (4) · InetAddress (3) · ServerSocket/Socket (3) · Streams (3) · Redes (4) · Capas y protocolos (2) · Desempeño (1) |
@@ -200,7 +200,7 @@ Detalles donde el material simplifica y las páginas lo aclaran explícitamente:
 - [x] Material semanal organizado por carpetas (weeks 1, 2, 3 y 5).
 - [x] Índice raíz (`index.html`) con menú a todo el proyecto.
 - [x] Presentación interactiva de conceptos previos (`course_introduction/index.html`, 11 slides).
-- [x] Test de diagnóstico (`course_introduction/test.html`, 20 preguntas).
+- [x] Test de repaso de la introducción (`course_introduction/test.html`, 20 preguntas sobre las secciones 01–09 del deck).
 - [x] Guía de estilo (`styles.md`).
 - [x] Convenciones para IA (`AGENTS.md`).
 - [x] Week 1: presentación (17 slides), introducción y test de repaso (16 preguntas).

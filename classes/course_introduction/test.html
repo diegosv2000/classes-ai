@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Test de diagnóstico — Programación Concurrente y Distribuida</title>
+<title>Test de repaso — Introducción al curso · Programación Concurrente y Distribuida</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -154,9 +154,9 @@
 
   <!-- ============ INICIO ============ -->
   <div class="card" id="scrStart">
-    <h1><i class="fa-solid fa-clipboard-check"></i>Test de diagnóstico</h1>
-    <p class="sub" style="margin-bottom:14px">Programación Concurrente y Distribuida</p>
-    <p style="margin-bottom:8px">Este test mide qué tanto sabes del contenido del curso antes de repasar. Son <b>20 preguntas</b> de selección múltiple que cubren las semanas 1, 2, 3 y 5.</p>
+    <h1><i class="fa-solid fa-clipboard-check"></i>Test de repaso</h1>
+    <p class="sub" style="margin-bottom:14px">Introducción al curso · Programación Concurrente y Distribuida</p>
+    <p style="margin-bottom:8px">Este test evalúa lo aprendido en la presentación de introducción. Son <b>20 preguntas</b> de selección múltiple que cubren las secciones 01–09: hardware e hilos, concurrencia, Java y redes.</p>
     <ul class="small" style="list-style:none;line-height:2;margin-bottom:20px">
       <li><i class="fa-solid fa-shuffle" style="color:var(--primary)"></i>El orden de preguntas y opciones es aleatorio en cada intento</li>
       <li><i class="fa-solid fa-pen" style="color:var(--primary)"></i>Solo marcas tu respuesta; puedes volver y cambiarla antes de finalizar</li>
@@ -192,8 +192,9 @@
     <div class="wkgrid" id="wkGrid"></div>
     <h3 style="margin:28px 0 4px"><i class="fa-solid fa-list-check"></i>Revisión de respuestas</h3>
     <div id="review"></div>
-    <div class="center" style="margin-top:24px">
+    <div class="center" style="margin-top:24px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
       <button class="btn ghost" id="retryBtn"><i class="fa-solid fa-rotate-right"></i>Reintentar (se rebaraja todo)</button>
+      <a class="btn ghost" href="index.html" style="display:inline-flex;align-items:center;text-decoration:none"><i class="fa-solid fa-arrow-left"></i>Volver a la presentación</a>
     </div>
   </div>
 
@@ -203,75 +204,75 @@
 (function(){
 "use strict";
 
-/* ---------- Banco de preguntas (fiel al material de las semanas) ---------- */
+/* ---------- Banco de preguntas (fiel a las secciones 01-09 de la introducción) ---------- */
 const BANK=[
-/* ----- Week 1: hilos y concurrencia (5) ----- */
-{w:'W1',q:'¿Cuál es la diferencia clave entre un proceso y un hilo?',
+/* ----- Hilos: secciones 01-03 (6) ----- */
+{w:'Hilos',q:'¿Qué es un núcleo (core) dentro de una CPU?',
+ o:['Un tipo de memoria rápida dentro de la CPU','Una unidad de procesamiento independiente dentro de la CPU: ocho núcleos significan, en potencia, ocho cosas haciendo progreso real al mismo tiempo','Un programa que administra los hilos del sistema','Un conector físico de la placa base'],
+ a:1,e:'Un núcleo es una unidad de procesamiento independiente. Con un solo núcleo el SO alterna tareas; con más núcleos varias tareas corren realmente a la vez (sección 01).'},
+{w:'Hilos',q:'Con un solo núcleo, ¿cómo "ejecuta a la vez" la CPU varias tareas?',
+ o:['No realmente a la vez: el sistema operativo alterna entre tareas tan rápido que parece simultáneo','Ejecuta todas exactamente al mismo instante','Las ejecuta solo si son del mismo programa','Las envía a otro procesador'],
+ a:0,e:'Con 1 núcleo el SO alterna tareas tan rápido que parece simultáneo; con más núcleos varias tareas corren realmente a la vez (sección 01).'},
+{w:'Hilos',q:'¿Cuál es la diferencia clave entre un proceso y un hilo?',
  o:['Un proceso es más ligero de crear que un hilo','Los hilos tienen un espacio de memoria completamente privado; los procesos lo comparten','Los procesos tienen un entorno autónomo con memoria privada; los hilos comparten la memoria y recursos de su proceso','No hay diferencia: son términos equivalentes'],
- a:2,e:'Un proceso tiene recursos completos y privados (propia memoria). Los hilos viven dentro de un proceso y comparten su memoria y archivos abiertos: comunicación eficiente pero riesgosa.'},
-{w:'W1',q:'En Java, ¿cuáles son las dos formas de definir e iniciar un hilo?',
- o:['Implementar Runnable y pasarla a un Thread, o extender la clase Thread (sobrescribiendo run())','Llamar a System.newThread() o usar hilos del SO directamente','Implementar Runnable o sobrescribir el método main()','Extender Thread o implementar start()'],
- a:0,e:'Ambas implican la clase Thread: se proporciona un Runnable (interfaz con el método run) o se crea una subclase de Thread (que ya implementa Runnable). En ambos casos se lanza con start().'},
-{w:'W1',q:'¿Por qué se debe llamar a start() y no directamente a run()?',
- o:['Porque run() es privado en Java','Porque start() crea un nuevo hilo que ejecuta run(); llamar run() directo ejecuta el código en el hilo actual, sin concurrencia','Porque start() compila el código más rápido','No hay diferencia práctica'],
- a:1,e:'start() le pide a la JVM crear un nuevo hilo de ejecución y ese nuevo hilo invoca run(). Llamar run() directo es solo una llamada de método normal y secuencial.'},
-{w:'W1',q:'En Java, ¿cómo funcionan las prioridades de los hilos?',
+ a:2,e:'Un proceso tiene recursos completos y privados (propia memoria). Los hilos viven dentro de un proceso y comparten su memoria y archivos abiertos: comunicación eficiente pero riesgosa (sección 02).'},
+{w:'Hilos',q:'¿Qué comparten los hilos de un mismo proceso?',
+ o:['Nada: cada hilo tiene su propio espacio de memoria, como un proceso','El espacio de memoria y los archivos abiertos del proceso','Solo el nombre del programa','Un núcleo exclusivo de la CPU'],
+ a:1,e:'La creación de un hilo es ligera porque reutiliza los recursos del proceso: comparten memoria y archivos abiertos. Por eso comunicarse es sencillo, pero hay riesgo de condiciones de carrera (sección 02).'},
+{w:'Hilos',q:'¿Qué hace el scheduler (planificador) del sistema operativo?',
+ o:['Decide qué hilo obtiene la CPU y por cuánto tiempo','Guarda los hilos en el disco duro','Traduce el código Java a instrucciones','Asigna una máquina a cada proceso en la red'],
+ a:0,e:'El scheduler decide qué hilo obtiene la CPU y por cuánto tiempo. Durante su vida, un hilo transita por estados como Runnable, Running, Blocked, Suspended y Terminated (sección 03).'},
+{w:'Hilos',q:'En Java, ¿cómo funcionan las prioridades de los hilos?',
  o:['Van de 0 a 100; a menor valor, mayor prioridad','Van de 1 a 10; a mayor valor, mayor oportunidad de ejecutarse primero','Son solo letras (A, B, C)','Java no soporta prioridades'],
- a:1,e:'Las prioridades en Java son enteros de 1 a 10. A mayor valor, más oportunidad de ejecutarse primero; con la misma prioridad, decide el sistema operativo.'},
-{w:'W1',q:'¿Qué caracteriza a un programa secuencial frente a uno concurrente?',
- o:['El secuencial ejecuta una única actividad (una sola secuencia de instrucciones); el concurrente tiene múltiples actividades que progresan de manera simultánea, cada una soportada por un hilo','El secuencial siempre es más lento porque usa más memoria','El concurrente no puede cooperar para una tarea común','Son lo mismo con distinto nombre'],
- a:0,e:'En el programa secuencial las instrucciones van una tras otra. En el concurrente hay varias actividades (hilos) que avanzan de forma simultánea y cooperan para la tarea común.'},
+ a:1,e:'Las prioridades en Java son enteros de 1 a 10. A mayor valor, más oportunidad de ejecutarse primero; con la misma prioridad, decide el sistema operativo (sección 03).'},
 
-/* ----- Week 2: sistemas distribuidos (4) ----- */
-{w:'W2',q:'¿Qué es un sistema distribuido?',
- o:['Un solo servidor muy potente con varios procesadores','Una colección de computadoras separadas físicamente y conectadas por red, cuyos componentes el programador percibe como un solo sistema','Una red de cables que conecta periféricos','Un programa que corre en dos núcleos a la vez'],
- a:1,e:'Es una colección de computadoras conectadas por red; el programador accede a componentes remotos como si fueran locales, con un middleware de por medio.'},
-{w:'W2',q:'¿Qué es el middleware y cuál es su función?',
- o:['Un antivirus para servidores','El estrato de software que provee abstracción de programación y enmascara la heterogeneidad de redes, hardware, SO y lenguajes (ej. CORBA, Java RMI)','El cableado físico de la red','Un tipo de base de datos distribuida'],
- a:1,e:'El middleware es la capa intermedia que oculta la heterogeneidad subyacente y ofrece una abstracción uniforme de programación (RPC, SOAP, RMI).'},
-{w:'W2',q:'"Permitir acceder a los recursos sin conocer su localización" corresponde a qué tipo de transparencia?',
- o:['Transparencia de acceso','Transparencia de ubicación','Transparencia de replicación','Transparencia frente a fallos'],
- a:1,e:'Es la transparencia de ubicación. (La de acceso permite usar operaciones idénticas para recursos locales y remotos; la de replicación oculta las copias; la de fallos oculta los fallos.)'},
-{w:'W2',q:'En el tratamiento de fallos, ¿qué implica la "recuperación de fallos"?',
- o:['Apagar el sistema para evitar más daños','Diseñar el software de modo que, tras una caída del servidor, el estado de los datos pueda reponerse o retrotraerse (rollback) a una situación anterior','Duplicar los cables de la red','Detectar datos corruptos con checksums'],
- a:1,e:'La recuperación implica restaurar el estado tras una caída (rollback). Detección = checksums; enmascaramiento = retransmisión/replicación; redundancia = componentes duplicados.'},
-
-/* ----- Week 3: redes, desempeño, sockets (5) ----- */
-{w:'W3',q:'¿Por qué se usa TCP en aplicaciones cliente-servidor confiables?',
- o:['Porque es más rápido que UDP','Porque proporciona un canal punto a punto confiable: no se descartan datos y llegan en el mismo orden en que se enviaron','Porque no requiere conexión','Porque cifra todo el tráfico automáticamente'],
- a:1,e:'TCP garantiza fiabilidad y orden. Para comunicarse, cliente y servidor establecen una conexión y cada uno vincula un socket a su extremo.'},
-{w:'W3',q:'¿Qué identifica un número de puerto?',
- o:['Una máquina física dentro de la red','Un tipo de protocolo de enrutamiento','Una aplicación/servicio dentro de una máquina','La velocidad de la conexión'],
- a:2,e:'La IP identifica la máquina; el puerto identifica el programa/servicio que escucha dentro de ella. El cliente también vincula un puerto local para identificarse.'},
-{w:'W3',q:'¿Cuál es el orden correcto del saludo de tres vías (3-way handshake) de TCP?',
- o:['ACK → SYN → SYN-ACK','SYN → SYN-ACK → ACK','SYN-ACK → ACK → SYN','SYN → ACK → SYN-ACK'],
- a:1,e:'El cliente envía SYN (solicitud), el servidor responde SYN-ACK (acepta) y el cliente confirma con ACK. Una vez aceptada, el servidor crea un socket nuevo para atender al cliente sin dejar de escuchar.'},
-{w:'W3',q:'En redes, ¿qué es la encapsulación?',
- o:['El proceso de cifrar los datos antes de enviarlos','Añadir cabecera (y cola) al payload de datos para formar un paquete','Comprimir los datos para que ocupen menos','Eliminar las cabeceras para obtener el payload'],
- a:1,e:'Encapsular = añadir header/tail al payload para formar el paquete que se transmite. El proceso inverso (quitarlas) es la decapsulación.'},
-{w:'W3',q:'¿Qué es la latencia y de qué factores depende?',
- o:['La cantidad de datos que soporta la red por segundo; depende del ancho de banda','El tiempo que tarda una solicitud en viajar al destino y regresar; depende de distancia física, congestión de red, hardware e ineficiencias de software','El número de usuarios simultáneos que soporta un servidor','Un tipo de cable de fibra óptica'],
- a:1,e:'La latencia es tiempo (ida y vuelta de una solicitud). Los cuellos de botella a optimizar: retrasos de propagación, transmisión, procesamiento y colas de espera.'},
-
-/* ----- Week 5: sincronización (6) ----- */
-{w:'W5',q:'¿Por qué la operación contador++ NO es atómica en un entorno multihilo?',
+/* ----- Concurrencia: secciones 04-05 (4) ----- */
+{w:'Concurrencia',q:'¿Cuál es la diferencia entre concurrencia y paralelismo?',
+ o:['Concurrencia: las tareas progresan de forma entrelazada, aunque sea sobre un solo núcleo; paralelismo: se ejecutan realmente al mismo tiempo en núcleos distintos','Son lo mismo con distinto nombre','El paralelismo ocurre sobre un núcleo; la concurrencia necesita varios','La concurrencia solo existe en sistemas distribuidos'],
+ a:0,e:'La concurrencia entrelaza (en cada tick solo una tarea avanza en el núcleo); el paralelismo da a cada tarea su propio núcleo y avanzan simultáneamente (sección 04).'},
+{w:'Concurrencia',q:'¿Qué es la programación concurrente?',
+ o:['Escribir software que coordina tareas que progresan juntas: puede hacer varias cosas "a la vez", como un procesador de texto que responde al teclado mientras guarda','Escribir programas que usan un solo hilo','Programar aplicaciones que corren en varias máquinas','Un tipo de error de memoria'],
+ a:0,e:'Es escribir software que coordina tareas que progresan juntas. El software concurrente puede hacer varias cosas "a la vez" (sección 04).'},
+{w:'Concurrencia',q:'¿Por qué la operación contador++ NO es atómica en un entorno multihilo?',
  o:['Porque Java no permite incrementar variables compartidas','Porque internamente son 3 pasos (leer, incrementar, escribir) y los hilos pueden interrumpirse entre ellos','Porque el contador se guarda en el disco duro','Porque siempre lanza InterruptedException'],
- a:1,e:'Leer-modificar-guardar puede entrelazarse entre hilos: la escritura de un hilo sobrescribe la del otro y su resultado se pierde (interferencia de hilos).'},
-{w:'W5',q:'Dos hilos incrementan 1000 veces cada uno un contador compartido protegido solo con variables normales. El valor esperado es 2000, pero…',
- o:['Siempre será exactamente 2000','Será mayor a 2000 por los solapamientos','Puede ser menor (ej. 1987, 1995) por la condición de carrera: valor++ no es atómico','El programa no compila'],
- a:2,e:'Esa es la condición de carrera: el resultado depende del entrelazado. Con synchronized en el método incrementar, solo un hilo ejecuta a la vez y el resultado es siempre 2000.'},
-{w:'W5',q:'¿Qué es un deadlock (interbloqueo)?',
- o:['Hilos que se ejecutan demasiado lento por baja prioridad','Dos o más hilos bloqueados indefinidamente, cada uno esperando un recurso que posee el otro','Hilos que cambian de estado constantemente sin avanzar','Un error de compilación por sincronizar de más'],
- a:1,e:'Cada hilo posee un recurso y espera el que tiene el otro; nadie libera lo suyo y quedan bloqueados para siempre. Se evita adquiriendo recursos siempre en el mismo orden o usando tryLock con timeout.'},
-{w:'W5',q:'¿Cuál es la diferencia entre livelock y deadlock?',
- o:['Son lo mismo con distinto nombre','En el deadlock los hilos quedan bloqueados esperando; en el livelock están activos, cambiando de estado en respuesta al otro, pero sin avanzar nunca','El livelock solo ocurre con un solo hilo','El deadlock se resuelve solo, el livelock no'],
- a:1,e:'En el livelock los hilos no están bloqueados: reaccionan constantemente a las acciones del otro (como dos personas cediéndose el paso en un pasillo) sin hacer progreso.'},
-{w:'W5',q:'¿Qué garantiza la palabra clave volatile y qué NO garantiza?',
- o:['Garantiza atomicidad de operaciones compuestas y exclusión mutua','Garantiza visibilidad inmediata de los cambios entre hilos, pero NO atomicidad ni sincronización completa','Garantiza que la variable sea privada a cada hilo','Garantiza orden de ejecución de todos los hilos'],
- a:1,e:'volatile evita que cada hilo trabaje con una copia cacheada: los cambios en la variable son visibles para los demás hilos. Pero no vuelve atómica una operación compuesta como contador++; para eso, synchronized o AtomicInteger.'},
-{w:'W5',q:'¿Para qué se usa AtomicInteger?',
- o:['Para evitar crear hilos manualmente','Para realizar operaciones sobre enteros de manera atómica (incrementAndGet, addAndGet) sin solapamientos entre hilos','Para declarar variables finales','Para medir el tiempo de ejecución de un hilo'],
- a:1,e:'Pertenece a java.util.concurrent.atomic y hace operaciones seguras en entornos concurrentes sin usar synchronized; muy usada para contadores compartidos.'},
+ a:1,e:'Un incremento como contador++ parece una sola operación, pero son 3 pasos: leer, incrementar, guardar. Si los hilos se entrelazan, aparece la interferencia de hilos (sección 05).'},
+{w:'Concurrencia',q:'Hilo A hace contador++ y Hilo B hace contador-- sobre la misma variable (inicial 0), con sus pasos entrelazados. ¿Qué resultado puede aparecer?',
+ o:['Siempre 0, porque las operaciones se cancelan','-1: la escritura de B sobrescribe la de A y su resultado se pierde','1, porque A siempre guarda primero','El programa no compila'],
+ a:1,e:'Con entrelazado ambos hilos leen 0, A guarda 1 y B guarda -1 encima: la actualización de A se pierde. En secuencia, el resultado sí sería 0 (demo de la sección 05).'},
+
+/* ----- Java: sección 06 (4) ----- */
+{w:'Java',q:'En Java, ¿cuáles son las dos formas de definir e iniciar un hilo?',
+ o:['Implementar Runnable y pasarla a un Thread, o extender la clase Thread (sobrescribiendo run())','Llamar a System.newThread() o usar hilos del SO directamente','Implementar Runnable o sobrescribir el método main()','Extender Thread o implementar start()'],
+ a:0,e:'Ambas implican la clase Thread: se proporciona un Runnable (interfaz con el método run) o se crea una subclase de Thread (que ya implementa Runnable). En ambos casos se lanza con start() (sección 06).'},
+{w:'Java',q:'¿Cuál de las dos formas de definir un hilo se recomienda y por qué?',
+ o:['Extender Thread, porque da acceso a más métodos','Implementar Runnable, porque separa la tarea del mecanismo de ejecución; extender Thread consume la única herencia disponible','Ninguna: los hilos solo se crean con librerías externas','Extender Thread, porque Runnable está obsoleto'],
+ a:1,e:'Implementar Runnable es la recomendada: separa la tarea del mecanismo de ejecución. Extender Thread funciona, pero consume la única herencia disponible (sección 06).'},
+{w:'Java',q:'¿Por qué se debe llamar a start() y no directamente a run()?',
+ o:['Porque run() es privado en Java','Porque start() crea un nuevo hilo que ejecuta run(); llamar run() directo ejecuta el código en el hilo actual, sin concurrencia','Porque start() compila el código más rápido','No hay diferencia práctica'],
+ a:1,e:'start() crea el nuevo hilo que invoca run(); llamar run() directo es solo una llamada de método normal, ejecutada en el hilo actual (sección 06).'},
+{w:'Java',q:'¿Qué es el main thread?',
+ o:['El hilo principal con el que arranca toda aplicación Java, desde el cual se crean y lanzan los demás hilos','Un hilo con prioridad 10','El hilo que nunca puede terminar','Un hilo exclusivo para entrada/salida de red'],
+ a:0,e:'Cada aplicación arranca con un hilo principal (main thread), capaz de crear hilos adicionales, cada uno asociado a una instancia de Thread (sección 06).'},
+
+/* ----- Redes: secciones 07-09 (6) ----- */
+{w:'Redes',q:'¿Qué identifica una dirección IP y qué identifica un número de puerto?',
+ o:['La IP identifica la máquina en la red; el puerto identifica la aplicación/servicio dentro de la máquina','La IP identifica la aplicación; el puerto identifica la máquina','Ambos identifican la misma cosa','La IP identifica la velocidad de la conexión; el puerto el tipo de cable'],
+ a:0,e:'La IP identifica la máquina (como la dirección de un edificio); el puerto (0-65535) identifica el servicio dentro de ella (como el número de apartamento). El cliente también vincula un puerto local (sección 07).'},
+{w:'Redes',q:'¿Cuál es la diferencia entre TCP y UDP?',
+ o:['TCP es un canal confiable con conexión previa: los datos no se descartan y llegan en orden; UDP envía datagramas sin conexión ni confirmación, más ligero pero sin garantías','UDP es más confiable que TCP','Ambos garantizan el orden de los paquetes','TCP no requiere conexión y UDP sí'],
+ a:0,e:'TCP: canal punto a punto confiable, base de los sockets. UDP: datagramas sin confirmación, útil cuando la velocidad importa más que la fiabilidad (streaming, juegos) (sección 07).'},
+{w:'Redes',q:'En redes, ¿qué es la encapsulación?',
+ o:['El proceso de cifrar los datos antes de enviarlos','Añadir cabecera (y cola) al payload de datos para formar un paquete','Comprimir los datos para que ocupen menos','Eliminar las cabeceras para obtener el payload'],
+ a:1,e:'Encapsular = añadir header/tail al payload para formar el paquete que se transmite. El proceso inverso (quitarlas en el destino) es la decapsulación (sección 07).'},
+{w:'Redes',q:'¿Cuál es el orden correcto del saludo de tres vías (3-way handshake) de TCP?',
+ o:['ACK → SYN → SYN-ACK','SYN → SYN-ACK → ACK','SYN-ACK → ACK → SYN','SYN → ACK → SYN-ACK'],
+ a:1,e:'El cliente envía SYN (solicitud), el servidor responde SYN-ACK (acepta) y el cliente confirma con ACK (sección 08).'},
+{w:'Redes',q:'Cuando el servidor acepta una conexión TCP, ¿qué ocurre con los sockets?',
+ o:['Cierra el socket de escucha y deja de aceptar clientes','Crea un socket nuevo para atender al cliente, mientras el original sigue escuchando nuevas solicitudes','Usa el mismo socket para todos los clientes a la vez','No usa sockets: TCP los reemplaza'],
+ a:1,e:'Un socket es el extremo local de la conexión: cada programa escribe y lee en su socket. Al aceptar, el servidor crea un socket nuevo para el cliente y el original sigue escuchando (sección 08).'},
+{w:'Redes',q:'¿Qué es la latencia y qué es el throughput?',
+ o:['Latencia: la cantidad de tareas por segundo; throughput: el tiempo de respuesta','Latencia: el tiempo que tarda una solicitud en viajar al destino y regresar; throughput: la cantidad de tareas completadas por unidad de tiempo','Son dos nombres para lo mismo','Latencia: el tamaño de los paquetes; throughput: la distancia entre servidores'],
+ a:1,e:'Latencia es tiempo (ida y vuelta de una solicitud); throughput es cantidad (ops/s). Un sistema puede procesar miles por segundo y aun así tener alta latencia individual (sección 09).'},
 ];
 
 /* ---------- utilidades ---------- */
