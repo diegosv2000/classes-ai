@@ -152,7 +152,7 @@
   <div class="card" id="scrStart">
     <h1><i class="fa-solid fa-clipboard-check"></i>Test de repaso · Semana 3</h1>
     <p class="sub" style="margin-bottom:14px">Redes y Sockets</p>
-    <p style="margin-bottom:8px">Comprueba cuánto aprendiste de los materiales <span class="mono">w3_3.pdf</span> (Sockets I) y <span class="mono">w3_2.pdf</span> (communication and networks). Son <b>20 preguntas</b> de selección múltiple.</p>
+    <p style="margin-bottom:8px">Comprueba cuánto aprendiste de los materiales <span class="mono">w3_3.pdf</span> (Sockets I), <span class="mono">w3_2.pdf</span> (communication and networks) y <span class="mono">w3_1.pdf</span> (desempeño, refuerzo). Son <b>20 preguntas</b> de selección múltiple.</p>
     <ul class="small" style="list-style:none;line-height:2;margin-bottom:20px">
       <li><i class="fa-solid fa-shuffle" style="color:var(--primary)"></i>El orden de preguntas y opciones es aleatorio en cada intento</li>
       <li><i class="fa-solid fa-pen" style="color:var(--primary)"></i>Solo marcas tu respuesta; puedes volver y cambiarla antes de finalizar</li>
@@ -200,7 +200,7 @@
 (function(){
 "use strict";
 
-/* ---------- Banco de preguntas (fiel a w3_3.pdf y w3_2.pdf) ---------- */
+/* ---------- Banco de preguntas (fiel a w3_3.pdf, w3_2.pdf y w3_1.pdf) ---------- */
 const BANK=[
 /* ----- Sockets y conexión (4) ----- */
 {w:'Sockets y conexión',q:'¿Por qué se usa TCP en las aplicaciones cliente-servidor del material?',
@@ -355,7 +355,7 @@ function finish(){
   $('scoreTxt').textContent=got+' / '+total;
   const badge=$('gradeBadge'),msg=$('msgTxt');
   if(pct>=85){badge.className='badge';badge.textContent=pct+'% · Excelente';
-    msg.textContent='Dominas la semana 3. Listo para avanzar a la semana 5.';}
+    msg.textContent='Dominas la semana 3. Listo para seguir con el resto del curso.';}
   else if(pct>=60){badge.className='badge mid';badge.textContent=pct+'% · Bien, pero repasa';
     msg.textContent='Buena base. Revisa la revisión de abajo y refuerza los temas más bajos.';}
   else{badge.className='badge low';badge.textContent=pct+'% · Necesitas repasar';
