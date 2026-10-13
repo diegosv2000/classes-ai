@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Test Semana 1 — Programación Concurrente con Hilos</title>
+<title>Test Semana 3 — Redes y Sockets</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -117,7 +117,7 @@
   .badge{background:rgba(44,194,119,.15);color:var(--success)}
   .badge.low{background:rgba(236,75,75,.15);color:var(--destructive)}
   .badge.mid{background:rgba(240,180,41,.15);color:var(--warning)}
-  .wkgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}
+  .wkgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
   @media(max-width:640px){.wkgrid{grid-template-columns:repeat(2,1fr)}}
   .wkbox{
     background:var(--surface);border:1px solid var(--border);border-radius:.75rem;
@@ -150,9 +150,9 @@
 
   <!-- ============ INICIO ============ -->
   <div class="card" id="scrStart">
-    <h1><i class="fa-solid fa-clipboard-check"></i>Test de repaso · Semana 1</h1>
-    <p class="sub" style="margin-bottom:14px">Programación concurrente con hilos</p>
-    <p style="margin-bottom:8px">Comprueba cuánto aprendiste del material <span class="mono">w1_1.pdf</span>. Son <b>16 preguntas</b> de selección múltiple sobre concurrencia, hilos, sus métodos y las interrupciones.</p>
+    <h1><i class="fa-solid fa-clipboard-check"></i>Test de repaso · Semana 3</h1>
+    <p class="sub" style="margin-bottom:14px">Redes y Sockets</p>
+    <p style="margin-bottom:8px">Comprueba cuánto aprendiste de los materiales <span class="mono">w3_3.pdf</span> (Sockets I), <span class="mono">w3_2.pdf</span> (communication and networks) y <span class="mono">w3_1.pdf</span> (desempeño, refuerzo). Son <b>20 preguntas</b> de selección múltiple.</p>
     <ul class="small" style="list-style:none;line-height:2;margin-bottom:20px">
       <li><i class="fa-solid fa-shuffle" style="color:var(--primary)"></i>El orden de preguntas y opciones es aleatorio en cada intento</li>
       <li><i class="fa-solid fa-pen" style="color:var(--primary)"></i>Solo marcas tu respuesta; puedes volver y cambiarla antes de finalizar</li>
@@ -190,7 +190,7 @@
     <div id="review"></div>
     <div class="center" style="margin-top:24px">
       <button class="btn" id="retryBtn"><i class="fa-solid fa-rotate-right"></i>Reintentar (se rebaraja todo)</button>
-      <p class="small" style="margin-top:14px"><a href="index.html" style="color:var(--muted-fg);text-decoration:none">← contenido de la semana 1</a> · <a href="../../courses/pccd/index.html" style="color:var(--muted-fg);text-decoration:none">índice del curso</a></p>
+      <p class="small" style="margin-top:14px"><a href="index.html" style="color:var(--muted-fg);text-decoration:none">← contenido de la semana 3</a> · <a href="../index.html" style="color:var(--muted-fg);text-decoration:none">índice del curso</a></p>
     </div>
   </div>
 
@@ -200,69 +200,81 @@
 (function(){
 "use strict";
 
-/* ---------- Banco de preguntas (fiel a w1_1.pdf) ---------- */
+/* ---------- Banco de preguntas (fiel a w3_3.pdf, w3_2.pdf y w3_1.pdf) ---------- */
 const BANK=[
-/* ----- Concurrencia (2) ----- */
-{w:'Concurrencia',q:'¿Qué es un software concurrente?',
- o:['Un software que corre obligatoriamente en varias máquinas','Un software capaz de hacer más de una cosa a la vez, como un procesador de textos que responde al teclado mientras actualiza la pantalla','Un software escrito en varios lenguajes de programación','Un software que usa varios monitores a la vez'],
- a:1,e:'Los usuarios esperan que el sistema (y una sola aplicación) haga varias cosas a la vez: descargar, imprimir, reproducir audio, responder al mouse. El software capaz de eso es concurrente.'},
-{w:'Concurrencia',q:'Un thread o hilo de ejecución es…',
- o:['la ejecución secuencial de una serie de instrucciones dentro de un programa','una conexión de red entre dos procesos','un programa con varios archivos fuente','una función recursiva'],
- a:0,e:'Un thread es la ejecución secuencial de una serie de instrucciones dentro de un programa. De forma simple: procesos ejecutados por un programa.'},
+/* ----- Sockets y conexión (4) ----- */
+{w:'Sockets y conexión',q:'¿Por qué se usa TCP en las aplicaciones cliente-servidor del material?',
+ o:['Porque es más ligero que UDP','Porque la comunicación debe ser confiable: no se descartan datos y llegan en el mismo orden en que se enviaron','Porque no requiere conexión','Porque cifra automáticamente'],
+ a:1,e:'La comunicación cliente-servidor debe ser confiable: sin descartar datos y en el mismo orden de envío. TCP proporciona ese canal punto a punto confiable, y ambos programas vinculan un socket a su extremo de la conexión.'},
+{w:'Sockets y conexión',q:'¿Qué necesita el cliente para solicitar la conexión y cómo se identifica?',
+ o:['La MAC del servidor y su IP','El hostname de la máquina del servidor y el puerto donde escucha; se identifica vinculando un puerto local propio','Solo la IP del servidor','Un certificado digital'],
+ a:1,e:'El cliente debe conocer el hostname de la máquina del servidor y el puerto al que escucha. Además, para identificarse, vincula un número de puerto local que usará durante la conexión.'},
+{w:'Sockets y conexión',q:'Al aceptar una conexión, ¿qué hace el servidor para seguir escuchando nuevas solicitudes?',
+ o:['Cierra el socket original y abre otro en otro puerto','Crea un nuevo socket vinculado al mismo puerto local, con endpoint remoto hacia el cliente, y el original sigue escuchando','Atiende al cliente con el mismo socket y no acepta más','Crea un hilo por cada paquete'],
+ a:1,e:'El servidor vincula un nuevo socket al mismo puerto local con el endpoint remoto establecido a la dirección y puerto del cliente; así el socket original sigue escuchando solicitudes mientras atiende al cliente conectado.'},
+{w:'Sockets y conexión',q:'En los 5 pasos del cliente, ¿cuál es el único que puede diferir entre clientes?',
+ o:['Abrir el socket','Cerrar los streams','Paso 3: leer o escribir según el protocolo del servidor','Cerrar el socket'],
+ a:2,e:'Los 5 pasos: 1) abrir un Socket, 2) abrir streams de entrada y salida, 3) leer/escribir según los protocolos del servidor, 4) cerrar los streams, 5) cerrar el socket. Solo el paso 3 puede diferir según la complejidad del servidor.'},
 
-/* ----- Hilos y procesos (2) ----- */
-{w:'Hilos y procesos',q:'¿Qué diferencia a un proceso de un hilo?',
- o:['El proceso tiene un entorno autónomo con su propio espacio de memoria; el hilo vive dentro de un proceso y comparte su memoria y archivos abiertos','El hilo es más costoso de crear que el proceso','El proceso comparte memoria con todos los demás procesos','No hay diferencia: son lo mismo'],
- a:0,e:'Un proceso tiene un conjunto completo y privado de recursos (propia memoria). Los hilos son "procesos ligeros": crearlos cuesta menos y comparten los recursos de su proceso.'},
-{w:'Hilos y procesos',q:'¿Para qué sirven los mecanismos IPC como pipes o sockets?',
- o:['Para que un hilo comparta su pila con otro','Para facilitar la comunicación entre procesos, incluso entre sistemas diferentes','Para aumentar la prioridad de un hilo','Para almacenar el código de los hilos'],
- a:1,e:'La mayoría de SO admite IPC (pipes, sockets) para comunicar procesos. Los IPC permiten además comunicación de procesos entre diferentes sistemas.'},
+/* ----- InetAddress (3) ----- */
+{w:'InetAddress',q:'¿Qué representa InetAddress y cómo se crean sus objetos?',
+ o:['Un dominio web; con new InetAddress()','Una dirección IP (IPv4 o IPv6) con su nombre de dominio; sin constructores, mediante métodos de fábrica estáticos','Un puerto abierto; con el constructor por defecto','Una conexión TCP; con connect()'],
+ a:1,e:'InetAddress representa una dirección IP (IPv4 o IPv6) y encapsula también el nombre de dominio. No cuenta con constructores: se usa sus métodos de fábrica estáticos (getLocalHost, getByName, etc.).'},
+{w:'InetAddress',q:'¿Qué retorna InetAddress.getByName(null)?',
+ o:['null','La dirección del host local','Un InetAddress que representa la interfaz de loopback','Lanza una excepción'],
+ a:2,e:'getByName(String host) determina la IP de un host a partir de su hostname (nombre de máquina o texto de IP). Si se entrega null como argumento, retorna un InetAddress representando la interfaz de loopback.'},
+{w:'InetAddress',q:'¿Qué diferencia hay entre getAddress() y getHostAddress()?',
+ o:['Ninguna, son alias','getAddress() retorna la IP sin procesar como byte[]; getHostAddress() la retorna en forma textual como String','getAddress() retorna el nombre del host; getHostAddress() el dominio','Una es estática y la otra no'],
+ a:1,e:'getAddress() retorna la dirección IP sin procesar (byte[], en orden de red), mientras que getHostAddress() la retorna en forma textual (String). Además existen getHostName() (nombre del host) y hashCode().'},
 
-/* ----- Crear hilos (3) ----- */
-{w:'Crear hilos',q:'En Java, ¿cuáles son las dos formas de definir e iniciar un hilo?',
- o:['Usar Runnable pasado a un Thread, o crear una subclase de Thread sobrescribiendo run()','Usar main() con varios argumentos','Importar la clase OSThread del sistema operativo','Declarar la clase como static'],
- a:0,e:'Cada hilo se asocia con una instancia de la clase Thread. Se define el trabajo con un objeto Runnable (interfaz con el método run) o creando una subclase de Thread (que ya implementa Runnable, aunque su run no hace nada).'},
-{w:'Crear hilos',q:'¿Qué se debe invocar SIEMPRE para iniciar el nuevo hilo?',
- o:['run() directamente','init()','Thread.start()','main()'],
- a:2,e:'Ambas formas requieren invocar Thread.start() para iniciar el nuevo hilo. Llamar run() directo solo ejecuta el método en el hilo actual, sin concurrencia.'},
-{w:'Crear hilos',q:'¿Por qué el material dice que usar Runnable es "más general"?',
- o:['Porque Runnable compila más rápido','Porque podemos crear una subclase de cualquier clase que no sea Thread e igualmente implementar Runnable','Porque Runnable crea más de un hilo a la vez','Porque Thread está obsoleto'],
- a:1,e:'Extender Thread nos limita a descender de Thread (y gasta la única herencia de Java). Con Runnable la clase puede extender cualquier otra; extender Thread solo facilita el trabajo en aplicaciones simples.'},
+/* ----- ServerSocket y Socket (3) ----- */
+{w:'ServerSocket y Socket',q:'¿Qué excepciones puede arrojar el constructor ServerSocket(int port)?',
+ o:['Solo IOException','IOException (error de I/O), SecurityException (un SecurityManager lo prohíbe) e IllegalArgumentException (puerto fuera de 0-65535)','NullPointerException y ClassCastException','Solo IllegalArgumentException'],
+ a:1,e:'ServerSocket(int port) arroja IOException si hay error de I/O al crear el socket, SecurityException si un administrador de seguridad lo prohíbe, e IllegalArgumentException si el puerto está fuera del rango 0-65535.'},
+{w:'ServerSocket y Socket',q:'Sobre el ServerSocket, ¿qué dicen las observaciones del material?',
+ o:['El puerto 0 es inválido y la cola es ilimitada','Con puerto 0 se asigna uno automáticamente; la cola de solicitudes tiene máximo 50 y las que llegan con la cola llena son rechazadas','La cola máxima es 100 y nunca rechaza','Debe crearse siempre con el puerto 80'],
+ a:1,e:'Si se entrega 0 como puerto, se toma uno asignado automáticamente. La longitud máxima de la cola de solicitudes entrantes es 50: una solicitud que llegue con la cola llena será rechazada.'},
+{w:'ServerSocket y Socket',q:'¿Qué limitación tienen los streams getInputStream()/getOutputStream() de un Socket?',
+ o:['Solo funcionan en el servidor','Solo sirven para leer y escribir arrays de bytes: hay que envolverlos con otras clases para otros tipos u objetos','Solo aceptan Strings','No se pueden cerrar'],
+ a:1,e:'Los streams retornados únicamente pueden usarse para leer y escribir arrays de bytes; es necesario instanciar otras clases sobre el stream (Scanner, PrintWriter, BufferedReader, streams de objetos) para trabajar con otros tipos.'},
 
-/* ----- Estados y prioridades (3) ----- */
-{w:'Estados y prioridades',q:'Un hilo en estado Blocked está…',
- o:['ejecutando con el control de la CPU','esperando por algún recurso o que ocurra un evento','listo para ejecutar pero sin la orden','terminado'],
- a:1,e:'Blocked: espera por algún recurso o que ocurra un evento. (Running = con el control de la CPU; Runnable = ready to run pero sin la orden).'},
-{w:'Estados y prioridades',q:'¿Qué significa que un hilo esté en estado Resumed?',
- o:['Que fue eliminado de memoria','Que está ready to run después de haber estado suspendido o bloqueado','Que cedió voluntariamente la CPU','Que es un daemon thread'],
- a:1,e:'Resumed: ready to run después de haber estado suspendido o bloqueado. (Suspended = cede voluntariamente la CPU para que otros threads se ejecuten).'},
-{w:'Estados y prioridades',q:'Sobre las prioridades de un thread en Java, ¿cuál afirmación es correcta?',
- o:['Van de 1 a 10, la default es 5 (NORM_PRIORITY), y mayor valor da mayor oportunidad de ejecutarse primero, aunque no es garantizado','Van de 0 a 100 y siempre se respetan de forma exacta','Son iguales para todos los hilos y no se pueden cambiar','Van de 1 a 10 y la default es 10 (MAX_PRIORITY)'],
- a:0,e:'Prioridades 1-10 con constantes MIN_PRIORITY (1), NORM_PRIORITY (5, la default) y MAX_PRIORITY (10). Mayor valor = mayor oportunidad, pero no es garantizado: depende de la JVM y del SO; con la misma prioridad, decide el sistema operativo.'},
+/* ----- Streams (3) ----- */
+{w:'Streams',q:'¿Qué hace el booleano del constructor PrintWriter(out, true)?',
+ o:['Activa el modo lectura','Especifica un flush automático del buffer tras println, printf o format','Cierra el stream al terminar','Convierte los datos a binario'],
+ a:1,e:'La segunda forma de instanciar PrintWriter especifica un booleano que indica si se realizará un flush automático del buffer de salida luego de ejecutar println, printf o format.'},
+{w:'Streams',q:'¿Qué retornan BufferedReader.read() y readLine() al final del stream?',
+ o:['0 y cadena vacía','read() retorna -1 y readLine() retorna null','Ambos lanzan EOFException','Ambos retornan null'],
+ a:1,e:'read() retorna el carácter leído como entero, o -1 si se llegó al final. readLine() retorna la línea sin el carácter de terminación, o null al final del stream. Ambos pueden arrojar IOException.'},
+{w:'Streams',q:'Al leer con ObjectInputStream lo escrito con ObjectOutputStream, ¿qué regla debe cumplirse?',
+ o:['Leer en cualquier orden, Java lo resuelve','Leer con los mismos tipos y en el mismo orden en que fueron escritos, casteando readObject() al tipo esperado','Solo se pueden leer Strings','Hay que cerrar y reabrir entre objeto y objeto'],
+ a:1,e:'Los objetos se leen con readObject() y deben castearse al tipo esperado; los datos se leen con los mismos tipos y en el mismo orden en que fueron escritos (ej. writeInt, writeObject("Today"), writeObject(new Date())).'},
 
-/* ----- Métodos esenciales (3) ----- */
-{w:'Métodos esenciales',q:'¿Qué retorna Thread.currentThread()?',
- o:['El hilo principal siempre','Una referencia al objeto Thread que se está ejecutando actualmente','El número de hilos activos','El estado del hilo'],
- a:1,e:'Es un método estático que retorna una referencia al objeto Thread ejecutándose actualmente (por ejemplo, el main thread si lo llamas desde main).'},
-{w:'Métodos esenciales',q:'Sobre Thread.sleep(ms), ¿cuál afirmación del material es correcta?',
- o:['Garantiza una pausa exacta al milisegundo','Los tiempos no son precisos: están limitados por el SO y pueden ser detenidos por interrupciones','Solo funciona en el hilo main','Bloquea todos los hilos del proceso'],
- a:1,e:'sleep() suspende al hilo actual por un periodo, pero no se garantiza precisión (depende de las facilidades del SO) y el descanso puede ser detenido por una interrupción, lanzando InterruptedException.'},
-{w:'Métodos esenciales',q:'¿Qué hace t.join() si t es un Thread en ejecución?',
- o:['Destruye el hilo t inmediatamente','Hace que t espere al hilo actual','Pausa la ejecución del hilo actual hasta que el hilo de t termine','Une a t con otro hilo en uno solo'],
- a:2,e:'join() permite a un hilo esperar por la terminación de otro. Permite especificar un periodo de espera y, como sleep(), responde a interrupciones con InterruptedException.'},
+/* ----- Redes (4) ----- */
+{w:'Redes',q:'¿Qué es la encapsulación en redes?',
+ o:['Cifrar los datos para que nadie los lea','Añadir header (y tail) al data payload para formar el nuevo paquete','Comprimir el paquete para que ocupe menos','Quitar las cabeceras en el destino'],
+ a:1,e:'Encapsulation: proceso de añadir header y tail al data payload para formar un nuevo paquete. El proceso inverso (removerlas para obtener el payload) es la decapsulation.'},
+{w:'Redes',q:'¿Cuál es la función principal de un router?',
+ o:['Conmutar tramas dentro de la red local','Seleccionar la ruta de reenvío de los paquetes según su dirección de destino','Cifrar las comunicaciones','Conectar los terminales al punto de acceso'],
+ a:1,e:'El router es un dispositivo de capa de red que reenvía paquetes: según la dirección de destino, selecciona el camino al siguiente router o al destino. Mantiene la tabla de ruteo, aísla dominios de broadcast y da acceso WAN con NAT.'},
+{w:'Redes',q:'¿Cómo se clasifican las redes según su cobertura geográfica?',
+ o:['Por velocidad: 3G, 4G, 5G','LAN (área local), MAN (una ciudad) y WAN (amplia, decenas a miles de km; Internet es una WAN típica)','Por protocolo: TCP, UDP, IP','Por medio: cable, fibra, aire'],
+ a:1,e:'Según la cobertura: LAN cubre un área local (oficina, casa); MAN se establece dentro de una ciudad; la WAN cubre decenas a miles de kilómetros y conecta redes de múltiples ciudades o países. Internet es una WAN típica.'},
+{w:'Redes',q:'¿En qué tipos se clasifican las topologías de red según el material?',
+ o:['Estrella, bus, anillo, árbol, malla total y malla parcial','Circular, cuadrada y triangular','Interna, externa y mixta','Alámbrica e inalámbrica'],
+ a:0,e:'Las topologías de red se clasifican en: estrella, bus, anillo, árbol, malla total (full-mesh) y malla parcial (partial-mesh). La topología es la disposición estructurada con que se interconectan los dispositivos.'},
 
-/* ----- Interrupciones (2) ----- */
-{w:'Interrupciones',q:'¿Qué es una interrupción en Java?',
- o:['Un error que crashea el hilo','Una indicación a un hilo de que debe detenerse y hacer algo más, enviada con interrupt()','Una señal del SO que no puede controlarse','Un tipo de excepción que siempre termina la JVM'],
- a:1,e:'Una interrupción es una indicación a un hilo de que debe detenerse y hacer algo más. Se envía con interrupt() y es cooperativa: el hilo debe ser capaz de manejar su propia interrupción (lo común es terminar).'},
-{w:'Interrupciones',q:'¿Diferencia entre Thread.interrupted() e isInterrupted()?',
- o:['No hay diferencia, son alias','interrupted() (estático) verifica y limpia la bandera del hilo actual; isInterrupted() verifica el estado de otro hilo sin modificar la bandera','interrupted() lanza la excepción; isInterrupted() la captura','isInterrupted() limpia la bandera; interrupted() no'],
- a:1,e:'La bandera Interrupt Status se establece con interrupt(). El estático Thread.interrupted() verifica si el hilo actual fue interrumpido y LIMPIA la bandera; el método de instancia isInterrupted() consulta el estado de otro hilo sin modificarla. Por convención, lanzar InterruptedException también la limpia.'},
+/* ----- Capas y protocolos (2) ----- */
+{w:'Capas y protocolos',q:'¿Por qué el modelo TCP/IP se convirtió en el marco dominante frente a OSI?',
+ o:['Es más barato de implementar','La pila OSI es compleja y los protocolos TCP e IP están ampliamente usados en la industria','Los gobiernos lo exigieron','OSI solo funciona en LANs'],
+ a:1,e:'El stack de protocolos OSI es complejo y TCP e IP están ampliamente usados en la industria, por lo que el modelo de referencia TCP/IP se convirtió en el marco mainstream para la comunicación de red.'},
+{w:'Capas y protocolos',q:'¿Qué papel juega la capa de transporte y qué identifica un puerto?',
+ o:['Conecta hosts entre sí; el puerto identifica la máquina','Encapsula los datos de aplicación y establece la conexión extremo a extremo (puerto a puerto); el puerto identifica la aplicación a la que van destinados los datos','Convierte bits en señales; el puerto mide la velocidad','Enruta paquetes; el puerto cuenta los saltos'],
+ a:1,e:'Un protocolo de transporte recibe los datos de la capa de aplicación, los encapsula con su cabecera y ayuda a establecer una conexión extremo a extremo, de puerto a puerto. El socket está vinculado a un puerto para que la capa TCP identifique la aplicación destinataria.'},
 
-/* ----- Daemon (1) ----- */
-{w:'Daemon',q:'Sobre los daemon threads, ¿cuál afirmación es correcta?',
- o:['Son hilos de alta prioridad que bloquean a los user threads','Cuando todos los hilos de usuario terminan, la JVM termina los daemon threads automáticamente; y setDaemon(true) debe llamarse antes de start() o lanza IllegalThreadStateException','Pueden convertirlos en daemon en cualquier momento sin consecuencias','La JVM espera a que los daemon threads terminen antes de cerrarse'],
- a:1,e:'Un daemon thread proporciona servicios a los hilos de usuario (ej. el garbage collector). Cuando todos los user threads terminan, la JVM termina los daemons automáticamente. Además, marcar como daemon un hilo ya iniciado arroja IllegalThreadStateException.'},
+/* ----- Desempeño (1) ----- */
+{w:'Desempeño',q:'El material w3_1 sobre desempeño y latencia enfatiza reducir los retrasos en…',
+ o:['El encendido del equipo y la memoria RAM','La transmisión de datos y el procesamiento dentro de los sistemas','La batería y la pantalla','El diseño de la interfaz'],
+ a:1,e:'El deck de desempeño de esta semana define la optimización como las estrategias y técnicas para mejorar la eficiencia y reducir los retrasos en la transmisión de datos y el procesamiento dentro de los sistemas — el mismo contenido base de la semana 2 (cuellos de botella: propagación, transmisión, procesamiento y colas).'},
 ];
 
 /* ---------- utilidades ---------- */
@@ -343,11 +355,11 @@ function finish(){
   $('scoreTxt').textContent=got+' / '+total;
   const badge=$('gradeBadge'),msg=$('msgTxt');
   if(pct>=85){badge.className='badge';badge.textContent=pct+'% · Excelente';
-    msg.textContent='Dominas la semana 1. Listo para avanzar a la semana 2.';}
+    msg.textContent='Dominas la semana 3. Listo para seguir con el resto del curso.';}
   else if(pct>=60){badge.className='badge mid';badge.textContent=pct+'% · Bien, pero repasa';
     msg.textContent='Buena base. Revisa la revisión de abajo y refuerza los temas más bajos.';}
   else{badge.className='badge low';badge.textContent=pct+'% · Necesitas repasar';
-    msg.textContent='Conviene volver a la presentación de la semana 1 y luego reintentar este test.';}
+    msg.textContent='Conviene volver a la presentación de la semana 3 y luego reintentar este test.';}
   const wk=$('wkGrid');
   wk.innerHTML=Object.keys(per).map(w=>
     '<div class="wkbox"><span class="small">'+w+'</span><b>'+per[w].got+' / '+per[w].total+'</b></div>'

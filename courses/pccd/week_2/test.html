@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Test de repaso — Introducción al curso · Programación Concurrente y Distribuida</title>
+<title>Test Semana 2 — Sistemas Distribuidos y Desempeño</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -38,7 +38,6 @@
     display:flex;align-items:center;justify-content:center;
     padding:30px 16px;position:relative;
   }
-  /* brillos de fondo en esquinas opuestas */
   body::before,body::after{
     content:'';position:fixed;border-radius:50%;pointer-events:none;z-index:0;
     filter:blur(64px);
@@ -83,13 +82,11 @@
   .btn.ghost:hover{border-color:rgba(143,92,240,.5);box-shadow:0 0 24px rgba(143,92,240,.12)}
   .btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
 
-  /* progreso */
   #hud{display:flex;align-items:center;gap:14px;margin-bottom:18px}
   #bar{flex:1;height:6px;background:rgba(255,255,255,.08);border-radius:9999px;overflow:hidden}
   #barFill{height:100%;width:0;background:var(--grad-brand);transition:width .3s}
   #cnt{font-size:.8rem;color:var(--muted-fg);white-space:nowrap;font-family:var(--font-mono)}
 
-  /* opciones */
   .opt{
     display:flex;align-items:flex-start;gap:12px;width:100%;text-align:left;
     background:var(--surface);border:1.5px solid var(--border);border-radius:.75rem;
@@ -108,7 +105,6 @@
   }
   .opt.sel .mark{border-color:var(--primary);background:var(--primary)}
 
-  /* resultado */
   .score{
     font-family:var(--font-mono);font-size:3rem;font-weight:600;line-height:1;
     background:var(--grad-num);-webkit-background-clip:text;background-clip:text;color:transparent;
@@ -121,7 +117,7 @@
   .badge{background:rgba(44,194,119,.15);color:var(--success)}
   .badge.low{background:rgba(236,75,75,.15);color:var(--destructive)}
   .badge.mid{background:rgba(240,180,41,.15);color:var(--warning)}
-  .wkgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}
+  .wkgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
   @media(max-width:640px){.wkgrid{grid-template-columns:repeat(2,1fr)}}
   .wkbox{
     background:var(--surface);border:1px solid var(--border);border-radius:.75rem;
@@ -154,13 +150,13 @@
 
   <!-- ============ INICIO ============ -->
   <div class="card" id="scrStart">
-    <h1><i class="fa-solid fa-clipboard-check"></i>Test de repaso</h1>
-    <p class="sub" style="margin-bottom:14px">Introducción al curso · Programación Concurrente y Distribuida</p>
-    <p style="margin-bottom:8px">Este test evalúa lo aprendido en la presentación de introducción. Son <b>20 preguntas</b> de selección múltiple que cubren las secciones 01–09: hardware e hilos, concurrencia, Java y redes.</p>
+    <h1><i class="fa-solid fa-clipboard-check"></i>Test de repaso · Semana 2</h1>
+    <p class="sub" style="margin-bottom:14px">Sistemas distribuidos y desempeño</p>
+    <p style="margin-bottom:8px">Comprueba cuánto aprendiste de los materiales <span class="mono">w2_1.pdf</span> y <span class="mono">w2_2.pdf</span>. Son <b>20 preguntas</b> de selección múltiple sobre sistemas distribuidos, sus desafíos, concurrencia y desempeño.</p>
     <ul class="small" style="list-style:none;line-height:2;margin-bottom:20px">
       <li><i class="fa-solid fa-shuffle" style="color:var(--primary)"></i>El orden de preguntas y opciones es aleatorio en cada intento</li>
       <li><i class="fa-solid fa-pen" style="color:var(--primary)"></i>Solo marcas tu respuesta; puedes volver y cambiarla antes de finalizar</li>
-      <li><i class="fa-solid fa-chart-column" style="color:var(--primary)"></i>Al final verás tu nota, el desglose por semana y la revisión de cada pregunta</li>
+      <li><i class="fa-solid fa-chart-column"></i>Al final verás tu nota, el desglose por tema y la revisión de cada pregunta</li>
     </ul>
     <button class="btn" id="startBtn"><i class="fa-solid fa-play"></i>Comenzar test</button>
   </div>
@@ -192,10 +188,9 @@
     <div class="wkgrid" id="wkGrid"></div>
     <h3 style="margin:28px 0 4px"><i class="fa-solid fa-list-check"></i>Revisión de respuestas</h3>
     <div id="review"></div>
-    <div class="center" style="margin-top:24px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-      <button class="btn ghost" id="retryBtn"><i class="fa-solid fa-rotate-right"></i>Reintentar (se rebaraja todo)</button>
-      <a class="btn ghost" href="index.html" style="display:inline-flex;align-items:center;text-decoration:none"><i class="fa-solid fa-arrow-left"></i>Volver a la presentación</a>
-      <a class="btn ghost" href="../../courses/pccd/index.html" style="display:inline-flex;align-items:center;text-decoration:none"><i class="fa-solid fa-house"></i>Índice del curso</a>
+    <div class="center" style="margin-top:24px">
+      <button class="btn" id="retryBtn"><i class="fa-solid fa-rotate-right"></i>Reintentar (se rebaraja todo)</button>
+      <p class="small" style="margin-top:14px"><a href="index.html" style="color:var(--muted-fg);text-decoration:none">← contenido de la semana 2</a> · <a href="../index.html" style="color:var(--muted-fg);text-decoration:none">índice del curso</a></p>
     </div>
   </div>
 
@@ -205,75 +200,79 @@
 (function(){
 "use strict";
 
-/* ---------- Banco de preguntas (fiel a las secciones 01-09 de la introducción) ---------- */
+/* ---------- Banco de preguntas (fiel a w2_1.pdf y w2_2.pdf) ---------- */
 const BANK=[
-/* ----- Hilos: secciones 01-03 (6) ----- */
-{w:'Hilos',q:'¿Qué es un núcleo (core) dentro de una CPU?',
- o:['Un tipo de memoria rápida dentro de la CPU','Una unidad de procesamiento independiente dentro de la CPU: ocho núcleos significan, en potencia, ocho cosas haciendo progreso real al mismo tiempo','Un programa que administra los hilos del sistema','Un conector físico de la placa base'],
- a:1,e:'Un núcleo es una unidad de procesamiento independiente. Con un solo núcleo el SO alterna tareas; con más núcleos varias tareas corren realmente a la vez (sección 01).'},
-{w:'Hilos',q:'Con un solo núcleo, ¿cómo "ejecuta a la vez" la CPU varias tareas?',
- o:['No realmente a la vez: el sistema operativo alterna entre tareas tan rápido que parece simultáneo','Ejecuta todas exactamente al mismo instante','Las ejecuta solo si son del mismo programa','Las envía a otro procesador'],
- a:0,e:'Con 1 núcleo el SO alterna tareas tan rápido que parece simultáneo; con más núcleos varias tareas corren realmente a la vez (sección 01).'},
-{w:'Hilos',q:'¿Cuál es la diferencia clave entre un proceso y un hilo?',
- o:['Un proceso es más ligero de crear que un hilo','Los hilos tienen un espacio de memoria completamente privado; los procesos lo comparten','Los procesos tienen un entorno autónomo con memoria privada; los hilos comparten la memoria y recursos de su proceso','No hay diferencia: son términos equivalentes'],
- a:2,e:'Un proceso tiene recursos completos y privados (propia memoria). Los hilos viven dentro de un proceso y comparten su memoria y archivos abiertos: comunicación eficiente pero riesgosa (sección 02).'},
-{w:'Hilos',q:'¿Qué comparten los hilos de un mismo proceso?',
- o:['Nada: cada hilo tiene su propio espacio de memoria, como un proceso','El espacio de memoria y los archivos abiertos del proceso','Solo el nombre del programa','Un núcleo exclusivo de la CPU'],
- a:1,e:'La creación de un hilo es ligera porque reutiliza los recursos del proceso: comparten memoria y archivos abiertos. Por eso comunicarse es sencillo, pero hay riesgo de condiciones de carrera (sección 02).'},
-{w:'Hilos',q:'¿Qué hace el scheduler (planificador) del sistema operativo?',
- o:['Decide qué hilo obtiene la CPU y por cuánto tiempo','Guarda los hilos en el disco duro','Traduce el código Java a instrucciones','Asigna una máquina a cada proceso en la red'],
- a:0,e:'El scheduler decide qué hilo obtiene la CPU y por cuánto tiempo. Durante su vida, un hilo transita por estados como Runnable, Running, Blocked, Suspended y Terminated (sección 03).'},
-{w:'Hilos',q:'En Java, ¿cómo funcionan las prioridades de los hilos?',
- o:['Van de 0 a 100; a menor valor, mayor prioridad','Van de 1 a 10; a mayor valor, mayor oportunidad de ejecutarse primero','Son solo letras (A, B, C)','Java no soporta prioridades'],
- a:1,e:'Las prioridades en Java son enteros de 1 a 10. A mayor valor, más oportunidad de ejecutarse primero; con la misma prioridad, decide el sistema operativo (sección 03).'},
+/* ----- Sistemas distribuidos (2) ----- */
+{w:'Sistemas distribuidos',q:'¿Qué es un sistema distribuido?',
+ o:['Un servidor con varios procesadores','Una colección de computadoras separadas físicamente, conectadas por red, que el programador percibe como un solo sistema','Un programa que ejecuta varios hilos a la vez','Un cable que conecta varias máquinas'],
+ a:1,e:'Colección de computadoras separadas físicamente y conectadas por una red de comunicaciones; el programador percibe todos los componentes como un solo sistema y accede a los remotos igual que a los locales, con middleware de por medio.'},
+{w:'Sistemas distribuidos',q:'¿Qué es el middleware y qué ejemplos menciona el material?',
+ o:['Un antivirus de red; ej. firewall','El estrato de software que abstrae y enmascara la heterogeneidad; ej. CORBA y Java RMI','El cableado del edificio; ej. fibra óptica','Una base de datos; ej. MySQL'],
+ a:1,e:'El middleware provee una abstracción de programación y enmascara la heterogeneidad subyacente de redes, hardware, SO y lenguajes. Ejemplos: CORBA, Java RMI; destacan también RPC y SOAP.'},
 
-/* ----- Concurrencia: secciones 04-05 (4) ----- */
-{w:'Concurrencia',q:'¿Cuál es la diferencia entre concurrencia y paralelismo?',
- o:['Concurrencia: las tareas progresan de forma entrelazada, aunque sea sobre un solo núcleo; paralelismo: se ejecutan realmente al mismo tiempo en núcleos distintos','Son lo mismo con distinto nombre','El paralelismo ocurre sobre un núcleo; la concurrencia necesita varios','La concurrencia solo existe en sistemas distribuidos'],
- a:0,e:'La concurrencia entrelaza (en cada tick solo una tarea avanza en el núcleo); el paralelismo da a cada tarea su propio núcleo y avanzan simultáneamente (sección 04).'},
-{w:'Concurrencia',q:'¿Qué es la programación concurrente?',
- o:['Escribir software que coordina tareas que progresan juntas: puede hacer varias cosas "a la vez", como un procesador de texto que responde al teclado mientras guarda','Escribir programas que usan un solo hilo','Programar aplicaciones que corren en varias máquinas','Un tipo de error de memoria'],
- a:0,e:'Es escribir software que coordina tareas que progresan juntas. El software concurrente puede hacer varias cosas "a la vez" (sección 04).'},
-{w:'Concurrencia',q:'¿Por qué la operación contador++ NO es atómica en un entorno multihilo?',
- o:['Porque Java no permite incrementar variables compartidas','Porque internamente son 3 pasos (leer, incrementar, escribir) y los hilos pueden interrumpirse entre ellos','Porque el contador se guarda en el disco duro','Porque siempre lanza InterruptedException'],
- a:1,e:'Un incremento como contador++ parece una sola operación, pero son 3 pasos: leer, incrementar, guardar. Si los hilos se entrelazan, aparece la interferencia de hilos (sección 05).'},
-{w:'Concurrencia',q:'Hilo A hace contador++ y Hilo B hace contador-- sobre la misma variable (inicial 0), con sus pasos entrelazados. ¿Qué resultado puede aparecer?',
- o:['Siempre 0, porque las operaciones se cancelan','-1: la escritura de B sobrescribe la de A y su resultado se pierde','1, porque A siempre guarda primero','El programa no compila'],
- a:1,e:'Con entrelazado ambos hilos leen 0, A guarda 1 y B guarda -1 encima: la actualización de A se pierde. En secuencia, el resultado sí sería 0 (demo de la sección 05).'},
+/* ----- Desafíos (4) ----- */
+{w:'Desafíos',q:'¿A qué elementos se aplica la heterogeneidad?',
+ o:['Solo a los lenguajes de programación','Redes, hardware, sistemas operativos, lenguajes de programación e implementaciones de diferentes desarrolladores','Solo al hardware de red','A los cables y conectores'],
+ a:1,e:'La heterogeneidad abarca: redes, hardware de computadores, sistemas operativos, lenguajes de programación e implementaciones de diferentes desarrolladores. El middleware la enmascara.'},
+{w:'Desafíos',q:'¿Qué se requiere para lograr la extensibilidad de un sistema distribuido abierto?',
+ o:['Comprar más servidores','Que las interfaces clave sean publicadas','Cerrar el sistema a terceros','Usar un solo proveedor'],
+ a:1,e:'Para la extensibilidad es imprescindible que las interfaces clave sean publicadas. Los sistemas abiertos se extienden con más computadoras (hardware) y nuevos servicios o re-implementaciones (software), y dan independencia de proveedores.'},
+{w:'Desafíos',q:'¿Cuáles son los tres componentes de la seguridad según el material?',
+ o:['Velocidad, memoria y disco','Confidencialidad, integridad y disponibilidad','Autenticación, autorización y auditoría','Firewall, antivirus y VPN'],
+ a:1,e:'Confidencialidad: protección contra individuos no autorizados. Integridad: protección contra la alteración o corrupción. Disponibilidad: protección contra la interferencia que impide el acceso a los recursos.'},
+{w:'Desafíos',q:'Se dice que un sistema es escalable si…',
+ o:['usa el último hardware disponible','conserva su efectividad cuando crecen significativamente el número de recursos y el número de usuarios','tiene más de un servidor','está escrito en un lenguaje moderno'],
+ a:1,e:'Escalabilidad: conservar la efectividad ante un incremento significativo de recursos y usuarios. No basta con "aguantar más": la efectividad debe mantenerse.'},
 
-/* ----- Java: sección 06 (4) ----- */
-{w:'Java',q:'En Java, ¿cuáles son las dos formas de definir e iniciar un hilo?',
- o:['Implementar Runnable y pasarla a un Thread, o extender la clase Thread (sobrescribiendo run())','Llamar a System.newThread() o usar hilos del SO directamente','Implementar Runnable o sobrescribir el método main()','Extender Thread o implementar start()'],
- a:0,e:'Ambas implican la clase Thread: se proporciona un Runnable (interfaz con el método run) o se crea una subclase de Thread (que ya implementa Runnable). En ambos casos se lanza con start() (sección 06).'},
-{w:'Java',q:'¿Cuál de las dos formas de definir un hilo se recomienda y por qué?',
- o:['Extender Thread, porque da acceso a más métodos','Implementar Runnable, porque separa la tarea del mecanismo de ejecución; extender Thread consume la única herencia disponible','Ninguna: los hilos solo se crean con librerías externas','Extender Thread, porque Runnable está obsoleto'],
- a:1,e:'Implementar Runnable es la recomendada: separa la tarea del mecanismo de ejecución. Extender Thread funciona, pero consume la única herencia disponible (sección 06).'},
-{w:'Java',q:'¿Por qué se debe llamar a start() y no directamente a run()?',
- o:['Porque run() es privado en Java','Porque start() crea un nuevo hilo que ejecuta run(); llamar run() directo ejecuta el código en el hilo actual, sin concurrencia','Porque start() compila el código más rápido','No hay diferencia práctica'],
- a:1,e:'start() crea el nuevo hilo que invoca run(); llamar run() directo es solo una llamada de método normal, ejecutada en el hilo actual (sección 06).'},
-{w:'Java',q:'¿Qué es el main thread?',
- o:['El hilo principal con el que arranca toda aplicación Java, desde el cual se crean y lanzan los demás hilos','Un hilo con prioridad 10','El hilo que nunca puede terminar','Un hilo exclusivo para entrada/salida de red'],
- a:0,e:'Cada aplicación arranca con un hilo principal (main thread), capaz de crear hilos adicionales, cada uno asociado a una instancia de Thread (sección 06).'},
+/* ----- Fallos y transparencia (4) ----- */
+{w:'Fallos y transparencia',q:'¿Cómo se implementa la detección de fallos según el ejemplo del material?',
+ o:['Reiniciando el servidor cada día','Con sumas de comprobación (checksums) para detectar datos corruptos en un mensaje','Contratando más administradores','Preguntando al usuario'],
+ a:1,e:'Detección: se pueden utilizar sumas de comprobación (checksums) para detectar datos corruptos en un mensaje.'},
+{w:'Fallos y transparencia',q:'¿Qué implica la recuperación de fallos?',
+ o:['Apagar todo el sistema','Que tras una caída del servidor, el estado de los datos pueda reponerse o retrotraerse (rollback) a una situación anterior','Borrar los datos corruptos','Ignorar el fallo'],
+ a:1,e:'La recuperación implica diseñar software donde, tras una caída del servidor, el estado de los datos se repone o retracta (rollback) a una situación anterior.'},
+{w:'Fallos y transparencia',q:'"Acceder a los recursos sin conocer su localización" es la transparencia de…',
+ o:['acceso','ubicación','replicación','movilidad'],
+ a:1,e:'Es la transparencia de ubicación. (La de acceso usa operaciones idénticas para local y remoto; la de replicación oculta las copias; la de movilidad permite reubicar sin afectar la operación).'},
+{w:'Fallos y transparencia',q:'¿Qué permite la transparencia de concurrencia?',
+ o:['Ocultar los fallos del sistema','Que varios procesos operen concurrentemente sobre recursos compartidos sin interferencia mutua','Reconfigurar el sistema según la carga','Copiar recursos sin avisar'],
+ a:1,e:'Transparencia de concurrencia: varios procesos operan concurrentemente sobre recursos compartidos sin interferencia mutua.'},
 
-/* ----- Redes: secciones 07-09 (6) ----- */
-{w:'Redes',q:'¿Qué identifica una dirección IP y qué identifica un número de puerto?',
- o:['La IP identifica la máquina en la red; el puerto identifica la aplicación/servicio dentro de la máquina','La IP identifica la aplicación; el puerto identifica la máquina','Ambos identifican la misma cosa','La IP identifica la velocidad de la conexión; el puerto el tipo de cable'],
- a:0,e:'La IP identifica la máquina (como la dirección de un edificio); el puerto (0-65535) identifica el servicio dentro de ella (como el número de apartamento). El cliente también vincula un puerto local (sección 07).'},
-{w:'Redes',q:'¿Cuál es la diferencia entre TCP y UDP?',
- o:['TCP es un canal confiable con conexión previa: los datos no se descartan y llegan en orden; UDP envía datagramas sin conexión ni confirmación, más ligero pero sin garantías','UDP es más confiable que TCP','Ambos garantizan el orden de los paquetes','TCP no requiere conexión y UDP sí'],
- a:0,e:'TCP: canal punto a punto confiable, base de los sockets. UDP: datagramas sin confirmación, útil cuando la velocidad importa más que la fiabilidad (streaming, juegos) (sección 07).'},
-{w:'Redes',q:'En redes, ¿qué es la encapsulación?',
- o:['El proceso de cifrar los datos antes de enviarlos','Añadir cabecera (y cola) al payload de datos para formar un paquete','Comprimir los datos para que ocupen menos','Eliminar las cabeceras para obtener el payload'],
- a:1,e:'Encapsular = añadir header/tail al payload para formar el paquete que se transmite. El proceso inverso (quitarlas en el destino) es la decapsulación (sección 07).'},
-{w:'Redes',q:'¿Cuál es el orden correcto del saludo de tres vías (3-way handshake) de TCP?',
- o:['ACK → SYN → SYN-ACK','SYN → SYN-ACK → ACK','SYN-ACK → ACK → SYN','SYN → ACK → SYN-ACK'],
- a:1,e:'El cliente envía SYN (solicitud), el servidor responde SYN-ACK (acepta) y el cliente confirma con ACK (sección 08).'},
-{w:'Redes',q:'Cuando el servidor acepta una conexión TCP, ¿qué ocurre con los sockets?',
- o:['Cierra el socket de escucha y deja de aceptar clientes','Crea un socket nuevo para atender al cliente, mientras el original sigue escuchando nuevas solicitudes','Usa el mismo socket para todos los clientes a la vez','No usa sockets: TCP los reemplaza'],
- a:1,e:'Un socket es el extremo local de la conexión: cada programa escribe y lee en su socket. Al aceptar, el servidor crea un socket nuevo para el cliente y el original sigue escuchando (sección 08).'},
-{w:'Redes',q:'¿Qué es la latencia y qué es el throughput?',
- o:['Latencia: la cantidad de tareas por segundo; throughput: el tiempo de respuesta','Latencia: el tiempo que tarda una solicitud en viajar al destino y regresar; throughput: la cantidad de tareas completadas por unidad de tiempo','Son dos nombres para lo mismo','Latencia: el tamaño de los paquetes; throughput: la distancia entre servidores'],
- a:1,e:'Latencia es tiempo (ida y vuelta de una solicitud); throughput es cantidad (ops/s). Un sistema puede procesar miles por segundo y aun así tener alta latencia individual (sección 09).'},
+/* ----- Concurrencia (4) ----- */
+{w:'Concurrencia',q:'Según la tabla del material, ¿qué distingue a los hilos de los procesos?',
+ o:['Creación costosa, memoria independiente','Creación ligera, memoria y recursos compartidos, comunicación sencilla pero mayor complejidad de programación','Solo se diferencian en el nombre','Los hilos no pueden comunicarse'],
+ a:1,e:'Procesos: creación costosa, memoria independiente, comunicación compleja, programación menos compleja. Hilos: creación ligera, recursos y memoria compartidos, comunicación sencilla, pero alta complejidad de programación.'},
+{w:'Concurrencia',q:'¿Cuándo constituyen un conjunto de actividades un programa concurrente?',
+ o:['Cuando se ejecutan en máquinas distintas','Cuando todas cooperan entre sí para realizar una tarea común','Cuando usan varios núcleos','Cuando tienen la misma prioridad'],
+ a:1,e:'Cada actividad está soportada por un hilo, y para que el conjunto constituya un programa concurrente todas deben cooperar entre sí para realizar una tarea común.'},
+{w:'Concurrencia',q:'¿Cuál es la diferencia entre paralelismo real y paralelismo lógico?',
+ o:['No hay diferencia práctica','Real: una actividad por procesador/núcleo, avanzan a la vez; lógico: se intercalan actividades en un núcleo, dando la imagen de simultaneidad','Real: un solo núcleo; lógico: varios núcleos','Lógico: solo en Java; real: en C'],
+ a:1,e:'Paralelismo real: múltiples procesadores/núcleos, cada actividad en el suyo (o varios ordenadores). Paralelismo lógico: las operaciones de E/S suspenden hilos y se intercalan actividades, ofreciendo la imagen de simultaneidad; el usuario no puede distinguir un caso del otro.'},
+{w:'Concurrencia',q:'¿Qué inconvenientes de la programación concurrente menciona el material?',
+ o:['Consume más memoria RAM siempre','Condición de carrera con inconsistencias en variables compartidas, interbloqueos, y depuración compleja por entrelazados distintos en cada ejecución','Solo funciona en Linux','Los programas quedan más lentos siempre'],
+ a:1,e:'Programación delicada: la condición de carrera genera inconsistencias imprevistas en variables compartidas y pueden surgir interbloqueos. Depuración compleja: las sentencias de cada actividad pueden intercalarse de manera distinta en cada ejecución.'},
+
+/* ----- Desempeño (3) ----- */
+{w:'Desempeño',q:'¿Qué aspectos abarca el término "desempeño"?',
+ o:['Velocidad de procesamiento, uso de recursos, confiabilidad y escalabilidad','Solo la velocidad de la red','Únicamente el número de usuarios','El precio del hardware'],
+ a:0,e:'Desempeño abarca: velocidad de procesamiento, uso de recursos (CPU, memoria, energía), confiabilidad (consistencia sin fallos) y escalabilidad (manejar más carga sin degradarse).'},
+{w:'Desempeño',q:'¿Qué es la latencia y de qué factores depende?',
+ o:['El ancho de banda disponible; depende del proveedor','El tiempo de una solicitud en viajar al destino y regresar; depende de distancia física, congestión, hardware e ineficiencias de software','El número de solicitudes por segundo','Una medida de almacenamiento'],
+ a:1,e:'La latencia es el tiempo que tarda una solicitud en ir del nodo origen al destino y regresar con la respuesta. La afectan la distancia física, la congestión de la red, las limitaciones de hardware y las ineficiencias de software.'},
+{w:'Desempeño',q:'¿En qué cuellos de botella se trabaja para optimizar la latencia?',
+ o:['Disco, CPU, RAM y red','Retrasos de propagación, transmisión, procesamiento y colas de espera','Solo en el hardware del cliente','En el diseño de la interfaz'],
+ a:1,e:'Optimizar la latencia implica identificar y abordar cuellos de botella en el retraso de propagación, de transmisión, de procesamiento y en las colas de espera; con algoritmos eficientes, hardware actualizado y diseños que minimicen distancia y congestión.'},
+
+/* ----- Paralelización (3) ----- */
+{w:'Paralelización',q:'¿Qué mide el throughput y en qué unidades se expresa?',
+ o:['El tiempo por tarea; en ms','La cantidad de operaciones/tareas completadas por período; en ops/s, TPS, req/s, B/s o mensajes/s','La memoria usada; en MB','El número de hilos; en unidades'],
+ a:1,e:'Throughput = operaciones o tareas completadas en un período. Ejemplos: ops/s (BD distribuida con 10,000 consultas/s), TPS (transacciones financieras), req/s (servidores web y APIs), B/s-KB/s-MB/s (datos) y mensajes/s (Kafka, RabbitMQ).'},
+{w:'Paralelización',q:'¿Cuándo es óptimo que #threads = #cores (N)?',
+ o:['Siempre, sin importar la tarea','Solo si todos los subprocesos son ejecutables sin interrupción (sin E/S, llamadas bloqueantes, sleep) y nada más consume mucha CPU','Solo en laptops','Solo si hay más hilos que núcleos'],
+ a:1,e:'Con N núcleos, N subtareas llenan la máquina; con N+1 tareas una queda en espera (idle). #threads = #cores es óptimo solo si todos los subprocesos son ejecutables sin bloqueo y no corre otra cosa que consuma CPU. Si los hilos se bloquean en E/S, más hilos que núcleos puede ser correcto.'},
+{w:'Paralelización',q:'¿Qué es el Simultaneous Multithreading (SMT / Hyper-Threading)?',
+ o:['Una librería de Java para crear hilos','Una técnica de hardware donde un núcleo físico gestiona dos hilos a la vez, emitiendo instrucciones de ambos en el mismo ciclo; no duplica la velocidad (mejoras hasta 70-80%)','Un algoritmo del sistema operativo','Lo mismo que multi-core'],
+ a:1,e:'SMT (Hyper-Threading en Intel, SMT en AMD) permite a un núcleo físico gestionar dos hilos simultáneamente aprovechando recursos inactivos: 4 núcleos / 8 hilos significa dos tareas por núcleo. No duplica la velocidad: hasta 70-80% de mejora en software especializado. Es hardware; el multithreading de software es el SO alternando hilos.'},
 ];
 
 /* ---------- utilidades ---------- */
@@ -354,11 +353,11 @@ function finish(){
   $('scoreTxt').textContent=got+' / '+total;
   const badge=$('gradeBadge'),msg=$('msgTxt');
   if(pct>=85){badge.className='badge';badge.textContent=pct+'% · Excelente';
-    msg.textContent='Dominas los conceptos del curso. Úsalos como base para profundizar.';}
+    msg.textContent='Dominas la semana 2. Listo para avanzar a la semana 3.';}
   else if(pct>=60){badge.className='badge mid';badge.textContent=pct+'% · Bien, pero repasa';
-    msg.textContent='Buena base. Revisa la revisión de abajo y refuerza las semanas más bajas.';}
+    msg.textContent='Buena base. Revisa la revisión de abajo y refuerza los temas más bajos.';}
   else{badge.className='badge low';badge.textContent=pct+'% · Necesitas repasar';
-    msg.textContent='Conviene volver a la introducción interactiva y luego reintentar este test.';}
+    msg.textContent='Conviene volver a la presentación de la semana 2 y luego reintentar este test.';}
   const wk=$('wkGrid');
   wk.innerHTML=Object.keys(per).map(w=>
     '<div class="wkbox"><span class="small">'+w+'</span><b>'+per[w].got+' / '+per[w].total+'</b></div>'

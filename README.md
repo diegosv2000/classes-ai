@@ -13,7 +13,7 @@ Repositorio personal de estudio para el curso **Programación Concurrente y Dist
 
 1. Abre `index.html` (raíz) — es el **catálogo de cursos**; por ahora solo existe **Programación Concurrente y Distribuida (PCCD)**.
 2. Entra al curso (`courses/pccd/index.html`) — su portada enlaza todo el material.
-3. Si es tu primer acercamiento: empieza por la **Introducción al curso** (`classes/course_introduction/index.html`).
+3. Si es tu primer acercamiento: empieza por la **Introducción al curso** (`courses/pccd/course_introduction/index.html`).
 4. Cada semana: lee el resumen (`introduction.html`), estudia la presentación completa (`index.html`) y cierra con su test (`test.html`).
 
 ```bash
@@ -29,45 +29,44 @@ entiendo-ai/
 ├── index.html                    ← catálogo de cursos (lista de cursos disponibles)
 ├── styles.md                     ← guía de estilo visual (paleta y reglas de diseño)
 ├── courses/
-│   └── pccd/
-│       └── index.html            ← portada del curso PCCD: menú con enlaces a todo el material
-└── classes/
-    ├── course_introduction/
-    │   ├── index.html            ← presentación interactiva de conceptos previos (11 slides)
-    │   └── test.html             ← test de repaso de la introducción (20 preguntas)
-    ├── week_1/
-    │   ├── index.html            ← presentación de la semana (17 slides)
-    │   ├── introduction.html     ← resumen de una página
-    │   ├── test.html             ← test de repaso (16 preguntas)
-    │   └── files/
-    │       └── w1_1.pdf          ← material de la semana 1 (27 p)
-    ├── week_2/
-    │   ├── index.html            ← presentación de la semana (25 slides)
-    │   ├── introduction.html     ← resumen de una página
-    │   ├── test.html             ← test de repaso (20 preguntas)
-    │   └── files/
-    │       ├── w2_1.pdf          ← desafío de los sistemas distribuidos + programación concurrente (44 p)
-    │       └── w2_2.pdf          ← desempeño y optimización para la latencia (30 p)
-    ├── week_3/
-    │   ├── index.html            ← presentación de la semana (23 slides)
-    │   ├── introduction.html     ← resumen de una página
-    │   ├── test.html             ← test de repaso (20 preguntas)
-    │   └── files/
-    │       ├── w3_1.pdf          ← desempeño y optimización para la latencia (24 p)
-    │       ├── w3_2.pdf          ← communication and networks (36 p)
-    │       └── w3_3.pdf          ← programación en red: Sockets I (22 p)
-    ├── week_4/
-    │   ├── index.html            ← (pendiente)
-    │   ├── introduction.html     ← (pendiente: contiene TODO)
-    │   └── files/                ← (vacía: no hay material de la semana 4)
-    └── week_5/
-        ├── index.html            ← presentación de la semana (27 slides)
-        ├── introduction.html     ← resumen de una página
-        ├── test.html             ← test de repaso (20 preguntas)
-        └── files/
-            ├── w5_1.pdf          ← sincronización de hilos (26 p)
-            ├── w5_2.pdf          ← monitores, condiciones de carrera, deadlock, semáforos, etc. (19 p)
-            └── w5_3.pdf          ← conceptos de threads en Java: volatile, executors, etc. (21 p)
+│   └── pccd/                        ← curso Programación Concurrente y Distribuida (autocontenido)
+│       ├── index.html               ← portada del curso: menú con enlaces a todo el material
+│       ├── course_introduction/
+│       │   ├── index.html           ← presentación interactiva de conceptos previos (11 slides)
+│       │   └── test.html            ← test de repaso de la introducción (20 preguntas)
+│       ├── week_1/
+│       │   ├── index.html           ← presentación de la semana (17 slides)
+│       │   ├── introduction.html    ← resumen de una página
+│       │   ├── test.html            ← test de repaso (16 preguntas)
+│       │   └── files/
+│       │       └── w1_1.pdf         ← material de la semana 1 (27 p)
+│       ├── week_2/
+│       │   ├── index.html           ← presentación de la semana (25 slides)
+│       │   ├── introduction.html    ← resumen de una página
+│       │   ├── test.html            ← test de repaso (20 preguntas)
+│       │   └── files/
+│       │       ├── w2_1.pdf         ← desafío de los sistemas distribuidos + programación concurrente (44 p)
+│       │       └── w2_2.pdf         ← desempeño y optimización para la latencia (30 p)
+│       ├── week_3/
+│       │   ├── index.html           ← presentación de la semana (23 slides)
+│       │   ├── introduction.html    ← resumen de una página
+│       │   ├── test.html            ← test de repaso (20 preguntas)
+│       │   └── files/
+│       │       ├── w3_1.pdf         ← desempeño y optimización para la latencia (24 p)
+│       │       ├── w3_2.pdf         ← communication and networks (36 p)
+│       │       └── w3_3.pdf         ← programación en red: Sockets I (22 p)
+│       ├── week_4/
+│       │   ├── index.html           ← (pendiente)
+│       │   ├── introduction.html    ← (pendiente: contiene TODO)
+│       │   └── files/               ← (vacía: no hay material de la semana 4)
+│       └── week_5/
+│           ├── index.html           ← presentación de la semana (27 slides)
+│           ├── introduction.html    ← resumen de una página
+│           ├── test.html            ← test de repaso (20 preguntas)
+│           └── files/
+│               ├── w5_1.pdf         ← sincronización de hilos (26 p)
+│               ├── w5_2.pdf         ← monitores, condiciones de carrera, deadlock, semáforos, etc. (19 p)
+│               └── w5_3.pdf         ← conceptos de threads en Java: volatile, executors, etc. (21 p)
 ```
 
 ### Convención de carpetas semanales
@@ -109,7 +108,7 @@ Interferencia de hilos y condición de carrera; consistencia de memoria y happen
 
 **Su presentación (27 slides)** incluye recorrido automático del entrelazado `c++`, animación del estacionamiento del semáforo y una **demo interactiva de productor-consumidor** con botones `notify()` / `notifyAll()` sobre 3 consumidores en `wait()`.
 
-## classes/course_introduction/index.html
+## courses/pccd/course_introduction/index.html
 
 Presentación interactiva (estilo PPT, 11 slides) con los conceptos previos del curso. Navegable con flechas del teclado (←/→, espacio), botones y puntos inferiores.
 
@@ -137,11 +136,11 @@ Todos los tests del proyecto comparten el mismo motor y formato:
 
 | Test | Preguntas | Temas |
 |---|---|---|
-| `classes/course_introduction/test.html` | 20 | Hilos (6) · Concurrencia (4) · Java (4) · Redes (6) |
-| `classes/week_1/test.html` | 16 | Concurrencia (2) · Hilos y procesos (2) · Crear hilos (3) · Estados y prioridades (3) · Métodos esenciales (3) · Interrupciones (2) · Daemon (1) |
-| `classes/week_2/test.html` | 20 | Sistemas distribuidos (2) · Desafíos (4) · Fallos y transparencia (4) · Concurrencia (4) · Desempeño (3) · Paralelización (3) |
-| `classes/week_3/test.html` | 20 | Sockets y conexión (4) · InetAddress (3) · ServerSocket/Socket (3) · Streams (3) · Redes (4) · Capas y protocolos (2) · Desempeño (1) |
-| `classes/week_5/test.html` | 20 | Interferencia y carrera (3) · Sincronización básica (4) · volatile y átomos (3) · Liveness (4) · Semaphore y thread-safe (2) · wait/notify (2) · Locks (1) · Executors (1) |
+| `courses/pccd/course_introduction/test.html` | 20 | Hilos (6) · Concurrencia (4) · Java (4) · Redes (6) |
+| `courses/pccd/week_1/test.html` | 16 | Concurrencia (2) · Hilos y procesos (2) · Crear hilos (3) · Estados y prioridades (3) · Métodos esenciales (3) · Interrupciones (2) · Daemon (1) |
+| `courses/pccd/week_2/test.html` | 20 | Sistemas distribuidos (2) · Desafíos (4) · Fallos y transparencia (4) · Concurrencia (4) · Desempeño (3) · Paralelización (3) |
+| `courses/pccd/week_3/test.html` | 20 | Sockets y conexión (4) · InetAddress (3) · ServerSocket/Socket (3) · Streams (3) · Redes (4) · Capas y protocolos (2) · Desempeño (1) |
+| `courses/pccd/week_5/test.html` | 20 | Interferencia y carrera (3) · Sincronización básica (4) · volatile y átomos (3) · Liveness (4) · Semaphore y thread-safe (2) · wait/notify (2) · Locks (1) · Executors (1) |
 
 ## Arquitectura técnica de las páginas
 
@@ -172,7 +171,7 @@ Chequeos que se aplican:
 
 Workflow establecido (ver `AGENTS.md` para las convenciones completas):
 
-1. Colocar los PDFs del profesor en `classes/week_N/files/` como `wN_1.pdf`, `wN_2.pdf`…
+1. Colocar los PDFs del profesor en `courses/pccd/week_N/files/` como `wN_1.pdf`, `wN_2.pdf`…
 2. Crear `introduction.html` (1 página: qué se aprenderá + 1 imagen visual + agenda).
 3. Crear `index.html` (deck con todo el material, demos/animaciones donde ayuden).
 4. Crear `test.html` (banco de preguntas fiel al material).
