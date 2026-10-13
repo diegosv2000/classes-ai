@@ -11,9 +11,10 @@ Repositorio personal de estudio para el curso **Programación Concurrente y Dist
 
 ## Cómo empezar
 
-1. Abre `index.html` (raíz) — es el menú que enlaza todo el proyecto.
-2. Si es tu primer acercamiento: empieza por la **Introducción al curso** (`classes/course_introduction/index.html`).
-3. Cada semana: lee el resumen (`introduction.html`), estudia la presentación completa (`index.html`) y cierra con su test (`test.html`).
+1. Abre `index.html` (raíz) — es el **catálogo de cursos**; por ahora solo existe **Programación Concurrente y Distribuida (PCCD)**.
+2. Entra al curso (`courses/pccd/index.html`) — su portada enlaza todo el material.
+3. Si es tu primer acercamiento: empieza por la **Introducción al curso** (`classes/course_introduction/index.html`).
+4. Cada semana: lee el resumen (`introduction.html`), estudia la presentación completa (`index.html`) y cierra con su test (`test.html`).
 
 ```bash
 xdg-open index.html
@@ -25,8 +26,11 @@ xdg-open index.html
 entiendo-ai/
 ├── README.md                     ← este archivo
 ├── AGENTS.md                     ← convenciones para sesiones de IA que generan contenido
-├── index.html                    ← índice del proyecto: menú con enlaces a todo
+├── index.html                    ← catálogo de cursos (lista de cursos disponibles)
 ├── styles.md                     ← guía de estilo visual (paleta y reglas de diseño)
+├── courses/
+│   └── pccd/
+│       └── index.html            ← portada del curso PCCD: menú con enlaces a todo el material
 └── classes/
     ├── course_introduction/
     │   ├── index.html            ← presentación interactiva de conceptos previos (11 slides)
@@ -75,7 +79,7 @@ Cada `week_N/` sigue la misma plantilla:
 - `test.html` — **test de repaso** de la semana con preguntas barajadas, nota y revisión (existe para weeks 1, 2, 3 y 5).
 - `files/` — los PDFs entregados por el profesor, nombrados `wN_X.pdf` (semana N, material X).
 
-No existe material para la **semana 4**: su carpeta mantiene la plantilla pero sin PDFs ni páginas, y el índice raíz la omite hasta que llegue.
+No existe material para la **semana 4**: su carpeta mantiene la plantilla pero sin PDFs ni páginas, y la portada del curso la omite hasta que llegue.
 
 ## Contenido del curso (por semana)
 
@@ -173,7 +177,7 @@ Workflow establecido (ver `AGENTS.md` para las convenciones completas):
 3. Crear `index.html` (deck con todo el material, demos/animaciones donde ayuden).
 4. Crear `test.html` (banco de preguntas fiel al material).
 5. Verificar con jsdom (sintaxis, navegación, tests consistentes, enlaces, sin emojis).
-6. Actualizar el **árbol** y el **checklist** de este README, la sección [Tests](#tests) si aplica, y el **índice raíz** (`index.html`).
+6. Actualizar el **árbol** y el **checklist** de este README, la sección [Tests](#tests) si aplica, y la **portada del curso** (`courses/pccd/index.html`).
 
 ## styles.md
 
@@ -198,7 +202,7 @@ Detalles donde el material simplifica y las páginas lo aclaran explícitamente:
 ## Estado actual
 
 - [x] Material semanal organizado por carpetas (weeks 1, 2, 3 y 5).
-- [x] Índice raíz (`index.html`) con menú a todo el proyecto.
+- [x] Catálogo de cursos (`index.html` raíz) y portada del curso PCCD (`courses/pccd/index.html`) con menú a todo el material.
 - [x] Presentación interactiva de conceptos previos (`course_introduction/index.html`, 11 slides).
 - [x] Test de repaso de la introducción (`course_introduction/test.html`, 20 preguntas sobre las secciones 01–09 del deck).
 - [x] Guía de estilo (`styles.md`).

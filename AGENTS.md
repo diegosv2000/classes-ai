@@ -74,10 +74,11 @@ Con jsdom, verificar: **0 errores de runtime**; navegar **todas** las slides por
 1. Crear los 3 archivos (`introduction.html`, `index.html`, `test.html`) + PDFs en `files/`.
 2. Pasar la verificación completa de arriba.
 3. **Actualizar `README.md`**: árbol del repositorio, sección "Contenido del curso", tabla de tests, checklist "Estado actual".
-4. **Actualizar el índice raíz `index.html`**: tarjeta de la semana (título, descripción, 3 mini-botones, PDFs con páginas).
+4. **Actualizar la portada del curso `courses/pccd/index.html`**: tarjeta de la semana (título, descripción, 3 mini-botones, PDFs con páginas). Si fuera un curso nuevo, además añadir tarjeta al catálogo raíz `index.html`.
 5. Si es la primera semana de alguien, ofrecer el test de diagnóstico como punto de comparación.
 
 ## Rutas (cuidado)
 
-- El directorio del proyecto es `/home/dsalazarv/Desktop/code/entiendo-ai` — verificar `pwd` si un comando falla con `FileSystem.access`.
-- Enlaces entre páginas SIEMPRE relativos: `index.html`, `../course_introduction/index.html`, `test.html`.
+- El directorio del proyecto es `/home/dsalazarv/Desktop/code/UNI/classes-ai` — verificar `pwd` si un comando falla con `FileSystem.access`.
+- Estructura: `index.html` raíz = **catálogo de cursos**; `courses/pccd/index.html` = **portada del curso PCCD** (enlaza todo el material); `classes/` = contenido por semanas.
+- Enlaces entre páginas SIEMPRE relativos: dentro de `classes/week_N/`: `index.html`, `../course_introduction/index.html`, `test.html`, `../../courses/pccd/index.html` (portada del curso), `../../index.html` (catálogo raíz); `../../../index.html` NO existe (saldría del repositorio).
