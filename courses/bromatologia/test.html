@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test de repaso — Bromatología</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+  :root{
+    --bg:#0C0B12;
+    --surface:#13121A;
+    --card:#17161F;
+    --muted:#1F1D28;
+    --secondary:#22202B;
+    --fg:#F4F3F7;
+    --muted-fg:#9A97A6;
+    --on-brand:#FCFCFC;
+    --primary:#8F5CF0;
+    --blue:#4A84F0;
+    --success:#2CC277;
+    --destructive:#EC4B4B;
+    --warning:#F0B429;
+    --info:#3EB0E0;
+    --border:rgba(255,255,255,.09);
+    --input-border:rgba(255,255,255,.12);
+    --font-sans:'Geist',system-ui,sans-serif;
+    --font-mono:'Geist Mono',Consolas,monospace;
+    --grad-brand:linear-gradient(90deg,var(--primary),var(--blue));
+    --grad-num:linear-gradient(180deg,#F4F3F7,#9A97A6);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    min-height:100vh;background:var(--bg);color:var(--fg);
+    font-family:var(--font-sans);font-size:16px;line-height:1.55;
+    display:flex;align-items:center;justify-content:center;
+    padding:30px 16px;position:relative;
+  }
+  body::before,body::after{
+    content:'';position:fixed;border-radius:50%;pointer-events:none;z-index:0;
+    filter:blur(64px);
+  }
+  body::before{
+    width:56vw;height:56vw;top:-18vw;left:-14vw;
+    background:radial-gradient(circle,rgba(143,92,240,.22),transparent 65%);
+  }
+  body::after{
+    width:50vw;height:50vw;bottom:-18vw;right:-12vw;
+    background:radial-gradient(circle,rgba(74,132,240,.18),transparent 65%);
+  }
+  i.fa-solid{font-size:.85em;margin-right:7px}
+  .wrap{width:100%;max-width:860px;position:relative;z-index:1}
+
+  .card{
+    background:var(--card);border:1px solid var(--border);
+    border-radius:1rem;padding:28px;animation:in .35s ease;
+    box-shadow:0 8px 48px rgba(143,92,240,.1);
+  }
+  @keyframes in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+  h1{font-size:1.8rem;font-weight:600;letter-spacing:-.02em;line-height:1.25;margin-bottom:.5em}
+  h2{font-size:1.25rem;font-weight:600;letter-spacing:-.01em;line-height:1.4;margin-bottom:.7em}
+  h3{font-size:.74rem;text-transform:uppercase;letter-spacing:.2em;color:var(--muted-fg);margin-bottom:.6em;font-weight:600}
+  p{line-height:1.6}
+  .sub{color:var(--muted-fg)}
+  .small{font-size:.86rem;color:var(--muted-fg);line-height:1.6}
+  .small b{color:var(--fg);font-weight:500}
+  .center{text-align:center}
+
+  .btn{
+    background:var(--primary);color:var(--on-brand);border:none;border-radius:9999px;
+    padding:11px 26px;font-size:.9rem;font-weight:600;cursor:pointer;
+    transition:all .2s;font-family:var(--font-sans);
+    box-shadow:0 8px 40px rgba(143,92,240,.25);
+  }
+  .btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 48px rgba(143,92,240,.35)}
+  .btn.ghost{
+    background:var(--secondary);color:var(--fg);border:1px solid var(--border);box-shadow:none;
+  }
+  .btn.ghost:hover{border-color:rgba(143,92,240,.5);box-shadow:0 0 24px rgba(143,92,240,.12)}
+  .btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+
+  #hud{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+  #bar{flex:1;height:6px;background:rgba(255,255,255,.08);border-radius:9999px;overflow:hidden}
+  #barFill{height:100%;width:0;background:var(--grad-brand);transition:width .3s}
+  #cnt{font-size:.8rem;color:var(--muted-fg);white-space:nowrap;font-family:var(--font-mono)}
+
+  .opt{
+    display:flex;align-items:flex-start;gap:12px;width:100%;text-align:left;
+    background:var(--surface);border:1.5px solid var(--border);border-radius:.75rem;
+    color:var(--fg);padding:13px 16px;font-size:.94rem;cursor:pointer;
+    margin-bottom:10px;transition:all .15s;line-height:1.5;font-family:var(--font-sans);
+  }
+  .opt:hover{border-color:var(--input-border)}
+  .opt .mark{
+    flex-shrink:0;width:22px;height:22px;border-radius:9999px;
+    border:2px solid var(--input-border);display:inline-flex;align-items:center;
+    justify-content:center;font-size:.68rem;margin-top:1px;transition:all .15s;color:var(--on-brand);
+  }
+  .opt.sel{
+    border-color:rgba(143,92,240,.6);background:var(--muted);
+    box-shadow:0 0 40px rgba(143,92,240,.15);
+  }
+  .opt.sel .mark{border-color:var(--primary);background:var(--primary)}
+
+  .score{
+    font-family:var(--font-mono);font-size:3rem;font-weight:600;line-height:1;
+    background:var(--grad-num);-webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .badge{
+    display:inline-flex;align-items:center;gap:8px;border-radius:9999px;
+    padding:6px 18px;font-weight:600;font-size:.85rem;
+  }
+  .badge::before{content:'';width:6px;height:6px;border-radius:9999px;background:currentColor}
+  .badge{background:rgba(44,194,119,.15);color:var(--success)}
+  .badge.low{background:rgba(236,75,75,.15);color:var(--destructive)}
+  .badge.mid{background:rgba(240,180,41,.15);color:var(--warning)}
+  .wkgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}
+  @media(max-width:640px){.wkgrid{grid-template-columns:repeat(2,1fr)}}
+  .wkbox{
+    background:var(--surface);border:1px solid var(--border);border-radius:.75rem;
+    padding:14px;text-align:center;
+  }
+  .wkbox b{
+    font-family:var(--font-mono);color:var(--fg);font-size:1.25rem;font-weight:600;display:block;margin-top:4px;
+  }
+  .rev{border-top:1px solid var(--border);padding:20px 4px}
+  .rev h3{margin-bottom:10px}
+  .tag{
+    display:inline-block;font-size:.68rem;font-weight:600;letter-spacing:.1em;
+    border-radius:9999px;padding:3px 10px;
+    background:var(--grad-brand);color:var(--on-brand);
+  }
+  .ansRow{
+    display:flex;gap:10px;align-items:flex-start;padding:9px 12px;border-radius:.75rem;
+    font-size:.9rem;line-height:1.5;margin-bottom:6px;
+  }
+  .ansRow.ok{background:rgba(44,194,119,.1)}
+  .ansRow.bad{background:rgba(236,75,75,.1)}
+  .ansRow i{margin-top:3px}
+  .ansRow.ok i{color:var(--success)}
+  .ansRow.bad i{color:var(--destructive)}
+  .exp{font-size:.84rem;color:var(--muted-fg);padding:4px 10px 0 30px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ INICIO ============ -->
+  <div class="card" id="scrStart">
+    <h1><i class="fa-solid fa-clipboard-check"></i>Test de repaso</h1>
+    <p class="sub" style="margin-bottom:14px">Bromatología · Lecciones 1–12 (resumen)</p>
+    <p style="margin-bottom:8px">Este test evalúa lo aprendido en el material del curso. Son <b>25 preguntas</b> de selección múltiple que cubren: definiciones y clasificación de alimentos, gammas alimentarias, calidad e inocuidad, legislación peruana, BPM y temperaturas, POES y saneamiento, ETAs y HACCP.</p>
+    <ul class="small" style="list-style:none;line-height:2;margin-bottom:20px">
+      <li><i class="fa-solid fa-shuffle" style="color:var(--primary)"></i>El orden de preguntas y opciones es aleatorio en cada intento</li>
+      <li><i class="fa-solid fa-pen" style="color:var(--primary)"></i>Solo marcas tu respuesta; puedes volver y cambiarla antes de finalizar</li>
+      <li><i class="fa-solid fa-chart-column" style="color:var(--primary)"></i>Al final verás tu nota, el desglose por tema y la revisión de cada pregunta</li>
+    </ul>
+    <button class="btn" id="startBtn"><i class="fa-solid fa-play"></i>Comenzar test</button>
+  </div>
+
+  <!-- ============ PREGUNTAS ============ -->
+  <div class="card" id="scrQuiz" style="display:none">
+    <div id="hud">
+      <div id="bar"><div id="barFill"></div></div>
+      <span id="cnt"></span>
+    </div>
+    <h2 id="qText"></h2>
+    <div id="opts"></div>
+    <div style="display:flex;gap:10px;justify-content:space-between;margin-top:18px">
+      <button class="btn ghost" id="prevBtn"><i class="fa-solid fa-arrow-left"></i>Anterior</button>
+      <button class="btn" id="nextBtn" disabled>Siguiente<i class="fa-solid fa-arrow-right" style="margin-right:0;margin-left:6px"></i></button>
+      <button class="btn" id="finishBtn" style="display:none"><i class="fa-solid fa-flag-checkered"></i>Finalizar test</button>
+    </div>
+    <p class="small" style="margin-top:12px" id="markHint"><i class="fa-solid fa-hand-pointer"></i>Marca una opción para continuar.</p>
+  </div>
+
+  <!-- ============ RESULTADO ============ -->
+  <div class="card" id="scrEnd" style="display:none">
+    <div class="center">
+      <h1><i class="fa-solid fa-award"></i>Tu resultado</h1>
+      <div class="score" id="scoreTxt"></div>
+      <p style="margin:12px 0 6px"><span class="badge" id="gradeBadge"></span></p>
+      <p class="sub" id="msgTxt"></p>
+    </div>
+    <div class="wkgrid" id="wkGrid"></div>
+    <h3 style="margin:28px 0 4px"><i class="fa-solid fa-list-check"></i>Revisión de respuestas</h3>
+    <div id="review"></div>
+    <div class="center" style="margin-top:24px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button class="btn ghost" id="retryBtn"><i class="fa-solid fa-rotate-right"></i>Reintentar (se rebaraja todo)</button>
+      <a class="btn ghost" href="../../index.html" style="display:inline-flex;align-items:center;text-decoration:none"><i class="fa-solid fa-arrow-left"></i>Catálogo de cursos</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- Banco de preguntas (fiel al material: BROMATOLOGIA (1).pptx, sesiones 1-14) ---------- */
+const BANK=[
+/* ----- Definiciones (3) ----- */
+{w:'Definiciones',q:'¿Qué estudia la bromatología?',
+ o:['Únicamente el valor nutricional de los alimentos','La ciencia que estudia el alimento en todos sus aspectos: composición química, propiedades físicas, valor nutricional, características organolépticas y comportamiento durante producción, manipulación, conservación y consumo','Solo las enfermedades que transmiten los alimentos','El diseño de plantas industriales de alimentos'],
+ a:1,e:'La bromatología abarca el análisis de la composición química, propiedades físicas, valor nutricional, características organolépticas (sabor, olor, textura, color) y el comportamiento del alimento durante producción, manipulación, conservación y consumo.'},
+{w:'Definiciones',q:'Según el material, ¿qué es un alimento?',
+ o:['Solo los productos naturales que aportan proteínas, grasas y carbohidratos','Únicamente los productos elaborados industrialmente','Todo producto natural, semielaborado o elaborado que aporte o no sustancias nutritivas (ej. agua, sal, aditivos, especias)','Solo los productos de origen animal'],
+ a:2,e:'Un alimento es todo producto natural, semielaborado o elaborado que aporte o no sustancias nutritivas: el agua, la sal, los aditivos y las especias también son alimentos aunque no aporten nutrientes.'},
+{w:'Definiciones',q:'¿Cuál es la diferencia entre un alimento fortificado y uno enriquecido?',
+ o:['Son sinónimos: ambos agregan nutrientes nuevos','Fortificado: se le agregan nutrientes que no contenía de forma natural; enriquecido: se le devuelven o restauran nutrientes perdidos durante el procesamiento industrial','Enriquecido: se le agrega azúcar; fortificado: se le agrega sal','Fortificado: es un alimento adulterado; enriquecido: es uno contaminado'],
+ a:1,e:'En el fortificado se agregan nutrientes que no contenía de forma natural; en el enriquecido se restauran los nutrientes que perdió durante el procesamiento industrial. Ambos son modificaciones legítimas, no fraudes.'},
+
+/* ----- Gammas (3) ----- */
+{w:'Gammas',q:'¿Qué caracteriza a los alimentos de 1ª gama?',
+ o:['Son conservas envasadas que no requieren refrigeración','Productos frescos sin procesos de conservación (frutas, carnes, pescados, huevos) o conservas tradicionales como el salazón y el deshidratado','Alimentos congelados o ultracongelados en crudo','Platos cocinados listos para consumir tras calentar en microondas'],
+ a:1,e:'La 1ª gama agrupa productos frescos sin procesos de conservación y conservas tradicionales (salazón, deshidratado). Es la gama de los alimentos "naturales".'},
+{w:'Gammas',q:'¿Qué caracteriza a los alimentos de 2ª gama?',
+ o:['Conservas y semiconservas envasadas sometidas a tratamiento térmico: no requieren refrigeración','Son congelados en crudo que duran 6 meses a un año','Son alimentos frescos que solo duran días','Son deshidratados que duran años'],
+ a:0,e:'La 2ª gama son conservas y semiconservas envasadas sometidas a tratamiento térmico, por lo que no requieren refrigeración. La 3ª gama en cambio agrupa los congelados/ultracongelados en crudo (6 meses a un año).'},
+{w:'Gammas',q:'¿Qué son los alimentos de 3ª gama y cuánto se mantienen intactos?',
+ o:['Alimentos congelados o ultracongelados en crudo: se mantienen intactos de 6 meses a un año','Alimentos refrigerados: duran una semana a 10 días','Alimentos en conserva: duran años sin refrigeración','Alimentos liofilizados: duran entre 15 y 25 años'],
+ a:0,e:'La 3ª gama son alimentos congelados o ultracongelados en crudo que se mantienen intactos de 6 meses a un año. La duración depende de mantener la cadena de frío.'},
+
+/* ----- Inocuidad (4) ----- */
+{w:'Inocuidad',q:'¿Cuál es la diferencia entre calidad e inocuidad de un alimento?',
+ o:['Son el mismo concepto con distinto nombre','Calidad: propiedades inherentes (sabor, textura, nutrición) que satisfacen las expectativas del consumidor y las normativas; inocuidad: garantía de que un alimento no causará daño o enfermedad al consumidor','Calidad: que no cause enfermedad; inocuidad: que sepa bien','La inocuidad solo la definen los consumidores'],
+ a:1,e:'La calidad agrupa las propiedades inherentes que satisfacen expectativas y normativas (sabor, textura, nutrición); la inocuidad es la garantía de que el alimento no causará daño o enfermedad cuando se prepare o ingiera.'},
+{w:'Inocuidad',q:'Según las 5 claves para la inocuidad de los alimentos, ¿cuál de las siguientes prácticas pertenece a ellas?',
+ o:['Congelar todos los alimentos sin excepción','Usar solo alimentos enlatados','Evitar la contaminación cruzada','Lavar los alimentos con agua de lluvia'],
+ a:2,e:'Las 5 claves son: mantener la higiene sanitaria, evitar la contaminación cruzada, cocción adecuada, temperatura de seguridad y usar agua y materias primas seguras.'},
+{w:'Inocuidad',q:'Objetos extraños que causan lesiones en un alimento corresponden a qué tipo de peligro?',
+ o:['Peligro biológico','Peligro químico','Peligro alergénico','Peligro físico'],
+ a:3,e:'Los peligros físicos son objetos extraños que causan lesiones. Los químicos son sustancias tóxicas; los alergénicos, alérgenos no declarados; los biológicos, microorganismos que causan enfermedades.'},
+{w:'Inocuidad',q:'¿Quiénes son los responsables de la inocuidad en la cadena alimentaria?',
+ o:['Solo las autoridades sanitarias','Solo los fabricantes y manipuladores','Solo los consumidores finales','Todos: fabricantes, manipuladores, distribuidores y comerciantes; autoridades competentes (control y vigilancia); y los consumidores'],
+ a:3,e:'La inocuidad es responsabilidad compartida en toda la cadena: primeros (fabricantes, manipuladores, distribuidores, comerciantes), segundos (autoridades competentes de control y vigilancia) y terceros (consumidores).'},
+
+/* ----- Legislación (2) ----- */
+{w:'Legislación',q:'En el Perú, ¿qué fiscaliza el SENASA?',
+ o:['Alimentos industrializados/procesados y restaurantes','Productos hidrobiológicos, pesqueros y acuícolas','Alimentos de producción primaria (agrícola y pecuaria sin procesar)','Mercados de abasto, transporte y venta minorista'],
+ a:2,e:'El SENASA fiscaliza la producción primaria agrícola y pecuaria sin procesar. La DIGESA: industrializados/procesados y restaurantes; SANIPES: hidrobiológicos y pesqueros; las municipalidades: mercados, transporte y venta minorista. Base legal: DL N° 1062 y DS N° 007-98-SA.'},
+{w:'Legislación',q:'¿Qué es el Codex Alimentarius?',
+ o:['Una ley peruana de rotulado de alimentos','El referente mundial (FAO/OMS) para armonizar normas, límites de aditivos y plaguicidas','Un organismo de control de la Unión Europea','El registro nacional de marcas de alimentos'],
+ a:1,e:'El Codex Alimentarius es la referencia internacional de la FAO/OMS: armoniza normas, límites de aditivos y plaguicidas para facilitar el comercio y proteger la salud.'},
+
+/* ----- BPM y temperatura (3) ----- */
+{w:'BPM y temperatura',q:'En el diseño de planta (BPM), ¿cómo debe ser el flujo del proceso y por qué?',
+ o:['Unidireccional (forma de L, U o línea recta) para evitar la contaminación cruzada','En zigzag para aprovechar mejor el espacio','Bidireccional para agilizar la producción','No importa el flujo, solo la limpieza'],
+ a:0,e:'El layout debe ser unidireccional (forma de L, U o línea recta): la Zona Sucia (recepción/vestuarios) avanza a la Zona Intermedia (corte/procesamiento) y termina en la Zona Crítica/Limpia (envasado), evitando cruzar flujos contaminados.'},
+{w:'BPM y temperatura',q:'¿Qué es la zona de peligro de temperatura y dónde está?',
+ o:['El rango de 4 °C a 60 °C, donde las bacterias se multiplican rápidamente','El rango de -4 °C a 4 °C, donde los alimentos se congelan','El rango de 60 °C a 100 °C, donde se destruyen las vitaminas','El rango de 100 °C a 200 °C, donde se queman los alimentos'],
+ a:0,e:'Entre 4 °C y 60 °C las bacterias se multiplican rápidamente. Por eso los alimentos fríos se mantienen a -4 °C o menos, los calientes a +60 °C o más, y la cocción/recalentamiento debe superar esos rangos.'},
+{w:'BPM y temperatura',q:'¿Qué exige el material para el recalentamiento seguro de un alimento?',
+ o:['Calentarlo solo hasta que "esté caliente al tacto"','Mínimo 74–75 °C en el centro térmico por 30 segundos (o ebullición para líquidos)','Recalentarlo a temperatura ambiente durante una hora','Basta con pasarlo por el microondas 10 segundos'],
+ a:1,e:'El recalentamiento seguro exige un mínimo de 74–75 °C en el centro térmico durante 30 segundos, o ebullición para líquidos. Además está prohibido descongelar a temperatura ambiente, en agua caliente o volver a congelar un producto descongelado.'},
+
+/* ----- POES y saneamiento (3) ----- */
+{w:'POES y saneamiento',q:'¿Qué es un POES?',
+ o:['Un certificado sanitario que otorga la DIGESA','Documentos obligatorios paso a paso que describen las tareas de limpieza y desinfección en una planta o cocina','Un tipo de detergente industrial','El registro de temperaturas de los refrigeradores'],
+ a:1,e:'Los POES (Procedimientos Operativos Estandarizados de Saneamiento) son documentos obligatorios paso a paso que describen las tareas de limpieza y desinfección. Las 8 condiciones clave de la FDA incluyen potabilidad del agua, prevención de contaminación cruzada e higiene del personal.'},
+{w:'POES y saneamiento',q:'En saneamiento, ¿qué significa higienizar?',
+ o:['Limpiar: eliminar solo lo visible','Desinfectar: eliminar solo los microorganismos','Limpiar (eliminar lo visible) más desinfectar (eliminar los microorganismos)','Esterilizar con calor a 121 °C'],
+ a:2,e:'Higienizar = limpiar (eliminar la suciedad visible) + desinfectar (eliminar los microorganismos). Son dos pasos distintos y complementarios.'},
+{w:'POES y saneamiento',q:'¿Qué dosis de cloro/hipoclorito de sodio corresponde a la desinfección de verduras y frutas?',
+ o:['50–100 ppm','100–200 ppm','200–300 ppm','Cualquier dosis: no importa la concentración'],
+ a:0,e:'Verduras y frutas: 50–100 ppm; superficies en contacto directo con alimentos: 100 ppm; superficies con alta carga microbiana, pisos y paredes: 200 ppm. Toda concentración mayor a 100 ppm requiere enjuague posterior.'},
+
+/* ----- ETAs (3) ----- */
+{w:'ETAs',q:'En el estudio de las ETAs, ¿qué es un brote de ETA?',
+ o:['Cuando una sola persona se enferma por comer en la calle','Cuando dos o más personas sufren una enfermedad tras ingerir el mismo alimento o agua','Cualquier intoxicación de origen químico','La enfermedad de un manipulador de alimentos'],
+ a:1,e:'Un brote ocurre cuando dos o más personas sufren una enfermedad tras ingerir el mismo alimento o agua. Las ETAs afectan con mayor severidad a niños, ancianos, embarazadas e inmunodeprimidos.'},
+{w:'ETAs',q:'¿Cuál es la diferencia entre infección, toxiinfección e intoxicación alimentaria?',
+ o:['Son tres nombres para la misma enfermedad','Infección: microorganismos vivos que se multiplican en el intestino; toxiinfección: bacterias que producen la toxina directamente en el intestino; intoxicación: toxinas ya preformadas en el alimento o sustancias químicas','La intoxicación siempre requiere cirugía; las otras no','La infección se cura sola; las otras son mortales siempre'],
+ a:1,e:'Infección = se ingieren microorganismos vivos que se multiplican en el intestino. Toxiinfección = se ingieren bacterias que producen la toxina directamente en el intestino. Intoxicación = se ingieren toxinas preformadas por los microorganismos en el alimento, o sustancias químicas/vegetales.'},
+{w:'ETAs',q:'El síndrome emético (vómitos) por Bacillus cereus se asocia típicamente a…',
+ o:['Lácteos no pasteurizados','Embutidos caseros','Alimentos ricos en almidón como el arroz cocido mantenido a temperatura ambiente','Pescado crudo marinado'],
+ a:2,e:'El síndrome emético de B. cereus se produce por toxina preformada en alimentos ricos en almidón (ej. arroz cocido a temperatura ambiente). Su síndrome diarreico en cambio es por toxina producida en el intestino (toxiinfección).'},
+
+/* ----- HACCP (4) ----- */
+{w:'HACCP',q:'¿Quién desarrolló el sistema HACCP y para qué?',
+ o:['La OMS, para regular el comercio internacional en los años 90','Pillsbury Company, la NASA y los Laboratorios Natick de EE. UU. en los años 1960, para garantizar que los alimentos de los astronautas estuvieran 100% libres de contaminantes y patógenos','La FDA, para fiscalizar restaurantes en 1970','La Unión Europea, para el etiquetado de conservas'],
+ a:1,e:'El HACCP se desarrolló en los años 1960 por Pillsbury Company, la NASA y los Laboratorios Natick (EE. UU.) para garantizar que los alimentos de los vuelos espaciales estuvieran 100% libres de contaminantes y patógenos.'},
+{w:'HACCP',q:'Los 12 pasos de la implementación del HACCP se dividen en…',
+ o:['5 tareas previas (pasos 1 al 5) más los 7 principios HACCP','6 pasos de limpieza y 6 de desinfección','10 pasos de producción y 2 de venta','7 tareas previas y 5 principios'],
+ a:0,e:'Pasos 1 al 5: formar equipo multidisciplinario, describir el producto (ficha técnica), determinar uso previsto y consumidor, elaborar el diagrama de flujo y verificarlo in situ. Luego los 7 principios (P1 al P7): análisis de peligros, PCC, límites críticos, monitoreo, acciones correctivas, verificación y documentación/registros.'},
+{w:'HACCP',q:'¿Qué es un Punto Crítico de Control (PCC)?',
+ o:['Cualquier punto donde se almacena alimento','La fase o etapa del proceso donde se aplica un control esencial para prevenir, eliminar o reducir un peligro significativo hasta un nivel aceptable','El lugar donde se lavan las manos los operarios','El punto final de venta al consumidor'],
+ a:1,e:'Un PCC es la etapa del proceso donde se aplica un control esencial para prevenir, eliminar o reducir un peligro significativo hasta un nivel aceptable. Se identifica tras el análisis de peligros (Principio 1) sobre el diagrama de flujo.'},
+{w:'HACCP',q:'Según el Principio 4 del HACCP, ¿cuáles son las 4 preguntas del monitoreo?',
+ o:['¿Dónde? ¿Cuánto? ¿Cómo? ¿Cuántas veces?','¿Qué medir? ¿Cómo (método o instrumento)? ¿Cuándo/frecuencia (continuo o por muestreo)? ¿Quién (persona designada y capacitada)?','¿Qué? ¿Dónde? ¿Por qué? ¿Para qué?','¿Quién? ¿Cuánto cuesta? ¿Dónde? ¿Cuándo?'],
+ a:1,e:'El monitoreo es la medición u observación planificada en un PCC para demostrar que el proceso se mantiene dentro de sus límites críticos. Responde: ¿qué? (parámetro), ¿cómo? (método/instrumento), ¿cuándo? (frecuencia) y ¿quién? (persona designada y capacitada).'},
+];
+
+/* ---------- utilidades ---------- */
+function shuffle(arr){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+const $=id=>document.getElementById(id);
+
+/* ---------- estado ---------- */
+let order=[],optsMap=[],answers=[],cur=0;
+
+function start(){
+  order=shuffle(BANK);
+  optsMap=order.map(q=>{ // baraja opciones y recuerda dónde quedó la correcta
+    const idx=shuffle(q.o.map((_,k)=>k));
+    return idx;
+  });
+  answers=Array(BANK.length).fill(null);
+  cur=0;
+  show('scrQuiz');
+  render();
+}
+
+function show(id){
+  ['scrStart','scrQuiz','scrEnd'].forEach(s=>$(s).style.display=s===id?'block':'none');
+  window.scrollTo(0,0);
+}
+
+/* ---------- render pregunta ---------- */
+function render(){
+  const q=order[cur];
+  $('barFill').style.width=((cur)/BANK.length*100)+'%';
+  $('cnt').innerHTML='<i class="fa-solid fa-circle-question"></i>Pregunta '+(cur+1)+' de '+BANK.length;
+  $('qText').innerHTML='<span class="tag">'+q.w+'</span> '+q.q;
+  const box=$('opts');box.innerHTML='';
+  optsMap[cur].forEach((origIdx,pos)=>{
+    const b=document.createElement('button');
+    b.className='opt'+(answers[cur]===pos?' sel':'');
+    b.innerHTML='<span class="mark">'+(answers[cur]===pos?'<i class="fa-solid fa-check"></i>':'')+'</span><span>'+q.o[origIdx]+'</span>';
+    b.onclick=()=>{
+      answers[cur]=pos;
+      render();
+      $('nextBtn').disabled=false;
+      $('markHint').style.display='none';
+    };
+    box.appendChild(b);
+  });
+  if(answers[cur]!==null){$('nextBtn').disabled=false;$('markHint').style.display='none';}
+  else{$('nextBtn').disabled=true;$('markHint').style.display='block';}
+
+  $('prevBtn').disabled=cur===0;
+  const last=cur===BANK.length-1;
+  $('nextBtn').style.display=last?'none':'inline-block';
+  $('finishBtn').style.display=last?'inline-block':'none';
+}
+
+$('prevBtn').onclick=()=>{if(cur>0){cur--;render();}};
+$('nextBtn').onclick=()=>{if(cur<BANK.length-1){cur++;render();}};
+$('finishBtn').onclick=finish;
+
+/* ---------- resultado ---------- */
+function finish(){
+  const total=BANK.length;
+  let got=0;
+  const per={};
+  order.forEach((q,i)=>{ // mismo orden barajado que answers/optsMap
+    per[q.w]=per[q.w]||{got:0,total:0};
+    per[q.w].total++;
+    const correctPos=optsMap[i].indexOf(q.a);
+    if(answers[i]===correctPos){got++;per[q.w].got++;}
+  });
+  const pct=Math.round(got/total*100);
+  $('scoreTxt').textContent=got+' / '+total;
+  const badge=$('gradeBadge'),msg=$('msgTxt');
+  if(pct>=85){badge.className='badge';badge.textContent=pct+'% · Excelente';
+    msg.textContent='Dominas el contenido del curso. Úsalo como base para profundizar.';}
+  else if(pct>=60){badge.className='badge mid';badge.textContent=pct+'% · Bien, pero repasa';
+    msg.textContent='Buena base. Revisa la revisión de abajo y refuerza los temas más bajos.';}
+  else{badge.className='badge low';badge.textContent=pct+'% · Necesitas repasar';
+    msg.textContent='Conviene repasar el material y luego reintentar este test.';}
+  const wk=$('wkGrid');
+  wk.innerHTML=Object.keys(per).map(w=>
+    '<div class="wkbox"><span class="small">'+w+'</span><b>'+per[w].got+' / '+per[w].total+'</b></div>'
+  ).join('');
+
+  const rev=$('review');rev.innerHTML='';
+  order.forEach((q,i)=>{
+    const correctPos=optsMap[i].indexOf(q.a);
+    const ok=answers[i]===correctPos;
+    const div=document.createElement('div');
+    div.className='rev';
+    let html='<h3><span class="tag">'+q.w+'</span> Pregunta '+(i+1)+' '+
+      (ok?'<i class="fa-solid fa-circle-check" style="color:var(--success)"></i>'
+         :'<i class="fa-solid fa-circle-xmark" style="color:var(--destructive)"></i>')+'</h3>';
+    html+='<p style="margin-bottom:10px">'+q.q+'</p>';
+    html+='<div class="ansRow '+(ok?'ok':'bad')+'"><i class="fa-solid fa-user"></i><span><b>Tu respuesta:</b> '+
+      (answers[i]===null?'Sin responder':q.o[optsMap[i][answers[i]]])+'</span></div>';
+    if(!ok){
+      html+='<div class="ansRow ok"><i class="fa-solid fa-check"></i><span><b>Respuesta correcta:</b> '+q.o[q.a]+'</span></div>';
+    }
+    html+='<div class="exp"><i class="fa-solid fa-circle-info"></i>'+q.e+'</div>';
+    div.innerHTML=html;
+    rev.appendChild(div);
+  });
+  show('scrEnd');
+}
+
+$('startBtn').onclick=start;
+$('retryBtn').onclick=start;
+})();
+</script>
+</body>
+</html>

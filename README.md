@@ -1,6 +1,6 @@
 # entiendo-ai
 
-Repositorio personal de estudio para el curso **Programación Concurrente y Distribuida (PCCD)**. Aquí organizo el material semanal del curso (PDFs del profesor) junto con recursos interactivos de estudio que construyo con ayuda de IA: una presentación de conceptos previos, el contenido detallado de cada semana estilo presentación, y tests de repaso con corrección automática.
+Repositorio personal de estudio. Organizo el material de mis cursos (PDFs y presentaciones del profesor) junto con recursos interactivos de estudio que construyo con ayuda de IA: presentaciones de conceptos previos, contenido detallado estilo presentación, y tests de repaso con corrección automática. Por ahora: **Programación Concurrente y Distribuida (PCCD)** y **Bromatología**.
 
 ## Objetivo
 
@@ -11,9 +11,10 @@ Repositorio personal de estudio para el curso **Programación Concurrente y Dist
 
 ## Cómo empezar
 
-1. Abre `index.html` (raíz) — es el menú que enlaza todo el proyecto.
-2. Si es tu primer acercamiento: empieza por la **Introducción al curso** (`classes/course_introduction/index.html`).
-3. Cada semana: lee el resumen (`introduction.html`), estudia la presentación completa (`index.html`) y cierra con su test (`test.html`).
+1. Abre `index.html` (raíz) — es el **catálogo de cursos**: **Programación Concurrente y Distribuida (PCCD)** y **Bromatología**.
+2. Entra al curso que quieras estudiar (PCCD tiene portada en `courses/pccd/index.html`; Bromatología enlaza directo a su test).
+3. En PCCD, si es tu primer acercamiento: empieza por la **Introducción al curso** (`courses/pccd/course_introduction/index.html`).
+4. Cada semana: lee el resumen (`introduction.html`), estudia la presentación completa (`index.html`) y cierra con su test (`test.html`).
 
 ```bash
 xdg-open index.html
@@ -25,45 +26,50 @@ xdg-open index.html
 entiendo-ai/
 ├── README.md                     ← este archivo
 ├── AGENTS.md                     ← convenciones para sesiones de IA que generan contenido
-├── index.html                    ← índice del proyecto: menú con enlaces a todo
+├── index.html                    ← catálogo de cursos (lista de cursos disponibles)
 ├── styles.md                     ← guía de estilo visual (paleta y reglas de diseño)
-└── classes/
-    ├── course_introduction/
-    │   ├── index.html            ← presentación interactiva de conceptos previos (11 slides)
-    │   └── test.html             ← test de repaso de la introducción (20 preguntas)
-    ├── week_1/
-    │   ├── index.html            ← presentación de la semana (17 slides)
-    │   ├── introduction.html     ← resumen de una página
-    │   ├── test.html             ← test de repaso (16 preguntas)
-    │   └── files/
-    │       └── w1_1.pdf          ← material de la semana 1 (27 p)
-    ├── week_2/
-    │   ├── index.html            ← presentación de la semana (25 slides)
-    │   ├── introduction.html     ← resumen de una página
-    │   ├── test.html             ← test de repaso (20 preguntas)
-    │   └── files/
-    │       ├── w2_1.pdf          ← desafío de los sistemas distribuidos + programación concurrente (44 p)
-    │       └── w2_2.pdf          ← desempeño y optimización para la latencia (30 p)
-    ├── week_3/
-    │   ├── index.html            ← presentación de la semana (23 slides)
-    │   ├── introduction.html     ← resumen de una página
-    │   ├── test.html             ← test de repaso (20 preguntas)
-    │   └── files/
-    │       ├── w3_1.pdf          ← desempeño y optimización para la latencia (24 p)
-    │       ├── w3_2.pdf          ← communication and networks (36 p)
-    │       └── w3_3.pdf          ← programación en red: Sockets I (22 p)
-    ├── week_4/
-    │   ├── index.html            ← (pendiente)
-    │   ├── introduction.html     ← (pendiente: contiene TODO)
-    │   └── files/                ← (vacía: no hay material de la semana 4)
-    └── week_5/
-        ├── index.html            ← presentación de la semana (27 slides)
-        ├── introduction.html     ← resumen de una página
-        ├── test.html             ← test de repaso (20 preguntas)
-        └── files/
-            ├── w5_1.pdf          ← sincronización de hilos (26 p)
-            ├── w5_2.pdf          ← monitores, condiciones de carrera, deadlock, semáforos, etc. (19 p)
-            └── w5_3.pdf          ← conceptos de threads en Java: volatile, executors, etc. (21 p)
+├── courses/
+│   ├── pccd/                        ← curso Programación Concurrente y Distribuida (autocontenido)
+│   │   ├── index.html               ← portada del curso: menú con enlaces a todo el material
+│   │   ├── course_introduction/
+│   │   │   ├── index.html           ← presentación interactiva de conceptos previos (11 slides)
+│   │   │   └── test.html            ← test de repaso de la introducción (20 preguntas)
+│   │   ├── week_1/
+│   │   │   ├── index.html           ← presentación de la semana (17 slides)
+│   │   │   ├── introduction.html    ← resumen de una página
+│   │   │   ├── test.html            ← test de repaso (16 preguntas)
+│   │   │   └── files/
+│   │   │       └── w1_1.pdf         ← material de la semana 1 (27 p)
+│   │   ├── week_2/
+│   │   │   ├── index.html           ← presentación de la semana (25 slides)
+│   │   │   ├── introduction.html    ← resumen de una página
+│   │   │   ├── test.html            ← test de repaso (20 preguntas)
+│   │   │   └── files/
+│   │   │       ├── w2_1.pdf         ← desafío de los sistemas distribuidos + programación concurrente (44 p)
+│   │   │       └── w2_2.pdf         ← desempeño y optimización para la latencia (30 p)
+│   │   ├── week_3/
+│   │   │   ├── index.html           ← presentación de la semana (23 slides)
+│   │   │   ├── introduction.html    ← resumen de una página
+│   │   │   ├── test.html            ← test de repaso (20 preguntas)
+│   │   │   └── files/
+│   │   │       ├── w3_1.pdf         ← desempeño y optimización para la latencia (24 p)
+│   │   │       ├── w3_2.pdf         ← communication and networks (36 p)
+│   │   │       └── w3_3.pdf         ← programación en red: Sockets I (22 p)
+│   │   ├── week_4/
+│   │   │   ├── index.html           ← (pendiente)
+│   │   │   ├── introduction.html    ← (pendiente: contiene TODO)
+│   │   │   └── files/               ← (vacía: no hay material de la semana 4)
+│   │   └── week_5/
+│   │       ├── index.html           ← presentación de la semana (27 slides)
+│   │       ├── introduction.html    ← resumen de una página
+│   │       ├── test.html            ← test de repaso (20 preguntas)
+│   │       └── files/
+│   │           ├── w5_1.pdf         ← sincronización de hilos (26 p)
+│   │           ├── w5_2.pdf         ← monitores, condiciones de carrera, deadlock, semáforos, etc. (19 p)
+│   │           └── w5_3.pdf         ← conceptos de threads en Java: volatile, executors, etc. (21 p)
+│   └── bromatologia/                ← curso Bromatología
+│       ├── test.html                ← test de repaso (25 preguntas, fiel al PPTX)
+│       └── BROMATOLOGIA (1).pptx    ← material del profesor: lecciones 1-12, sesiones 1-14 (21 slides)
 ```
 
 ### Convención de carpetas semanales
@@ -75,7 +81,7 @@ Cada `week_N/` sigue la misma plantilla:
 - `test.html` — **test de repaso** de la semana con preguntas barajadas, nota y revisión (existe para weeks 1, 2, 3 y 5).
 - `files/` — los PDFs entregados por el profesor, nombrados `wN_X.pdf` (semana N, material X).
 
-No existe material para la **semana 4**: su carpeta mantiene la plantilla pero sin PDFs ni páginas, y el índice raíz la omite hasta que llegue.
+No existe material para la **semana 4**: su carpeta mantiene la plantilla pero sin PDFs ni páginas, y la portada del curso la omite hasta que llegue.
 
 ## Contenido del curso (por semana)
 
@@ -105,7 +111,7 @@ Interferencia de hilos y condición de carrera; consistencia de memoria y happen
 
 **Su presentación (27 slides)** incluye recorrido automático del entrelazado `c++`, animación del estacionamiento del semáforo y una **demo interactiva de productor-consumidor** con botones `notify()` / `notifyAll()` sobre 3 consumidores en `wait()`.
 
-## classes/course_introduction/index.html
+## courses/pccd/course_introduction/index.html
 
 Presentación interactiva (estilo PPT, 11 slides) con los conceptos previos del curso. Navegable con flechas del teclado (←/→, espacio), botones y puntos inferiores.
 
@@ -133,11 +139,12 @@ Todos los tests del proyecto comparten el mismo motor y formato:
 
 | Test | Preguntas | Temas |
 |---|---|---|
-| `classes/course_introduction/test.html` | 20 | Hilos (6) · Concurrencia (4) · Java (4) · Redes (6) |
-| `classes/week_1/test.html` | 16 | Concurrencia (2) · Hilos y procesos (2) · Crear hilos (3) · Estados y prioridades (3) · Métodos esenciales (3) · Interrupciones (2) · Daemon (1) |
-| `classes/week_2/test.html` | 20 | Sistemas distribuidos (2) · Desafíos (4) · Fallos y transparencia (4) · Concurrencia (4) · Desempeño (3) · Paralelización (3) |
-| `classes/week_3/test.html` | 20 | Sockets y conexión (4) · InetAddress (3) · ServerSocket/Socket (3) · Streams (3) · Redes (4) · Capas y protocolos (2) · Desempeño (1) |
-| `classes/week_5/test.html` | 20 | Interferencia y carrera (3) · Sincronización básica (4) · volatile y átomos (3) · Liveness (4) · Semaphore y thread-safe (2) · wait/notify (2) · Locks (1) · Executors (1) |
+| `courses/pccd/course_introduction/test.html` | 20 | Hilos (6) · Concurrencia (4) · Java (4) · Redes (6) |
+| `courses/pccd/week_1/test.html` | 16 | Concurrencia (2) · Hilos y procesos (2) · Crear hilos (3) · Estados y prioridades (3) · Métodos esenciales (3) · Interrupciones (2) · Daemon (1) |
+| `courses/pccd/week_2/test.html` | 20 | Sistemas distribuidos (2) · Desafíos (4) · Fallos y transparencia (4) · Concurrencia (4) · Desempeño (3) · Paralelización (3) |
+| `courses/pccd/week_3/test.html` | 20 | Sockets y conexión (4) · InetAddress (3) · ServerSocket/Socket (3) · Streams (3) · Redes (4) · Capas y protocolos (2) · Desempeño (1) |
+| `courses/pccd/week_5/test.html` | 20 | Interferencia y carrera (3) · Sincronización básica (4) · volatile y átomos (3) · Liveness (4) · Semaphore y thread-safe (2) · wait/notify (2) · Locks (1) · Executors (1) |
+| `courses/bromatologia/test.html` | 25 | Definiciones (3) · Gammas (3) · Inocuidad (4) · Legislación (2) · BPM y temperatura (3) · POES y saneamiento (3) · ETAs (3) · HACCP (4) |
 
 ## Arquitectura técnica de las páginas
 
@@ -168,12 +175,12 @@ Chequeos que se aplican:
 
 Workflow establecido (ver `AGENTS.md` para las convenciones completas):
 
-1. Colocar los PDFs del profesor en `classes/week_N/files/` como `wN_1.pdf`, `wN_2.pdf`…
+1. Colocar los PDFs del profesor en `courses/pccd/week_N/files/` como `wN_1.pdf`, `wN_2.pdf`…
 2. Crear `introduction.html` (1 página: qué se aprenderá + 1 imagen visual + agenda).
 3. Crear `index.html` (deck con todo el material, demos/animaciones donde ayuden).
 4. Crear `test.html` (banco de preguntas fiel al material).
 5. Verificar con jsdom (sintaxis, navegación, tests consistentes, enlaces, sin emojis).
-6. Actualizar el **árbol** y el **checklist** de este README, la sección [Tests](#tests) si aplica, y el **índice raíz** (`index.html`).
+6. Actualizar el **árbol** y el **checklist** de este README, la sección [Tests](#tests) si aplica, y la **portada del curso** (`courses/pccd/index.html`).
 
 ## styles.md
 
@@ -198,7 +205,7 @@ Detalles donde el material simplifica y las páginas lo aclaran explícitamente:
 ## Estado actual
 
 - [x] Material semanal organizado por carpetas (weeks 1, 2, 3 y 5).
-- [x] Índice raíz (`index.html`) con menú a todo el proyecto.
+- [x] Catálogo de cursos (`index.html` raíz) y portada del curso PCCD (`courses/pccd/index.html`) con menú a todo el material.
 - [x] Presentación interactiva de conceptos previos (`course_introduction/index.html`, 11 slides).
 - [x] Test de repaso de la introducción (`course_introduction/test.html`, 20 preguntas sobre las secciones 01–09 del deck).
 - [x] Guía de estilo (`styles.md`).
@@ -207,4 +214,5 @@ Detalles donde el material simplifica y las páginas lo aclaran explícitamente:
 - [x] Week 2: presentación (25 slides), introducción y test de repaso (20 preguntas).
 - [x] Week 3: presentación (23 slides), introducción y test de repaso (20 preguntas).
 - [x] Week 5: presentación (27 slides), introducción y test de repaso (20 preguntas).
+- [x] Curso **Bromatología** (`courses/bromatologia/`): test de repaso de 25 preguntas fiel al PPTX del profesor.
 - [ ] Material de la semana 4 — aún no entregado.

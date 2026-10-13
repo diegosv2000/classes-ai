@@ -4,7 +4,7 @@ Instrucciones para sesiones de IA (o personas) que generen o modifiquen contenid
 
 ## Contexto del repositorio
 
-- Es un repositorio de **estudio personal**: cada `classes/week_N/` contiene el material semanal (PDFs en `files/`) y páginas HTML interactivas generadas a partir de ese material.
+- Es un repositorio de **estudio personal**: cada `courses/pccd/week_N/` contiene el material semanal (PDFs en `files/`) y páginas HTML interactivas generadas a partir de ese material.
 - Todo es **HTML estático autocontenido** (CSS y JS inline): sin frameworks, sin build, sin dependencias de proyecto.
 - El contenido de las páginas está en **español** (algunos PDFs de redes están en inglés; el contenido generado siempre se explica en español).
 - La fuente de verdad del contenido son **los PDFs de `files/`**: extraerlos con `pdftotext` antes de escribir contenido.
@@ -19,7 +19,7 @@ Instrucciones para sesiones de IA (o personas) que generen o modifiquen contenid
 
 ## Estructura de una semana
 
-Cada `classes/week_N/` tiene exactamente:
+Cada `courses/pccd/week_N/` tiene exactamente:
 
 | Archivo | Qué es |
 |---|---|
@@ -30,7 +30,7 @@ Cada `classes/week_N/` tiene exactamente:
 
 ## Motor de deck (presentaciones)
 
-Reutilizar el motor ya probado (copiarlo de `classes/week_5/index.html`, el más reciente):
+Reutilizar el motor ya probado (copiarlo de `courses/pccd/week_5/index.html`, el más reciente):
 
 - Slides como `<section class="slide" data-title="...">` en `#deck`; la activa lleva clase `.active`.
 - **Primera slide = portada con agenda de temas** (siempre).
@@ -43,7 +43,7 @@ Reutilizar el motor ya probado (copiarlo de `classes/week_5/index.html`, el más
 
 ## Motor de test
 
-Reutilizar el motor de `classes/week_5/test.html`:
+Reutilizar el motor de `courses/pccd/week_5/test.html`:
 
 - Banco de preguntas `BANK` con objetos `{ w, q, o, a, e }`: **w** = tema (aparece como tag y en el desglose), **q** = pregunta, **o** = opciones (exactamente 4), **a** = índice de la correcta, **e** = explicación (fiel al material).
 - Barajar con **Fisher-Yates** (`shuffle`): el orden de preguntas **y** de opciones se randomiza en cada intento (`optsMap` guarda dónde quedó la correcta).
@@ -74,10 +74,11 @@ Con jsdom, verificar: **0 errores de runtime**; navegar **todas** las slides por
 1. Crear los 3 archivos (`introduction.html`, `index.html`, `test.html`) + PDFs en `files/`.
 2. Pasar la verificación completa de arriba.
 3. **Actualizar `README.md`**: árbol del repositorio, sección "Contenido del curso", tabla de tests, checklist "Estado actual".
-4. **Actualizar el índice raíz `index.html`**: tarjeta de la semana (título, descripción, 3 mini-botones, PDFs con páginas).
+4. **Actualizar la portada del curso `courses/pccd/index.html`**: tarjeta de la semana (título, descripción, 3 mini-botones, PDFs con páginas). Si fuera un curso nuevo, además añadir tarjeta al catálogo raíz `index.html`.
 5. Si es la primera semana de alguien, ofrecer el test de diagnóstico como punto de comparación.
 
 ## Rutas (cuidado)
 
-- El directorio del proyecto es `/home/dsalazarv/Desktop/code/entiendo-ai` — verificar `pwd` si un comando falla con `FileSystem.access`.
-- Enlaces entre páginas SIEMPRE relativos: `index.html`, `../course_introduction/index.html`, `test.html`.
+- El directorio del proyecto es `/home/dsalazarv/Desktop/code/UNI/classes-ai` — verificar `pwd` si un comando falla con `FileSystem.access`.
+- Estructura: `index.html` raíz = **catálogo de cursos**; `courses/pccd/` = **carpeta autocontenida del curso PCCD** (portada + semanas); no existe ningún `classes/` de primer nivel.
+- Enlaces entre páginas SIEMPRE relativos: dentro de `courses/pccd/week_N/`: `index.html`, `../course_introduction/index.html`, `test.html`, `../../courses/pccd/index.html` (portada del curso), `../../index.html` (catálogo raíz); `../../../index.html` NO existe (saldría del repositorio).
