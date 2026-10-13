@@ -67,7 +67,8 @@
     background:rgba(12,11,18,.7);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
     border:1px solid var(--border);border-radius:9999px;padding:6px 14px;
   }
-  #brand{top:16px;left:22px;text-transform:uppercase;color:var(--muted-fg)}
+  #brand{top:16px;left:22px;text-transform:uppercase;color:var(--muted-fg);transition:all .25s}
+  a#brand:hover{border-color:rgba(143,92,240,.6);color:var(--fg);box-shadow:0 0 24px rgba(143,92,240,.15)}
   #counter{top:16px;right:22px;color:var(--muted-fg);font-family:var(--font-mono)}
   #hint{bottom:22px;left:22px;color:var(--muted-fg)}
 
@@ -284,7 +285,7 @@
 <body>
 
 <div id="progress"><div id="progressFill"></div></div>
-<div id="brand">PCCD · Introducción</div>
+<a id="brand" href="../../index.html" title="Índice del curso">PCCD · Introducción</a>
 <div id="counter">1 / 11</div>
 <div id="hint">← &nbsp;→</div>
 

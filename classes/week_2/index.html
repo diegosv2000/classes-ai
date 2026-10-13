@@ -61,7 +61,8 @@
     background:rgba(12,11,18,.7);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
     border:1px solid var(--border);border-radius:9999px;padding:6px 14px;
   }
-  #brand{top:16px;left:22px;text-transform:uppercase;color:var(--muted-fg)}
+  #brand{top:16px;left:22px;text-transform:uppercase;color:var(--muted-fg);transition:all .25s}
+  a#brand:hover{border-color:rgba(143,92,240,.6);color:var(--fg);box-shadow:0 0 24px rgba(143,92,240,.15)}
   #counter{top:16px;right:22px;color:var(--muted-fg);font-family:var(--font-mono)}
   #hint{bottom:22px;left:22px;color:var(--muted-fg)}
 
@@ -191,12 +192,24 @@
     h2{font-size:1.55rem}
     .demo{padding:16px}
   }
+  /* CTA final */
+  .cta{margin-top:34px;text-align:left}
+  .cta-btn{
+    display:inline-flex;align-items:center;gap:10px;
+    background:var(--primary);color:var(--on-brand);text-decoration:none;
+    padding:14px 30px;border-radius:9999px;font-weight:600;font-size:.95rem;
+    letter-spacing:.02em;box-shadow:0 8px 40px rgba(143,92,240,.25);
+    transition:all .2s;
+  }
+  .cta-btn:hover{transform:translateY(-2px);box-shadow:0 12px 48px rgba(143,92,240,.35)}
+  .cta-btn i{margin:0}
+  .cta-btn.ghost{background:var(--secondary);color:var(--fg);border:1px solid var(--border);box-shadow:none}
 </style>
 </head>
 <body>
 
 <div id="progress"><div id="progressFill"></div></div>
-<div id="brand">PCCD · Semana 2</div>
+<a id="brand" href="../../index.html" title="Índice del curso">PCCD · Semana 2</a>
 <div id="counter">1 / 25</div>
 <div id="hint">← &nbsp;→</div>
 
@@ -827,6 +840,11 @@
       </div>
     </div>
     <p class="note anim d5 small">Cierre de la semana: ya sabes qué hace posible un sistema distribuido (middleware, transparencia, tolerancia a fallos), cómo logra concurrencia (hilos) y cómo se mide su velocidad (latencia, throughput) junto con los límites reales de la paralelización. En la semana 3, esas máquinas empiezan a <b>comunicarse</b>: redes y sockets.</p>
+
+    <div class="cta anim d5">
+      <a class="cta-btn" href="test.html"><i class="fa-solid fa-clipboard-check"></i>Poner a prueba lo aprendido</a>
+      <a class="cta-btn ghost" style="margin-left:10px" href="../week_3/introduction.html"><i class="fa-solid fa-arrow-right"></i>Siguiente: semana 3</a>
+    </div>
   </div>
 </section>
 
