@@ -1,18 +1,18 @@
 # entiendo-ai
 
-Repositorio personal de estudio. Organizo el material de mis cursos (PDFs y presentaciones del profesor) junto con recursos interactivos de estudio que construyo con ayuda de IA: presentaciones de conceptos previos, contenido detallado estilo presentación, y tests de repaso con corrección automática. Por ahora: **Programación Concurrente y Distribuida (PCCD)** y **Bromatología**.
+Repositorio personal de estudio. Organizo el material de mis cursos (PDFs, presentaciones y documentos del profesor) junto con recursos interactivos de estudio que construyo con ayuda de IA: presentaciones de conceptos previos, contenido detallado estilo presentación, y tests de repaso con corrección automática. Por ahora: **Programación Concurrente y Distribuida (PCCD)**, **Bromatología** y **Bromatología 2**.
 
 ## Objetivo
 
 - **Centralizar** el material semanal del curso y hacer que sea fácil de consultar.
 - **Crear recursos de estudio interactivos** (HTML/CSS/JS puro, sin build ni dependencias de proyecto) que expliquen los conceptos previos necesarios antes de cada clase.
 - **Estudiar con método de *active recall***: conceptos primero, ejemplos visuales después, test de repaso al final.
-- **Fidelidad al material**: todo el contenido se deriva de los PDFs de `files/`; las simplificaciones del material se documentan en lugar de ocultarse (ver [Simplificaciones documentadas](#simplificaciones-del-material-documentadas)).
+- **Fidelidad al material**: el contenido se deriva de los PDFs de `files/` y de los PPTX y DOC originales de Bromatología; las simplificaciones del material se documentan en lugar de ocultarse (ver [Simplificaciones documentadas](#simplificaciones-del-material-documentadas)).
 
 ## Cómo empezar
 
-1. Abre `index.html` (raíz) — es el **catálogo de cursos**: **Programación Concurrente y Distribuida (PCCD)** y **Bromatología**.
-2. Entra al curso que quieras estudiar (PCCD tiene portada en `courses/pccd/index.html`; Bromatología enlaza directo a su test).
+1. Abre `index.html` (raíz) — es el **catálogo de cursos**: **Programación Concurrente y Distribuida (PCCD)**, **Bromatología** y **Bromatología 2**.
+2. Entra al curso que quieras estudiar (PCCD tiene portada en `courses/pccd/index.html`; los dos cursos de Bromatología enlazan directamente a sus tests).
 3. En PCCD, si es tu primer acercamiento: empieza por la **Introducción al curso** (`courses/pccd/course_introduction/index.html`).
 4. Cada semana: lee el resumen (`introduction.html`), estudia la presentación completa (`index.html`) y cierra con su test (`test.html`).
 
@@ -67,9 +67,18 @@ entiendo-ai/
 │   │           ├── w5_1.pdf         ← sincronización de hilos (26 p)
 │   │           ├── w5_2.pdf         ← monitores, condiciones de carrera, deadlock, semáforos, etc. (19 p)
 │   │           └── w5_3.pdf         ← conceptos de threads en Java: volatile, executors, etc. (21 p)
-│   └── bromatologia/                ← curso Bromatología
-│       ├── test.html                ← test de repaso (25 preguntas, fiel al PPTX)
-│       └── BROMATOLOGIA (1).pptx    ← material del profesor: lecciones 1-12, sesiones 1-14 (21 slides)
+│   ├── bromatologia/                ← curso Bromatología
+│   │   ├── test.html                ← test de repaso (25 preguntas, fiel al PPTX)
+│   │   └── BROMATOLOGIA (1).pptx    ← material del profesor: lecciones 1-12, sesiones 1-14 (21 slides)
+│   └── bromatologia-2/              ← curso Bromatología 2
+│       ├── test.html                ← test de dificultad moderada (50 preguntas, 7 temas)
+│       ├── SESION_15_y_16_CONSERVACION(4).pptx
+│       ├── SESION_19_BROMATOLOGIA_okok.pptx
+│       ├── SESION_20_LABORATORIO_Ndeg1_ANALISIS_DE_LECHE(10).doc
+│       ├── SESION_21_BROMATOLOGIA_yogurt(6).pptx
+│       ├── SESION_22_LABORATORIO_2_ANALISIS_DE_YOGURT_-ok(4).doc
+│       ├── SESION_23_BROMATOLOGIA_-_QUESO(12).pptx
+│       └── SESION_24_ANALISIS_DE_QUESO_ok.doc
 ```
 
 ### Convención de carpetas semanales
@@ -111,6 +120,12 @@ Interferencia de hilos y condición de carrera; consistencia de memoria y happen
 
 **Su presentación (27 slides)** incluye recorrido automático del entrelazado `c++`, animación del estacionamiento del semáforo y una **demo interactiva de productor-consumidor** con botones `notify()` / `notifyAll()` sobre 3 consumidores en `wait()`.
 
+### Bromatología 2 — Conservación y calidad de lácteos
+
+Test basado en los siete originales de `courses/bromatologia-2/`: conservación (sesiones 15–16, 26 diapositivas), calidad de leche (sesión 19, 21 diapositivas), yogurt (sesión 21, 20 diapositivas), queso (sesión 23, 19 diapositivas) y sus guías de laboratorio (sesiones 20, 22 y 24).
+
+Sus **50 preguntas de dificultad moderada** combinan conceptos, casos, cálculo e interpretación de resultados: frío, calor, deshidratación y métodos químicos; fases y calidad de la leche; densidad corregida, acidez, pH, alcohol, Lugol y reductasa; fermentación, proceso y defectos del yogurt; coagulación, desuerado, maduración y evaluación de quesos. Las opciones cercanas requieren distinguir matices y cada explicación final enlaza el original e identifica la diapositiva o sección utilizada. No se muestran soluciones durante el intento.
+
 ## courses/pccd/course_introduction/index.html
 
 Presentación interactiva (estilo PPT, 11 slides) con los conceptos previos del curso. Navegable con flechas del teclado (←/→, espacio), botones y puntos inferiores.
@@ -131,7 +146,7 @@ Presentación interactiva (estilo PPT, 11 slides) con los conceptos previos del 
 
 Todos los tests del proyecto comparten el mismo motor y formato:
 
-- **Banco de preguntas** `{ w, q, o, a, e }`: tema, pregunta, opciones, índice de la correcta y explicación — fiel a los PDFs.
+- **Banco de preguntas** `{ w, q, o, a, e }`: tema, pregunta, opciones, índice de la correcta y explicación — fiel al material original de cada curso.
 - **Barajado aleatorio** (Fisher-Yates) del orden de preguntas **y** de opciones en cada intento.
 - **Una pregunta por pantalla**: se marca la opción; se puede volver con "Anterior" y cambiar respuestas antes de finalizar.
 - **Resultado**: nota sobre el total con porcentaje y escala (≥85 % Excelente, ≥60 % Bien pero repasa, <60 % Repasar), **desglose por tema** y **revisión completa** de cada pregunta (tu respuesta, la correcta y la explicación).
@@ -145,6 +160,7 @@ Todos los tests del proyecto comparten el mismo motor y formato:
 | `courses/pccd/week_3/test.html` | 20 | Sockets y conexión (4) · InetAddress (3) · ServerSocket/Socket (3) · Streams (3) · Redes (4) · Capas y protocolos (2) · Desempeño (1) |
 | `courses/pccd/week_5/test.html` | 20 | Interferencia y carrera (3) · Sincronización básica (4) · volatile y átomos (3) · Liveness (4) · Semaphore y thread-safe (2) · wait/notify (2) · Locks (1) · Executors (1) |
 | `courses/bromatologia/test.html` | 25 | Definiciones (3) · Gammas (3) · Inocuidad (4) · Legislación (2) · BPM y temperatura (3) · POES y saneamiento (3) · ETAs (3) · HACCP (4) |
+| `courses/bromatologia-2/test.html` | 50 | Conservación (10) · Leche (6) · Laboratorio de leche (8) · Yogurt (6) · Laboratorio de yogurt (7) · Queso (6) · Laboratorio de queso (7) |
 
 ## Arquitectura técnica de las páginas
 
@@ -201,6 +217,9 @@ Detalles donde el material simplifica y las páginas lo aclaran explícitamente:
 - **Paralelización**: dividir una tarea en N no garantiza mejora N — hay costos inherentes (creación de hilos, agregación) y la solución multihilo puede ser más lenta en tareas pequeñas o mal divisibles.
 - **TCP**: fiable y en orden *mientras la conexión se mantenga activa*.
 - **RTT de la tabla de latencia**: valores ilustrativos, no mediciones.
+- **Bromatología 2 — resultados orientativos**: densidad, alcohol y reductasa se interpretan como indicios o estimaciones; no identifican por sí solos una causa ni garantizan inocuidad. Para densidad se usa el rango del procedimiento desarrollado de la sesión 20 (1.028–1.034 g/cm³ a 15 °C), frente a la cifra discordante de su tabla inicial; no se exige una concentración única de alcohol porque la guía menciona varias.
+- **Bromatología 2 — alcance de Lugol**: un negativo indica que no se detecta almidón con el ensayo, no que se haya probado pureza total o ausencia de otros adulterantes. En yogurt comercial con almidón declarado, un positivo puede corresponder a su formulación, como aclara la sesión 22.
+- **Bromatología 2 — conservación y pH**: las afirmaciones absolutas sobre UHT y eliminación de patógenos por acidificación se presentan con notas sobre el alcance del proceso y la necesidad de higiene y controles. El pH de una preparación de queso se interpreta según el método de dilución, sin asumir equivalencia automática entre diluciones. Se evitan preguntas que exijan un único rango de pH de queso cuando las sesiones 23 y 24 difieren.
 
 ## Estado actual
 
@@ -215,4 +234,5 @@ Detalles donde el material simplifica y las páginas lo aclaran explícitamente:
 - [x] Week 3: presentación (23 slides), introducción y test de repaso (20 preguntas).
 - [x] Week 5: presentación (27 slides), introducción y test de repaso (20 preguntas).
 - [x] Curso **Bromatología** (`courses/bromatologia/`): test de repaso de 25 preguntas fiel al PPTX del profesor.
+- [x] Curso **Bromatología 2** (`courses/bromatologia-2/`): test de 50 preguntas basadas en cuatro PPTX y tres DOC, con barajado, nota, desglose y revisión con fuentes; acceso desde el catálogo raíz.
 - [ ] Material de la semana 4 — aún no entregado.
