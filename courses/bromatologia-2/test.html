@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Test de repaso — Bromatología 2</title>
+<title>Tests por tema — Bromatología 2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -142,6 +142,14 @@
   .ansRow i{margin-top:3px}
   .ansRow.ok i{color:var(--success)}
   .ansRow.bad i{color:var(--destructive)}
+  .test-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:22px 0}
+  .test-choice{display:flex;flex-direction:column;align-items:flex-start;gap:10px;text-align:left;font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--border);border-radius:1rem;padding:20px;cursor:pointer;transition:border-color .2s,box-shadow .2s}
+  .test-choice:hover{border-color:rgba(143,92,240,.6);box-shadow:0 0 32px rgba(143,92,240,.12)}
+  .test-label{font-size:1.05rem;font-weight:600;letter-spacing:-.01em}
+  .test-meta{font-family:var(--font-mono);font-size:.75rem;color:var(--muted-fg);margin-top:auto}
+  .test-action{font-size:.86rem;font-weight:600;color:var(--fg)}
+  .test-action i{color:var(--primary);margin-left:6px}
+  @media(max-width:640px){.test-grid{grid-template-columns:1fr}.test-choice{padding:18px}}
   .exp a,.sources a{color:var(--info);text-underline-offset:3px}
   .sources{padding-left:20px;margin-top:10px}
   .sources li{margin:8px 0}
@@ -157,17 +165,42 @@
 
   <!-- ============ INICIO ============ -->
   <div class="card" id="scrStart">
-    <h1><i class="fa-solid fa-clipboard-check"></i>Test de repaso</h1>
+    <h1><i class="fa-solid fa-clipboard-check"></i>Elige qué tema repasar</h1>
     <p class="sub" style="margin-bottom:14px">Bromatología 2 · Conservación y calidad de lácteos</p>
-    <p style="margin-bottom:8px">Son <b>50 preguntas de dificultad moderada</b> basadas en las siete presentaciones y guías de las sesiones 15–16 y 19–24: conservación, leche, yogurt y queso, con sus análisis de laboratorio.</p>
+    <p style="margin-bottom:8px">Elige uno de los <b>4 tests de 8 preguntas</b>, de dificultad moderada. Cada tema reúne sus conceptos y, en los lácteos, su análisis de laboratorio. Están basados en las siete presentaciones y guías del curso.</p>
     <p class="small" style="margin-bottom:14px">Lee los matices: encontrarás casos e interpretaciones con opciones cercanas. Elige la mejor respuesta según el material. Al terminar, cada explicación incluye su fuente.</p>
     <ul class="small" style="list-style:none;line-height:2;margin-bottom:20px">
       <li><i class="fa-solid fa-shuffle" style="color:var(--primary)"></i>El orden de preguntas y opciones es aleatorio en cada intento</li>
       <li><i class="fa-solid fa-pen" style="color:var(--primary)"></i>Solo marcas tu respuesta; puedes volver y cambiarla antes de finalizar</li>
       <li><i class="fa-solid fa-chart-column" style="color:var(--primary)"></i>Al final verás tu nota, el desglose por tema y la revisión de cada pregunta</li>
     </ul>
+    <div class="test-grid" aria-label="Tests disponibles">
+      <button class="test-choice" data-test="conservacion">
+        <span class="test-label"><i class="fa-solid fa-snowflake"></i>Conservación de alimentos</span>
+        <span class="small">Frío, calor, deshidratación y métodos químicos.</span>
+        <span class="test-meta">8 preguntas · Sesiones 15–16</span>
+        <span class="test-action">Hacer test <i class="fa-solid fa-arrow-right"></i></span>
+      </button>
+      <button class="test-choice" data-test="leche">
+        <span class="test-label"><i class="fa-solid fa-flask"></i>Leche y su análisis</span>
+        <span class="small">Calidad, composición e interpretación de pruebas de laboratorio.</span>
+        <span class="test-meta">8 preguntas · Sesiones 19–20</span>
+        <span class="test-action">Hacer test <i class="fa-solid fa-arrow-right"></i></span>
+      </button>
+      <button class="test-choice" data-test="yogurt">
+        <span class="test-label"><i class="fa-solid fa-vial"></i>Yogurt y su análisis</span>
+        <span class="small">Fermentación, elaboración, defectos y control de calidad.</span>
+        <span class="test-meta">8 preguntas · Sesiones 21–22</span>
+        <span class="test-action">Hacer test <i class="fa-solid fa-arrow-right"></i></span>
+      </button>
+      <button class="test-choice" data-test="queso">
+        <span class="test-label"><i class="fa-solid fa-cheese"></i>Queso y su análisis</span>
+        <span class="small">Coagulación, elaboración y evaluación sensorial y fisicoquímica.</span>
+        <span class="test-meta">8 preguntas · Sesiones 23–24</span>
+        <span class="test-action">Hacer test <i class="fa-solid fa-arrow-right"></i></span>
+      </button>
+    </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <button class="btn" id="startBtn"><i class="fa-solid fa-play"></i>Comenzar test</button>
       <a class="btn ghost" href="../../index.html" style="text-decoration:none"><i class="fa-solid fa-arrow-left"></i>Catálogo de cursos</a>
     </div>
     <details class="small" style="margin-top:20px">
@@ -178,6 +211,7 @@
 
   <!-- ============ PREGUNTAS ============ -->
   <div class="card" id="scrQuiz" style="display:none">
+    <h1 id="quizTitle"></h1>
     <div id="hud">
       <div id="bar"><div id="barFill"></div></div>
       <span id="cnt" aria-live="polite"></span>
@@ -190,12 +224,15 @@
       <button class="btn" id="finishBtn" style="display:none"><i class="fa-solid fa-flag-checkered"></i>Finalizar test</button>
     </div>
     <p class="small" style="margin-top:12px" id="markHint"><i class="fa-solid fa-hand-pointer"></i>Marca una opción para continuar.</p>
+    <button class="btn ghost" id="quizMenuBtn" style="margin-top:16px">Elegir otro test</button>
+    <p class="small" style="margin-top:8px">Al elegir otro test, este intento se reinicia.</p>
   </div>
 
   <!-- ============ RESULTADO ============ -->
   <div class="card" id="scrEnd" style="display:none">
     <div class="center">
       <h1><i class="fa-solid fa-award"></i>Tu resultado</h1>
+      <p class="sub" id="resultTitle" style="margin-bottom:14px"></p>
       <div class="score" id="scoreTxt"></div>
       <p style="margin:12px 0 6px"><span class="badge" id="gradeBadge"></span></p>
       <p class="sub" id="msgTxt"></p>
@@ -204,7 +241,8 @@
     <h3 style="margin:28px 0 4px"><i class="fa-solid fa-list-check"></i>Revisión de respuestas</h3>
     <div id="review"></div>
     <div class="center" style="margin-top:24px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-      <button class="btn ghost" id="retryBtn"><i class="fa-solid fa-rotate-right"></i>Reintentar (se rebaraja todo)</button>
+      <button class="btn ghost" id="retryBtn"><i class="fa-solid fa-rotate-right"></i>Reintentar este tema</button>
+      <button class="btn" id="menuBtn"><i class="fa-solid fa-list"></i>Elegir otro test</button>
       <a class="btn ghost" href="../../index.html" style="display:inline-flex;align-items:center;text-decoration:none"><i class="fa-solid fa-arrow-left"></i>Catálogo de cursos</a>
     </div>
   </div>
@@ -243,18 +281,6 @@ const BANK=[
   },
   {
     "w": "Conservación",
-    "q": "Una verdura recibe un tratamiento breve a unos 100 °C antes de congelarse. ¿Cómo se clasifica esa etapa previa?",
-    "o": [
-      "Escaldado, previo a otro tratamiento de conservación.",
-      "Pasteurización, que sustituye la congelación posterior.",
-      "Esterilización, que permite almacenarla sin otro tratamiento.",
-      "Uperización, aplicada para convertirla en un producto seco."
-    ],
-    "a": 0,
-    "e": "El escaldado se presenta como un calentamiento breve a 100 °C, previo a congelación, enlatado, liofilización o secado. <br><a href=\"SESION_15_y_16_CONSERVACION(4).pptx\">Fuente: Sesión 15–16 · diapositiva 13</a>."
-  },
-  {
-    "w": "Conservación",
     "q": "¿Qué diferencia es esencial entre pasteurización y esterilización en la comparación del material?",
     "o": [
       "La pasteurización destruye patógenos sin destruir esporas; la esterilización incluye el control de esporas.",
@@ -276,18 +302,6 @@ const BANK=[
     ],
     "a": 0,
     "e": "El material describe UHT a 135–150 °C durante 2–5 segundos y refrigeración posterior a la apertura. Nota: su expresión «elimina todos los microorganismos sin alterar nutrientes» es una simplificación; no implica protección frente a contaminación tras abrir. <br><a href=\"SESION_15_y_16_CONSERVACION(4).pptx\">Fuente: Sesión 15–16 · diapositiva 16</a>."
-  },
-  {
-    "w": "Conservación",
-    "q": "Un alimento correctamente deshidratado se deja en un recipiente abierto en un ambiente húmedo. ¿Qué condición de conservación se está descuidando?",
-    "o": [
-      "Evitar la reabsorción de humedad mediante un recipiente hermético y almacenamiento seco.",
-      "Favorecer la absorción de humedad para mantener el efecto de la deshidratación.",
-      "Permitir la entrada de oxígeno para neutralizar las enzimas que quedan activas.",
-      "Mantener la exposición a la luz para impedir la rehidratación de sus componentes."
-    ],
-    "a": 0,
-    "e": "La deshidratación extrae agua. El almacenamiento hermético, fresco, seco y oscuro evita que el producto absorba humedad y vuelva a deteriorarse. <br><a href=\"SESION_15_y_16_CONSERVACION(4).pptx\">Fuente: Sesión 15–16 · diapositiva 17</a>."
   },
   {
     "w": "Conservación",
@@ -339,30 +353,6 @@ const BANK=[
   },
   {
     "w": "Leche",
-    "q": "¿Qué combinación explica mejor por qué la leche es altamente perecible?",
-    "o": [
-      "Mucha agua, pH próximo al neutro y nutrientes aprovechables por microorganismos.",
-      "Mucha agua, pH muy ácido y ausencia de proteínas disponibles para microorganismos.",
-      "Poca agua, pH próximo al neutro y grasa que impide la proliferación microbiana.",
-      "Poca agua, abundancia de sales y enzimas inactivadas desde el ordeño."
-    ],
-    "a": 0,
-    "e": "La sesión relaciona la inestabilidad de la leche con su elevado contenido de agua, pH próximo al neutro y abundancia de nutrientes. <br><a href=\"SESION_19_BROMATOLOGIA_okok.pptx\">Fuente: Sesión 19 · diapositiva 7</a>."
-  },
-  {
-    "w": "Leche",
-    "q": "Una muestra procede del ordeño higiénico de una vaca sana, pero contiene calostro. ¿Encaja en la definición bromatológica presentada?",
-    "o": [
-      "No; la definición exige un producto íntegro y sin calostro.",
-      "Sí; basta con que se cumpla la condición de ordeño higiénico.",
-      "Sí; el calostro forma parte obligatoria de la leche definida para consumo.",
-      "No; la definición solo admite leche después de su fermentación."
-    ],
-    "a": 0,
-    "e": "La definición bromatológica exige leche íntegra, no alterada ni adulterada, procedente de vacas sanas y bien alimentadas, sin calostro ni características anormales. <br><a href=\"SESION_19_BROMATOLOGIA_okok.pptx\">Fuente: Sesión 19 · diapositiva 8</a>."
-  },
-  {
-    "w": "Leche",
     "q": "¿Qué asignación de componentes a las fases de la leche es correcta?",
     "o": [
       "Lactosa en disolución acuosa; grasa en emulsión; caseína en suspensión coloidal.",
@@ -375,18 +365,6 @@ const BANK=[
   },
   {
     "w": "Leche",
-    "q": "Al separar la fracción de proteínas solubles de la leche, ¿qué componentes se esperan en ella?",
-    "o": [
-      "Lactoalbúmina y lactoglobulina.",
-      "Caseína y triglicéridos.",
-      "Caseína y sales insolubles.",
-      "Lactosa y vitaminas liposolubles."
-    ],
-    "a": 0,
-    "e": "La sesión sitúa las proteínas del suero, como lactoalbúmina y lactoglobulina, en la fracción soluble; la caseína se presenta como micelas coloidales. <br><a href=\"SESION_19_BROMATOLOGIA_okok.pptx\">Fuente: Sesión 19 · diapositivas 9 y 11</a>."
-  },
-  {
-    "w": "Leche",
     "q": "Una leche presenta olor y color normales, pero se detectan antibióticos. ¿Qué conclusión se ajusta a los criterios de calidad del material?",
     "o": [
       "No cumple los criterios de buena materia prima aunque su apariencia sea normal.",
@@ -396,30 +374,6 @@ const BANK=[
     ],
     "a": 0,
     "e": "La leche cruda de buena calidad no debe contener sustancias químicas indeseables como antibióticos o detergentes. La evaluación sensorial no sustituye las demás pruebas. <br><a href=\"SESION_19_BROMATOLOGIA_okok.pptx\">Fuente: Sesión 19 · diapositivas 14 y 17</a>."
-  },
-  {
-    "w": "Leche",
-    "q": "Una industria recibe leche con alta carga bacteriana y propone compensarla solamente con una buena formulación del derivado. ¿Qué principio se está omitiendo?",
-    "o": [
-      "La calidad de la leche cruda determina la de los derivados y debe controlarse desde la recepción.",
-      "La calidad de la leche cruda solo determina el color, y no afecta a sus derivados.",
-      "La formulación sustituye los análisis de acidez, pH y microbiología de la leche.",
-      "La refrigeración final permite omitir el control higiénico durante el ordeño."
-    ],
-    "a": 0,
-    "e": "El material insiste en que no se obtienen derivados de buena calidad a partir de leche de mala calidad. Describe control continuo y almacenamiento industrial refrigerado a 4 °C. <br><a href=\"SESION_19_BROMATOLOGIA_okok.pptx\">Fuente: Sesión 19 · diapositivas 14–16</a>."
-  },
-  {
-    "w": "Laboratorio de leche",
-    "q": "Antes de medir la densidad, la muestra tiene grasa separada en la superficie. ¿Qué preparación corresponde?",
-    "o": [
-      "Homogeneizar suavemente sin generar espuma.",
-      "Agitar con fuerza hasta obtener una capa estable de espuma.",
-      "Retirar la grasa superficial antes de tomar la muestra.",
-      "Usar solo la fracción inferior para evitar variaciones."
-    ],
-    "a": 0,
-    "e": "La guía exige homogeneizar suavemente para distribuir grasa y componentes. Retirar una fase modifica la composición de la muestra; la espuma interfiere con la medición. <br><a href=\"SESION_20_LABORATORIO_Ndeg1_ANALISIS_DE_LECHE(10).doc\">Fuente: Sesión 20 · preparación de las pruebas fisicoquímicas</a>."
   },
   {
     "w": "Laboratorio de leche",
@@ -483,18 +437,6 @@ const BANK=[
   },
   {
     "w": "Laboratorio de leche",
-    "q": "Una muestra de leche se vuelve azul-violeta al añadir Lugol después de hervirla y enfriarla. ¿Qué sustancia detecta este ensayo?",
-    "o": [
-      "Almidón o féculas.",
-      "Lactosa natural de la leche.",
-      "Ácido láctico adquirido.",
-      "Residuos de antibióticos."
-    ],
-    "a": 0,
-    "e": "El yodo forma un complejo coloreado con la amilosa del almidón. La lactosa natural de la leche no produce esa reacción. La prueba es cualitativa y no cuantifica el adulterante. <br><a href=\"SESION_20_LABORATORIO_Ndeg1_ANALISIS_DE_LECHE(10).doc\">Fuente: Sesión 20 · prueba de Lugol</a>."
-  },
-  {
-    "w": "Laboratorio de leche",
     "q": "Dos muestras se decoloran en la prueba de reductasa a los 90 minutos y después de 5 horas, respectivamente. ¿Cuál sugiere mayor contaminación?",
     "o": [
       "La de 90 minutos, porque una reducción más rápida se asocia a mayor actividad bacteriana.",
@@ -543,18 +485,6 @@ const BANK=[
   },
   {
     "w": "Yogurt",
-    "q": "Un yogurt presenta sabor amargo y otro sabor rancio. ¿Qué asociación propone el material?",
-    "o": [
-      "Amargor con proteólisis; rancidez con hidrólisis de la grasa.",
-      "Amargor con hidrólisis de la grasa; rancidez con proteólisis.",
-      "Amargor con falta de acidez; rancidez con exceso de sorbato.",
-      "Amargor con falta de homogenización; rancidez con ausencia de lactosa."
-    ],
-    "a": 0,
-    "e": "La tabla relaciona sabor amargo con proteólisis de la leche, rancio con hidrólisis de grasas, picante con exceso de sorbato y falta de sabor con poco desarrollo de acidez. <br><a href=\"SESION_21_BROMATOLOGIA_yogurt(6).pptx\">Fuente: Sesión 21 · diapositiva 15</a>."
-  },
-  {
-    "w": "Yogurt",
     "q": "Un yogurt presenta separación de suero. ¿Qué enfoque es coherente con la lista de defectos del material?",
     "o": [
       "Revisar sólidos no grasos, calentamiento y homogenización de la leche.",
@@ -564,18 +494,6 @@ const BANK=[
     ],
     "a": 0,
     "e": "La sinéresis figura entre los defectos y se vincula con factores de composición y proceso, como bajos sólidos no grasos, calentamiento insuficiente y homogenización insuficiente. No permite atribuir una causa única sin revisar el proceso. <br><a href=\"SESION_21_BROMATOLOGIA_yogurt(6).pptx\">Fuente: Sesión 21 · diapositiva 15</a>."
-  },
-  {
-    "w": "Yogurt",
-    "q": "Un yogurt tiene pH 4.3 y acidez titulable de 0.9 % de ácido láctico. ¿Qué conclusión permiten los rangos del material?",
-    "o": [
-      "Ambas mediciones están dentro de los rangos indicados, pero no sustituyen el resto del control de calidad.",
-      "El pH está dentro del rango y la acidez titulable está por encima del límite indicado.",
-      "La acidez está dentro del rango y el pH es demasiado alto para el intervalo indicado.",
-      "Ambas mediciones permiten confirmar ausencia de patógenos y de adulterantes."
-    ],
-    "a": 0,
-    "e": "La sesión indica pH 4.0–4.65 y acidez de 0.7–1.2 % (70–120 °D). Estar dentro de esos rangos no demuestra por sí solo inocuidad o autenticidad completas. <br><a href=\"SESION_21_BROMATOLOGIA_yogurt(6).pptx\">Fuente: Sesión 21 · diapositivas 14 y 16</a>."
   },
   {
     "w": "Laboratorio de yogurt",
@@ -591,18 +509,6 @@ const BANK=[
   },
   {
     "w": "Laboratorio de yogurt",
-    "q": "Se titula yogurt directamente a 4 °C y cuesta mezclarlo mientras se agrega NaOH. ¿Qué error advierte la guía?",
-    "o": [
-      "La alta viscosidad puede retrasar la homogenización y provocar gasto excesivo de reactivo.",
-      "El frío elimina el ácido láctico y obliga a registrar una acidez titulable nula.",
-      "El frío vuelve innecesario el indicador y permite titular sin observar el viraje.",
-      "La alta viscosidad confirma presencia de almidón, aunque no se haya realizado Lugol."
-    ],
-    "a": 0,
-    "e": "La guía recomienda 15–20 °C para acidez titulable. A 4 °C, la mezcla más viscosa puede dificultar la homogenización y favorecer una falsa acidez alta por exceso de titulante. <br><a href=\"SESION_22_LABORATORIO_2_ANALISIS_DE_YOGURT_-ok(4).doc\">Fuente: Sesión 22 · preparación · acidez titulable</a>."
-  },
-  {
-    "w": "Laboratorio de yogurt",
     "q": "En la titulación de yogurt con NaOH y fenolftaleína, ¿cuándo se debe detener el goteo?",
     "o": [
       "Al aparecer un rosa pálido que persista al menos 30 segundos.",
@@ -612,18 +518,6 @@ const BANK=[
     ],
     "a": 0,
     "e": "La guía usa 9 g de yogurt y NaOH 0.1 N, con rosa tenue persistente por al menos 30 segundos como punto final. El azul-violeta corresponde a Lugol, no a esta titulación. <br><a href=\"SESION_22_LABORATORIO_2_ANALISIS_DE_YOGURT_-ok(4).doc\">Fuente: Sesión 22 · acidez titulable · procedimiento</a>."
-  },
-  {
-    "w": "Laboratorio de yogurt",
-    "q": "¿Por qué se miden tanto pH como acidez titulable en el yogurt?",
-    "o": [
-      "Porque describen aspectos complementarios de la acidez y no se sustituyen automáticamente.",
-      "Porque ambos son la misma magnitud y deben tener el mismo valor numérico.",
-      "Porque el pH mide solo grasa y la titulación mide solo proteínas.",
-      "Porque cualquiera de los dos identifica qué microorganismo produjo el ácido."
-    ],
-    "a": 0,
-    "e": "La guía distingue intensidad de acidez (pH) y acidez medible por titulación, expresada como ácido láctico. El pH y la acidez titulable son mediciones complementarias, con escalas distintas. <br><a href=\"SESION_22_LABORATORIO_2_ANALISIS_DE_YOGURT_-ok(4).doc\">Fuente: Sesión 22 · análisis de acidez · pH y titulación</a>."
   },
   {
     "w": "Laboratorio de yogurt",
@@ -648,18 +542,6 @@ const BANK=[
     ],
     "a": 0,
     "e": "La guía reconoce que ciertos yogures comerciales pueden incluir almidón modificado declarado como estabilizante. El ensayo detecta almidón; por sí solo no determina si su uso está permitido en un producto concreto. <br><a href=\"SESION_22_LABORATORIO_2_ANALISIS_DE_YOGURT_-ok(4).doc\">Fuente: Sesión 22 · Lugol · consideración para yogurt light</a>."
-  },
-  {
-    "w": "Laboratorio de yogurt",
-    "q": "Un yogurt tiene fruta en el fondo y se desea aplicar el protocolo de Lugol para estudiar su base láctea. ¿De dónde se toma la muestra según la guía?",
-    "o": [
-      "De la base blanca superior, evitando incorporar la fruta del fondo.",
-      "Solo de la fruta, porque representa mejor la composición de la base láctea.",
-      "Del envase sin contenido, para identificar residuos de espesantes.",
-      "De cualquier zona sin homogenizar, porque la distribución no influye."
-    ],
-    "a": 0,
-    "e": "La guía pide una muestra uniforme y, cuando hay fruta en el fondo, especifica tomar la base blanca superior para este ensayo. Después indica dilución 1:1, calentamiento y enfriamiento. <br><a href=\"SESION_22_LABORATORIO_2_ANALISIS_DE_YOGURT_-ok(4).doc\">Fuente: Sesión 22 · Lugol · homogeneización y muestreo</a>."
   },
   {
     "w": "Queso",
@@ -699,30 +581,6 @@ const BANK=[
   },
   {
     "w": "Queso",
-    "q": "¿Qué operación separa el suero después de cortar la cuajada?",
-    "o": [
-      "Desuerado.",
-      "Inoculación.",
-      "Pasteurización.",
-      "Pesado de recepción."
-    ],
-    "a": 0,
-    "e": "El corte divide la masa cuajada; el desuerado separa el suero dejándolo escurrir. El pesado posterior permite registrar rendimientos. <br><a href=\"SESION_23_BROMATOLOGIA_-_QUESO(12).pptx\">Fuente: Sesión 23 · diapositivas 14–15</a>."
-  },
-  {
-    "w": "Queso",
-    "q": "Un queso fresco abierto presenta superficie babosa y manchas verdes. ¿Qué acción indica el material?",
-    "o": [
-      "Desecharlo ante esas señales de alteración.",
-      "Considerarlas equivalentes a las vetas de un Roquefort y mantener el producto.",
-      "Retirar solo el suero y conservarlo durante el plazo restante.",
-      "Mantenerlo a temperatura ambiente para reducir la humedad superficial."
-    ],
-    "a": 0,
-    "e": "La sesión identifica superficie babosa, olor agrio y manchas rosadas o verdes como señales de descarte del queso fresco. No se interpretan como las vetas propias de un queso azul. <br><a href=\"SESION_23_BROMATOLOGIA_-_QUESO(12).pptx\">Fuente: Sesión 23 · diapositiva 9</a>."
-  },
-  {
-    "w": "Queso",
     "q": "Dos quesos muestran cavidades: un Paria tiene ojos pequeños e irregulares y un queso fresco presenta hinchazón. ¿Qué interpretación evita aplicar el mismo criterio a todos los quesos?",
     "o": [
       "El Paria puede presentar ojos mecánicos; el fresco requiere investigar una posible alteración.",
@@ -759,30 +617,6 @@ const BANK=[
   },
   {
     "w": "Laboratorio de queso",
-    "q": "Un Roquefort tiene vetas verde-azuladas, se desmigaja y resulta cremoso en boca. ¿Qué interpretación coincide con la guía?",
-    "o": [
-      "El conjunto puede corresponder a su perfil esperado de maduración con Penicillium roqueforti.",
-      "El conjunto confirma deterioro por el solo hecho de observar vetas de color.",
-      "El conjunto demuestra que se elaboró con leche de cabra en vez de oveja.",
-      "El conjunto indica textura defectuosa porque un Roquefort debe ser elástico como Paria."
-    ],
-    "a": 0,
-    "e": "La guía describe Roquefort de leche de oveja, con Penicillium roqueforti, vetas verde-azuladas, friabilidad y cremosidad en boca. Estos rasgos característicos no demuestran por sí solos la calidad integral del lote. <br><a href=\"SESION_24_ANALISIS_DE_QUESO_ok.doc\">Fuente: Sesión 24 · tipos de queso y fases visual y táctil</a>."
-  },
-  {
-    "w": "Laboratorio de queso",
-    "q": "En la evaluación del queso, ¿qué se entiende por persistencia?",
-    "o": [
-      "El tiempo que permanece su sabor en boca después de tragarlo.",
-      "El tiempo necesario para que el queso alcance la temperatura de cata.",
-      "La resistencia de una lámina a romperse durante la prueba táctil.",
-      "La intensidad del olor percibido antes de llevar el queso a la boca."
-    ],
-    "a": 0,
-    "e": "La guía distingue persistencia gustativa, elasticidad táctil e intensidad olfativa. Señala persistencia breve en queso fresco y prolongada en Roquefort o cabra curado. <br><a href=\"SESION_24_ANALISIS_DE_QUESO_ok.doc\">Fuente: Sesión 24 · fase gustativa · persistencia</a>."
-  },
-  {
-    "w": "Laboratorio de queso",
     "q": "Al preparar queso para medir pH por el método 1:1, ¿qué combinación de muestra y agua indica el procedimiento?",
     "o": [
       "10 g de queso rallado y 10 ml de agua destilada.",
@@ -792,18 +626,6 @@ const BANK=[
     ],
     "a": 0,
     "e": "El método 1:1 de la guía utiliza 10 g y 10 ml. La variante 1:10 se describe como 10 g y 90 ml para muestras secas o grasas. Nota: el resultado corresponde al método de preparación; no debe asumirse equivalencia automática entre diluciones. <br><a href=\"SESION_24_ANALISIS_DE_QUESO_ok.doc\">Fuente: Sesión 24 · pH · pesaje y mezcla</a>."
-  },
-  {
-    "w": "Laboratorio de queso",
-    "q": "Después de homogeneizar y dejar reposar la preparación de queso para pH, ¿dónde se introduce el electrodo según la guía?",
-    "o": [
-      "En la fase acuosa, evitando la capa grasa y esperando estabilización.",
-      "En la capa grasa superior, antes de que se estabilice la lectura.",
-      "En la corteza externa intacta, aunque se preparó una dilución del interior.",
-      "En el agua destilada sin queso, usando ese valor como pH del producto."
-    ],
-    "a": 0,
-    "e": "El procedimiento indica homogeneizar de 5 a 10 minutos, reposar de 3 a 5 y medir en la fase acuosa evitando la grasa. Se registra la lectura estabilizada. <br><a href=\"SESION_24_ANALISIS_DE_QUESO_ok.doc\">Fuente: Sesión 24 · pH · homogenización, reposo y medición</a>."
   },
   {
     "w": "Laboratorio de queso",
@@ -819,6 +641,13 @@ const BANK=[
   }
 ];
 
+const TESTS=[
+  {id:'conservacion',title:'Conservación de alimentos',topics:['Conservación']},
+  {id:'leche',title:'Leche y su análisis',topics:['Leche','Laboratorio de leche']},
+  {id:'yogurt',title:'Yogurt y su análisis',topics:['Yogurt','Laboratorio de yogurt']},
+  {id:'queso',title:'Queso y su análisis',topics:['Queso','Laboratorio de queso']}
+];
+
 /* ---------- utilidades ---------- */
 function shuffle(arr){
   const a=arr.slice();
@@ -831,15 +660,21 @@ function shuffle(arr){
 const $=id=>document.getElementById(id);
 
 /* ---------- estado ---------- */
-let order=[],optsMap=[],answers=[],cur=0;
+let order=[],optsMap=[],answers=[],cur=0,activeTest=null;
 
-function start(){
-  order=shuffle(BANK);
+function start(testId){
+  activeTest=TESTS.find(test=>test.id===testId);
+  if(!activeTest)return;
+  order=shuffle(BANK.filter(q=>activeTest.topics.includes(q.w)));
+  $('quizTitle').textContent=activeTest.title;
+  $('resultTitle').textContent=activeTest.title;
+  $('review').innerHTML='';
+  $('wkGrid').innerHTML='';
   optsMap=order.map(q=>{ // baraja opciones y recuerda dónde quedó la correcta
     const idx=shuffle(q.o.map((_,k)=>k));
     return idx;
   });
-  answers=Array(BANK.length).fill(null);
+  answers=Array(order.length).fill(null);
   cur=0;
   show('scrQuiz');
   render();
@@ -847,14 +682,17 @@ function start(){
 
 function show(id){
   ['scrStart','scrQuiz','scrEnd'].forEach(s=>$(s).style.display=s===id?'block':'none');
+  const heading=$(id).querySelector('h1');
+  heading.tabIndex=-1;
+  heading.focus({preventScroll:true});
   window.scrollTo(0,0);
 }
 
 /* ---------- render pregunta ---------- */
 function render(){
   const q=order[cur];
-  $('barFill').style.width=((cur)/BANK.length*100)+'%';
-  $('cnt').innerHTML='<i class="fa-solid fa-circle-question"></i>Pregunta '+(cur+1)+' de '+BANK.length;
+  $('barFill').style.width=((cur)/order.length*100)+'%';
+  $('cnt').innerHTML='<i class="fa-solid fa-circle-question"></i>Pregunta '+(cur+1)+' de '+order.length;
   $('qText').innerHTML='<span class="tag">'+q.w+'</span> '+q.q;
   const box=$('opts');box.innerHTML='';
   optsMap[cur].forEach((origIdx,pos)=>{
@@ -875,19 +713,19 @@ function render(){
 
   $('finishBtn').disabled=answers[cur]===null;
   $('prevBtn').disabled=cur===0;
-  const last=cur===BANK.length-1;
+  const last=cur===order.length-1;
   $('nextBtn').style.display=last?'none':'inline-block';
   $('finishBtn').style.display=last?'inline-block':'none';
 }
 
 $('prevBtn').onclick=()=>{if(cur>0){cur--;render();}};
-$('nextBtn').onclick=()=>{if(cur<BANK.length-1){cur++;render();}};
+$('nextBtn').onclick=()=>{if(cur<order.length-1){cur++;render();}};
 $('finishBtn').onclick=finish;
 
 /* ---------- resultado ---------- */
 function finish(){
-  if(answers.some(a=>a===null))return;
-  const total=BANK.length;
+  if(!order.length||answers.some(a=>a===null))return;
+  const total=order.length;
   let got=0;
   const per={};
   order.forEach((q,i)=>{ // mismo orden barajado que answers/optsMap
@@ -901,7 +739,7 @@ function finish(){
   $('scoreTxt').textContent=got+' / '+total;
   const badge=$('gradeBadge'),msg=$('msgTxt');
   if(rawPct>=85){badge.className='badge';badge.textContent=pct+'% · Excelente';
-    msg.textContent='Buen dominio del material de conservación y control de calidad de lácteos. Revisa las explicaciones para afinar los matices.';}
+    msg.textContent='Buen dominio de '+activeTest.title.toLowerCase()+'. Revisa las explicaciones para afinar los matices.';}
   else if(rawPct>=60){badge.className='badge mid';badge.textContent=pct+'% · Bien, pero repasa';
     msg.textContent='Buena base. Revisa la revisión de abajo y refuerza los temas más bajos.';}
   else{badge.className='badge low';badge.textContent=pct+'% · Necesitas repasar';
@@ -933,8 +771,20 @@ function finish(){
   show('scrEnd');
 }
 
-$('startBtn').onclick=start;
-$('retryBtn').onclick=start;
+function chooseTest(){
+  activeTest=null;
+  order=[];optsMap=[];answers=[];cur=0;
+  $('review').innerHTML='';
+  $('wkGrid').innerHTML='';
+  show('scrStart');
+}
+
+document.querySelectorAll('[data-test]').forEach(button=>{
+  button.onclick=()=>start(button.dataset.test);
+});
+$('retryBtn').onclick=()=>start(activeTest.id);
+$('menuBtn').onclick=chooseTest;
+$('quizMenuBtn').onclick=chooseTest;
 })();
 </script>
 </body>

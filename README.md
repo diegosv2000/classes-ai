@@ -71,7 +71,7 @@ entiendo-ai/
 │   │   ├── test.html                ← test de repaso (25 preguntas, fiel al PPTX)
 │   │   └── BROMATOLOGIA (1).pptx    ← material del profesor: lecciones 1-12, sesiones 1-14 (21 slides)
 │   └── bromatologia-2/              ← curso Bromatología 2
-│       ├── test.html                ← test de dificultad moderada (50 preguntas, 7 temas)
+│       ├── test.html                ← selector de 4 tests de 8 preguntas (32 en total)
 │       ├── SESION_15_y_16_CONSERVACION(4).pptx
 │       ├── SESION_19_BROMATOLOGIA_okok.pptx
 │       ├── SESION_20_LABORATORIO_Ndeg1_ANALISIS_DE_LECHE(10).doc
@@ -124,7 +124,7 @@ Interferencia de hilos y condición de carrera; consistencia de memoria y happen
 
 Test basado en los siete originales de `courses/bromatologia-2/`: conservación (sesiones 15–16, 26 diapositivas), calidad de leche (sesión 19, 21 diapositivas), yogurt (sesión 21, 20 diapositivas), queso (sesión 23, 19 diapositivas) y sus guías de laboratorio (sesiones 20, 22 y 24).
 
-Sus **50 preguntas de dificultad moderada** combinan conceptos, casos, cálculo e interpretación de resultados: frío, calor, deshidratación y métodos químicos; fases y calidad de la leche; densidad corregida, acidez, pH, alcohol, Lugol y reductasa; fermentación, proceso y defectos del yogurt; coagulación, desuerado, maduración y evaluación de quesos. Las opciones cercanas requieren distinguir matices y cada explicación final enlaza el original e identifica la diapositiva o sección utilizada. No se muestran soluciones durante el intento.
+Su selector permite elegir **4 tests de 8 preguntas**: conservación, leche, yogurt y queso (32 en total). Cada test de lácteos incluye teoría y laboratorio. Sus preguntas de dificultad moderada combinan conceptos, casos, cálculo e interpretación de resultados: frío, calor, deshidratación y métodos químicos; fases y calidad de la leche; densidad corregida, acidez, pH, alcohol, Lugol y reductasa; fermentación, proceso y defectos del yogurt; coagulación, desuerado, maduración y evaluación de quesos. Las opciones cercanas requieren distinguir matices y cada explicación final enlaza el original e identifica la diapositiva o sección utilizada. No se muestran soluciones durante el intento. Cada test tiene nota sobre 8, revisión con fuentes, reintento del mismo tema y regreso al selector; cambiar de tema reinicia el intento.
 
 ## courses/pccd/course_introduction/index.html
 
@@ -160,7 +160,7 @@ Todos los tests del proyecto comparten el mismo motor y formato:
 | `courses/pccd/week_3/test.html` | 20 | Sockets y conexión (4) · InetAddress (3) · ServerSocket/Socket (3) · Streams (3) · Redes (4) · Capas y protocolos (2) · Desempeño (1) |
 | `courses/pccd/week_5/test.html` | 20 | Interferencia y carrera (3) · Sincronización básica (4) · volatile y átomos (3) · Liveness (4) · Semaphore y thread-safe (2) · wait/notify (2) · Locks (1) · Executors (1) |
 | `courses/bromatologia/test.html` | 25 | Definiciones (3) · Gammas (3) · Inocuidad (4) · Legislación (2) · BPM y temperatura (3) · POES y saneamiento (3) · ETAs (3) · HACCP (4) |
-| `courses/bromatologia-2/test.html` | 50 | Conservación (10) · Leche (6) · Laboratorio de leche (8) · Yogurt (6) · Laboratorio de yogurt (7) · Queso (6) · Laboratorio de queso (7) |
+| `courses/bromatologia-2/test.html` | 4 × 8 (32) | Conservación (8) · Leche y laboratorio (8) · Yogurt y laboratorio (8) · Queso y laboratorio (8); elección por tema |
 
 ## Arquitectura técnica de las páginas
 
@@ -234,5 +234,5 @@ Detalles donde el material simplifica y las páginas lo aclaran explícitamente:
 - [x] Week 3: presentación (23 slides), introducción y test de repaso (20 preguntas).
 - [x] Week 5: presentación (27 slides), introducción y test de repaso (20 preguntas).
 - [x] Curso **Bromatología** (`courses/bromatologia/`): test de repaso de 25 preguntas fiel al PPTX del profesor.
-- [x] Curso **Bromatología 2** (`courses/bromatologia-2/`): test de 50 preguntas basadas en cuatro PPTX y tres DOC, con barajado, nota, desglose y revisión con fuentes; acceso desde el catálogo raíz.
+- [x] Curso **Bromatología 2** (`courses/bromatologia-2/`): selector de cuatro tests de 8 preguntas basadas en cuatro PPTX y tres DOC, con barajado, nota por test, desglose, revisión con fuentes y cambio de tema; acceso desde el catálogo raíz.
 - [ ] Material de la semana 4 — aún no entregado.
